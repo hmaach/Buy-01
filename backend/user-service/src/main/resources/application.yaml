@@ -1,3 +1,14 @@
+server:
+  port: 8081
+
 spring:
   application:
-    name: user
+    name: user-service
+
+  docker:
+    compose:
+      enabled: false
+
+  jwt:
+  secret: ${JWT_SECRET:azertyuiopqsdfghjklmwxcvbn}
+

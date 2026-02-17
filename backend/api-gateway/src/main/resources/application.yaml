@@ -1,3 +1,32 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: gateway
+
+  docker:
+    compose:
+      enabled: false
+
+  jwt:
+  secret: ${JWT_SECRET:azertyuiopqsdfghjklmwxcvbn}
+
+  cloud:
+    gateway:
+      routes:
+
+        - id: user-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/users/**
+
+        - id: product-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/products/**
+
+        - id: media-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/media/**

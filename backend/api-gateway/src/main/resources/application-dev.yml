@@ -1,0 +1,9 @@
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
+    com.ecommerce.gateway: TRACE
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/

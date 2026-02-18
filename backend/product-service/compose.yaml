@@ -1,1 +1,15 @@
-services: {}
+services:
+  mongodb:
+    container_name: mongodb
+    image: mongo:latest
+    ports:
+      - "${MONGO_LOCAL_PORT}:${MONGO_DOCKER_PORT}"
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_DB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_DB_PWD}
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:

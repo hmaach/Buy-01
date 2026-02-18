@@ -1,3 +1,6 @@
 spring:
   application:
     name: product
+  mongodb:
+    uri: "mongodb://${MONGO_DB_USER}:${MONGO_DB_PWD}@mongodb:27017/${MONGO_DB_NAME}?authSource=admin"
+  

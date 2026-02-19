@@ -5,15 +5,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverter;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
 
-import reactor.core.publisher.Flux;
-
 @Configuration
 @EnableWebFluxSecurity
-@EnableReactiveMethodSecurity // ← enables @PreAuthorize in reactive world
+@EnableReactiveMethodSecurity
 public class SecurityConfig {
 
     @Bean
@@ -22,15 +19,9 @@ public class SecurityConfig {
                 .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
 
-                .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/products", "/products/**").permitAll()
-                        .anyExchange().authenticated());
-
-        // .oauth2ResourceServer(oauth2 -> oauth2
-        // .jwt(jwt -> jwt
-        // .jwtAuthenticationConverter(jwtAuthenticationConverter())
-        // )
-        // );
+                .authorizeExchange(exchanges -> exchanges.anyExchange().permitAll()
+                // .pathMatchers("/products", "/products/**").permitAll()
+                );
 
         return http.build();
     }

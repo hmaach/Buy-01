@@ -13,7 +13,7 @@ public class ProductDocumentMapper {
         d.setName(p.getName());
         d.setDescription(p.getDescription());
         d.setPrice(p.getPrice());
-        d.setUserId(p.getuserId());
+        d.setUserId(p.getUserId());
         d.setCreatedAt(p.getCreatedAt());
         d.setUpdatedAt(p.getUpdatedAt());
         return d;

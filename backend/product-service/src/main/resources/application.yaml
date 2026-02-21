@@ -2,7 +2,7 @@ spring:
   application:
     name: product
   mongodb:
-    uri: "mongodb://${MONGO_DB_USER}:${MONGO_DB_PWD}@localhost:27017/${MONGO_DB_NAME}?authSource=admin"
+    uri: "mongodb://${MONGO_DB_USER:rserraf}:${MONGO_DB_PWD:PDB}@localhost:${MONGO_LOCAL_PORT:27017}/${MONGO_DB_NAME:product_database}?authSource=admin"
   
 server:
   port: 8082

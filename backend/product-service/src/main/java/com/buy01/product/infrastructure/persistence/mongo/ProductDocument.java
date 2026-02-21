@@ -10,8 +10,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import com.buy01.product.domain.model.PositiveFloat;
-
 import lombok.Data;
 
 @Data
@@ -21,7 +19,7 @@ public class ProductDocument {
     private String id;
     private String name;
     private String description;
-    private PositiveFloat price;
+    private float price;
 
     @Field("user_id")
     private String userId;

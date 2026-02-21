@@ -27,4 +27,25 @@ public class ProductServiceImpl implements ProductUseCase {
                 .flatMap(productRepository::save);
     }
 
+    public Mono<Product> updateProduct(Product update, String id, String userId) {
+        return productRepository.findById(id)
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Product not found")))
+                .flatMap(existing -> {
+                    if (!existing.getUserId().equals(userId)) {
+                        return Mono.error(new SecurityException("Not your product"));
+                    }
+
+                    Product updatedProduct = existing.toBuilder()
+                            .name(update.getName())
+                            .description(update.getDescription())
+                            .mediaIds(update.getMediaIds())
+                            .price(update.getPrice())
+                            .quantity(update.getQuantity())
+                            .updatedAt(Instant.now())
+                            .build();
+
+                    return productRepository.save(updatedProduct);
+                });
+    }
+
 }

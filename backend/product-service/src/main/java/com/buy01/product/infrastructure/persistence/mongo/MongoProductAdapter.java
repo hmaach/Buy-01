@@ -23,4 +23,14 @@ public class MongoProductAdapter implements ProductRepositoryPort {
                 .flatMap(springRepo::save)
                 .map(mapper::toDomain);
     }
+
+    @Override
+    public Mono<Product> findById(String id) {
+        return springRepo.findById(id).map(mapper::toDomain);
+    }
+
+    @Override
+    public void deleteById(String id) {
+        springRepo.deleteById(id);
+    }
 }

@@ -1,98 +1,87 @@
 package com.buy01.product.application.web.exception;
 
+import static org.springframework.http.HttpStatus.*;
+
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
-import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.reactive.resource.NoResourceFoundException;
+
+import com.nimbusds.jwt.proc.ExpiredJWTException;
+
 import reactor.core.publisher.Mono;
 
-import java.net.URI;
-import java.time.Instant;
+import java.security.SignatureException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final Map<Class<? extends Throwable>, ProblemTemplate> TEMPLATES = new ProblemTemplate.Registry()
+            .add(SignatureException.class, UNAUTHORIZED, "Invalid JWT Signature")
+            .add(ExpiredJWTException.class, UNAUTHORIZED, "JWT Token Expired")
+            .add(AuthorizationDeniedException.class, FORBIDDEN, "Access Denied")
+            .add(NoResourceFoundException.class, BAD_REQUEST, "Missing Argument")
+            .add(HttpMessageNotReadableException.class, BAD_REQUEST, "JSON Not Valid")
+            .add(IllegalArgumentException.class, BAD_REQUEST, "Bad Argument")
+            .add(NotFoundException.class, NOT_FOUND, "Validation Error")
+            .add(UsernameNotFoundException.class, NOT_FOUND, "User Not Found")
+            .add(WebExchangeBindException.class, BAD_REQUEST, "Validation Failed",
+                    ex -> "Fields: " + ((WebExchangeBindException) ex).getBindingResult().getFieldErrorCount())
+            .build();
 
-    // @ExceptionHandler(ProductNotFoundException.class)
-    // public Mono<ResponseEntity<ProblemDetail>> handleNotFound(
-    //         ProductNotFoundException ex,
-    //         ServerWebExchange exchange) {
-
-    //     ProblemDetail problem = ProblemDetail.forStatusAndDetail(
-    //             HttpStatus.NOT_FOUND,
-    //             ex.getMessage()
-    //     );
-    //     problem.setTitle("Product Not Found");
-    //     problem.setType(URI.create("https://api.example.com/errors/not-found"));
-    //     problem.setProperty("timestamp", Instant.now());
-    //     problem.setProperty("path", exchange.getRequest().getPath().value());
-
-    //     return Mono.just(ResponseEntity
-    //             .status(HttpStatus.NOT_FOUND)
-    //             .body(problem));
-    // }
-
-    // @ExceptionHandler(ProductOwnershipException.class)
-    // public Mono<ResponseEntity<ProblemDetail>> handleOwnershipViolation(
-    //         ProductOwnershipException ex,
-    //         ServerWebExchange exchange) {
-
-    //     ProblemDetail problem = ProblemDetail.forStatusAndDetail(
-    //             HttpStatus.FORBIDDEN,
-    //             ex.getMessage()
-    //     );
-    //     problem.setTitle("Ownership Violation");
-    //     problem.setType(URI.create("https://api.example.com/errors/forbidden"));
-
-    //     return Mono.just(ResponseEntity
-    //             .status(HttpStatus.FORBIDDEN)
-    //             .body(problem));
-    // }
-
-    // 2. Handle validation errors (e.g. @Valid in controller)
-    @ExceptionHandler(WebExchangeBindException.class)
-    public Mono<ResponseEntity<Map<String, Object>>> handleValidationErrors(
-            WebExchangeBindException ex) {
-
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("title", "Validation Failed");
-        body.put("timestamp", Instant.now());
-
-        List<Map<String, String>> errors = ex.getFieldErrors().stream()
-                .map(err -> {
-                    Map<String, String> error = new HashMap<>();
-                    error.put("field", err.getField());
-                    error.put("message", err.getDefaultMessage());
-                    return error;
-                })
-                .toList();
-
-        body.put("errors", errors);
-
-        return Mono.just(ResponseEntity.badRequest().body(body));
-    }
+    private static final ProblemTemplate DEFAULT_TEMPLATE = new ProblemTemplate(
+            INTERNAL_SERVER_ERROR,
+            Throwable::getMessage,
+            "Internal Server Error");
 
     @ExceptionHandler(Exception.class)
-    public Mono<ResponseEntity<ProblemDetail>> handleGeneric(
-            Exception ex,
-            ServerWebExchange exchange) {
-
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "An unexpected error occurred. Please try again later."
-        );
-        problem.setProperty("info", ex.getMessage());
-        problem.setProperty("exception", ex.getClass());
-        problem.setTitle("Internal Server Error");
-        System.out.println(ex.getMessage());
-        return Mono.just(ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(problem));
+    public Mono<ProblemDetail> handle(Exception ex) {
+        ProblemTemplate template = TEMPLATES.get(ex.getClass());
+        if (template == null) {
+            template = DEFAULT_TEMPLATE;
+        }
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+                template.status(),
+                template.detailGenerator().apply(ex));
+        pd.setTitle(template.title());
+        System.err.println(ex.getClass() + "\n");
+        return Mono.just(pd);
     }
+}
+
+record ProblemTemplate(
+        HttpStatus status,
+        DetailGenerator detailGenerator,
+        String title) {
+
+    public static class Registry {
+        private final Map<Class<? extends Throwable>, ProblemTemplate> map = new HashMap<>();
+
+        public Registry add(Class<? extends Throwable> type, HttpStatus status, String title) {
+            map.put(type, new ProblemTemplate(status, Throwable::getMessage, title));
+            return this;
+        }
+
+        public Registry add(Class<? extends Throwable> type, HttpStatus status, String title,
+                DetailGenerator gen) {
+            map.put(type, new ProblemTemplate(status, gen, title));
+            return this;
+        }
+
+        public Map<Class<? extends Throwable>, ProblemTemplate> build() {
+            return Map.copyOf(map);
+        }
+    }
+}
+
+@FunctionalInterface
+interface DetailGenerator {
+    String apply(Throwable ex);
 }

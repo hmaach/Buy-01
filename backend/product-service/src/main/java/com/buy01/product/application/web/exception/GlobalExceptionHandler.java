@@ -51,7 +51,7 @@ public class GlobalExceptionHandler {
                 template.status(),
                 template.detailGenerator().apply(ex));
         pd.setTitle(template.title());
-        System.err.println(ex.getClass() + "\n");
+        System.err.println(ex + "\n");
         return Mono.just(pd);
     }
 }

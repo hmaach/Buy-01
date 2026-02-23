@@ -26,3 +26,8 @@ product-service/
 └── pom.xml
 ```
 ```curl -H "Authorization: Bearer <your-jwt>" http://localhost:8080/products -X POST -d '{"name":"test"}'```
+
+
+```
+/opt/kafka/bin/kafka-topics.sh --list --bootstrap-server localhost:9092
+```

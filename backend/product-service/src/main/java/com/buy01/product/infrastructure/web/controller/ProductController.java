@@ -1,4 +1,4 @@
-package com.buy01.product.application.web.controller;
+package com.buy01.product.infrastructure.web.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.buy01.product.application.web.dto.ProductCreateRequest;
-import com.buy01.product.application.web.dto.ProductResponse;
-import com.buy01.product.application.web.mapper.ProductWebMapper;
 import com.buy01.product.domain.model.Product;
 import com.buy01.product.domain.ports.inbound.ProductUseCase;
+import com.buy01.product.infrastructure.web.dto.ProductCreateRequest;
+import com.buy01.product.infrastructure.web.dto.ProductResponse;
+import com.buy01.product.infrastructure.web.mapper.ProductWebMapper;
 
 import jakarta.validation.Valid;
 import reactor.core.publisher.Mono;

@@ -1,6 +1,8 @@
-package com.buy01.product.domain.service;
+package com.buy01.product.application.service;
 
 import java.time.Instant;
+
+import org.springframework.stereotype.Service;
 
 import com.buy01.product.domain.model.Product;
 import com.buy01.product.domain.ports.inbound.ProductUseCase;
@@ -8,6 +10,7 @@ import com.buy01.product.domain.ports.outbound.ProductRepositoryPort;
 
 import reactor.core.publisher.Mono;
 
+@Service
 public class ProductServiceImpl implements ProductUseCase {
     private final ProductRepositoryPort productRepository;
 

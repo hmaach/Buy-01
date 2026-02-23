@@ -1,10 +1,10 @@
-package com.buy01.product.application.web.mapper;
+package com.buy01.product.infrastructure.web.mapper;
 
 import org.springframework.stereotype.Component;
 
-import com.buy01.product.application.web.dto.ProductCreateRequest;
-import com.buy01.product.application.web.dto.ProductResponse;
 import com.buy01.product.domain.model.Product;
+import com.buy01.product.infrastructure.web.dto.ProductCreateRequest;
+import com.buy01.product.infrastructure.web.dto.ProductResponse;
 
 @Component
 public class ProductWebMapper {

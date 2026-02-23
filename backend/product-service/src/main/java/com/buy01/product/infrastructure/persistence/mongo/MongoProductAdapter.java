@@ -4,9 +4,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import com.buy01.product.application.web.dto.ProductCreatedEvent;
 import com.buy01.product.domain.model.Product;
 import com.buy01.product.domain.ports.outbound.ProductRepositoryPort;
+import com.buy01.product.infrastructure.web.dto.ProductCreatedEvent;
 
 import reactor.core.publisher.Mono;
 

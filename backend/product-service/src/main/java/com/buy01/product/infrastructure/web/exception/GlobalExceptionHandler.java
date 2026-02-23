@@ -1,4 +1,4 @@
-package com.buy01.product.application.web.exception;
+package com.buy01.product.infrastructure.web.exception;
 
 import static org.springframework.http.HttpStatus.*;
 

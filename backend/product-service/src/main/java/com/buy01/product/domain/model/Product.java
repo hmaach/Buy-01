@@ -7,7 +7,7 @@ public class Product {
     private final String id;
     private final String name;
     private final String description;
-    private final Float price;
+    private final double price;
     private final Integer quantity;
     private final String userId;
     private final Instant createdAt;
@@ -36,7 +36,7 @@ public class Product {
         return description;
     }
 
-    public Float getPrice() {
+    public double getPrice() {
         return price;
     }
 
@@ -80,7 +80,7 @@ public class Product {
         private String id;
         private String name;
         private String description;
-        private Float price;
+        private double price;
         private Integer quantity;
         private String userId;
         private Instant createdAt;
@@ -115,7 +115,7 @@ public class Product {
             return this;
         }
 
-        public Builder price(Float price) {
+        public Builder price(double price) {
             this.price = price;
             return this;
         }

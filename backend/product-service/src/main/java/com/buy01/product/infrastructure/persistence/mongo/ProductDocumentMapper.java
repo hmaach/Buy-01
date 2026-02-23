@@ -11,6 +11,7 @@ public class ProductDocumentMapper {
         ProductDocument d = new ProductDocument();
         d.setId(p.getId());
         d.setName(p.getName());
+        d.setQuantity(p.getQuantity());
         d.setDescription(p.getDescription());
         d.setPrice(p.getPrice());
         d.setUserId(p.getUserId());

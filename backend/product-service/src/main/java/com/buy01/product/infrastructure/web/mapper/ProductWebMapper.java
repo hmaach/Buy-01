@@ -14,7 +14,6 @@ public class ProductWebMapper {
                 .name(request.name())
                 .description(request.description())
                 .price(request.price())
-                .mediaIds(request.mediaIds())
                 .userId(userId)
                 .build();
     }
@@ -26,7 +25,6 @@ public class ProductWebMapper {
                 .description(product.getDescription())
                 .price(product.getPrice())
                 .userId(product.getUserId())
-                .mediaIds(product.getMediaIds())
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())
                 .build();

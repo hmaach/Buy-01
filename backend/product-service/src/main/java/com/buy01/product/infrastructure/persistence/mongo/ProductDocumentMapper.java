@@ -13,7 +13,6 @@ public class ProductDocumentMapper {
         d.setName(p.getName());
         d.setDescription(p.getDescription());
         d.setPrice(p.getPrice());
-        d.setMediaIds(p.getMediaIds());
         d.setUserId(p.getUserId());
         d.setCreatedAt(p.getCreatedAt());
         d.setUpdatedAt(p.getUpdatedAt());
@@ -26,7 +25,6 @@ public class ProductDocumentMapper {
                 .name(d.getName())
                 .description(d.getDescription())
                 .price(d.getPrice())
-                .mediaIds(d.getMediaIds())
                 .userId(d.getUserId())
                 .createdAt(d.getCreatedAt())
                 .updatedAt(d.getUpdatedAt())

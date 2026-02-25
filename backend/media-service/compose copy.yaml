@@ -1,0 +1,15 @@
+services:
+  mongodb:
+    container_name: ${MEDIA_DB_NAME}
+    image: mongo:latest
+    ports:
+      - "${MEDIA_LOCAL_PORT}:${MEDIA_DOCKER_PORT}"
+    environment:
+      MEDIA_INITDB_DATABASE: ${MEDIA_DB_NAME}
+      MEDIA_INITDB_ROOT_USERNAME: ${MEDIA_DB_USER}
+      MEDIA_INITDB_ROOT_PASSWORD: ${MEDIA_DB_PWD}
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:

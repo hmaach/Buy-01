@@ -1,4 +1,4 @@
-package com.buy01.product.application.web.dto;
+package com.buy01.product.infrastructure.web.dto;
 
 import java.time.Instant;
 import java.util.List;
@@ -12,7 +12,7 @@ public class ProductResponse {
     private String id;
     private String name;
     private String description;
-    private float price;
+    private double price;
     private String userId;
     private List<String> mediaIds;
     private Instant createdAt;

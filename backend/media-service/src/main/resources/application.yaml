@@ -1,3 +1,8 @@
 spring:
   application:
     name: media
+  mongodb:
+      uri: "mongodb://${MEDIA_MONGO_DB_USER}:${MEDIA_MONGO_DB_PWD}@localhost:${MEDIA_MONGO_LOCAL_PORT}/${MEDIA_MONGO_DB_NAME}?authSource=admin"
+
+server:
+  port: 8083

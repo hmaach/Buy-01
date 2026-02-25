@@ -1,0 +1,102 @@
+version: "3.9"
+
+services:
+  # USER DATABASE
+  mongo-user:
+    image: mongo:7
+    container_name: mongo-user
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${USER_MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${USER_MONGO_PASSWORD}
+    volumes:
+      - mongo-user-data:/data/db
+    networks:
+      - ecommerce-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PRODUCT DATABASE
+  mongo-product:
+    image: mongo:7
+    container_name: mongo-product
+    restart: unless-stopped
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${PRODUCT_MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${PRODUCT_MONGO_PASSWORD}
+    volumes:
+      - mongo-product-data:/data/db
+    networks:
+      - ecommerce-network
+
+  # MEDIA DATABASE
+  mongo-media:
+    image: mongo:7
+    container_name: mongo-media
+    restart: unless-stopped
+    ports:
+      - "27019:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MEDIA_MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MEDIA_MONGO_PASSWORD}
+    volumes:
+      - mongo-media-data:/data/db
+    networks:
+      - ecommerce-network
+
+  # USER SERVICE
+  user-service:
+    build: ./backend/user-service
+    container_name: user-service
+    restart: unless-stopped
+    depends_on:
+      mongo-user:
+        condition: service_healthy
+    ports:
+      - "${USER_SERVICE_PORT}:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+      MONGO_HOST: mongo-user
+      MONGO_PORT: 27017
+      MONGO_DB: ${USER_MONGO_DB}
+      MONGO_USERNAME: ${USER_MONGO_USERNAME}
+      MONGO_PASSWORD: ${USER_MONGO_PASSWORD}
+
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+
+    networks:
+      - ecommerce-network
+
+  # API GATEWAY
+  api-gateway:
+    build: ./backend/api-gateway
+    container_name: api-gateway
+    restart: unless-stopped
+    depends_on:
+      - user-service
+    ports:
+      - "${GATEWAY_PORT}:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - ecommerce-network
+
+# NETWORK
+networks:
+  ecommerce-network:
+    driver: bridge
+
+# VOLUMES
+volumes:
+  mongo-user-data:
+  mongo-product-data:
+  mongo-media-data:

@@ -3,6 +3,17 @@ spring:
     name: media
   mongodb:
       uri: "mongodb://${MEDIA_MONGO_DB_USER}:${MEDIA_MONGO_DB_PWD}@localhost:${MEDIA_MONGO_LOCAL_PORT}/${MEDIA_MONGO_DB_NAME}?authSource=admin"
+  kafka:
+      bootstrap-servers: localhost:9092
+      consumer:
+        group-id: media-service-group
+        auto-offset-reset: earliest
+        enable-auto-commit: true           # usually true for simple cases
+        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+        properties:
+          spring.json.trusted.packages: "*"           # very important      # allow deserializing your event classes
+          spring.json.value.default.type: com.buy01.media.infrastructure.web.dto.ImagesLinkedEvent
 
 server:
   port: 8083

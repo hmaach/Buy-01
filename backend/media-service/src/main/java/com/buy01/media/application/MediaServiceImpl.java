@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.core.io.Resource;
@@ -39,12 +40,12 @@ public class MediaServiceImpl implements MediaUseCase {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Media ID is required");
         }
 
-        Media doc = repository.findById(mediaId);
-        if (doc == null) {
+        Optional<Media> doc = repository.findById(mediaId);
+        if (doc.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Media not found");
         }
 
-        String pathStr = doc.getImagePath();
+        String pathStr = doc.get().getImagePath();
         if (pathStr == null || pathStr.trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Media has no stored path");
         }

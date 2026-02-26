@@ -6,8 +6,12 @@ public class MediaDocumentMapper {
 
     public static MediaDocument toDocument(Media m) {
         var d = new MediaDocument();
+        if (m.getId() != null) {
+            d.setId(m.getId());
+        }
         d.setImagePath(m.getImagePath());
         d.setCreatedAt(m.getCreatedAt());
+        d.setProductId(m.getProductId());
         d.setStatus(m.getStatus());
         return d;
     }

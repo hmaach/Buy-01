@@ -29,7 +29,7 @@ public class MediaController {
     public MediaController(MediaUseCase muc) {
         this.mediaService = muc;
     }
-
+    
     @GetMapping("/{id}")
     public ResponseEntity<Resource> getImage(@PathVariable String id) {
         Resource resource = mediaService.getImageFile(id);

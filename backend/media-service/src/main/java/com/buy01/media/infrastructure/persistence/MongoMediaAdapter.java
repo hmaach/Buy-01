@@ -1,5 +1,7 @@
 package com.buy01.media.infrastructure.persistence;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Component;
 
 import com.buy01.media.domain.model.Media;
@@ -19,9 +21,9 @@ public class MongoMediaAdapter implements MediaRepositoryPort {
     }
 
     @Override
-    public Media findById(String id) {
+    public Optional<Media> findById(String id) {
         var media = mediaRepository.findById(id);
-        return media.map(MediaDocumentMapper::toDomain).orElse(null);
+        return media.map(MediaDocumentMapper::toDomain);
     }
 
 }

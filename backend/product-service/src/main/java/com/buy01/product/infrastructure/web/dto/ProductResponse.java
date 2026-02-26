@@ -14,7 +14,7 @@ public class ProductResponse {
     private String description;
     private double price;
     private String userId;
-    private List<String> mediaIds;
+    private List<String> imagesIds;
     private Instant createdAt;
     private Instant updatedAt;
 }

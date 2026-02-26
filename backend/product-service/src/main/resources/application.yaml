@@ -4,7 +4,12 @@ spring:
   mongodb:
     uri: "mongodb://${PRODUCT_MONGO_DB_USER:rserraf}:${PRODUCT_MONGO_DB_PWD:PDB}@localhost:${PRODUCT_MONGO_LOCAL_PORT:27017}/${PRODUCT_MONGO_DB_NAME:product_database}?authSource=admin"
   kafka:
-    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+      properties:
+        spring.json.add.type.headers: false
 
 server:
   port: 8082

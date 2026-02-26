@@ -10,7 +10,7 @@ spring:
         auto-offset-reset: earliest
         enable-auto-commit: true           # usually true for simple cases
         key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-        value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+        value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
         properties:
           spring.json.trusted.packages: "*"           # very important      # allow deserializing your event classes
           spring.json.value.default.type: com.buy01.media.infrastructure.web.dto.ImagesLinkedEvent

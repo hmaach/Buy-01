@@ -28,7 +28,6 @@ public class ProductController {
 
     private final ProductWebMapper mapper;
     private final ProductUseCase productUseCase;
-    private KafkaTemplate<String, ImageLinkedEvent> kafkaTemplate;
     
     String userId = "qwertyuiopasdfdfghhjfghjfh";
 
@@ -37,12 +36,8 @@ public class ProductController {
     // @PreAuthorize("hasRole('SELLER')")
     public Mono<ResponseEntity<ProductResponse>> createProduct(
             @Valid @RequestBody ProductCreateRequest request) {
-
         Product product = mapper.toDomain(request, userId);
-        System.out.println(request.mediaIds());
-        return productUseCase.createProduct(product)
-                .doOnSuccess(p -> kafkaTemplate.send("image-linked-topic",
-                        new ImageLinkedEvent(p.getId(), request.mediaIds())))
+        return productUseCase.createProduct(product, request.imagesIds())
                 .map(mapper::toResponse)
                 .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response));
     }

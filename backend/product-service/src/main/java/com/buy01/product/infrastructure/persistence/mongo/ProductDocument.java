@@ -1,8 +1,6 @@
 package com.buy01.product.infrastructure.persistence.mongo;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -19,13 +17,11 @@ public class ProductDocument {
     private String id;
     private String name;
     private String description;
-    private float price;
+    private double price;
+    private int quantity;
 
     @Field("user_id")
     private String userId;
-
-    @Field("media_ids")
-    private List<String> mediaIds = new ArrayList<>();
 
     @CreatedDate
     @Field("created_at")

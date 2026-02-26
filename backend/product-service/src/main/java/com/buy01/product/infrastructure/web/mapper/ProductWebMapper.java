@@ -1,10 +1,10 @@
-package com.buy01.product.application.web.mapper;
+package com.buy01.product.infrastructure.web.mapper;
 
 import org.springframework.stereotype.Component;
 
-import com.buy01.product.application.web.dto.ProductCreateRequest;
-import com.buy01.product.application.web.dto.ProductResponse;
 import com.buy01.product.domain.model.Product;
+import com.buy01.product.infrastructure.web.dto.ProductCreateRequest;
+import com.buy01.product.infrastructure.web.dto.ProductResponse;
 
 @Component
 public class ProductWebMapper {
@@ -14,7 +14,6 @@ public class ProductWebMapper {
                 .name(request.name())
                 .description(request.description())
                 .price(request.price())
-                .mediaIds(request.mediaIds())
                 .userId(userId)
                 .build();
     }
@@ -26,7 +25,6 @@ public class ProductWebMapper {
                 .description(product.getDescription())
                 .price(product.getPrice())
                 .userId(product.getUserId())
-                .mediaIds(product.getMediaIds())
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())
                 .build();

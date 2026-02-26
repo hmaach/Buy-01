@@ -1,4 +1,4 @@
-package com.buy01.product.config;
+package com.buy01.product.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

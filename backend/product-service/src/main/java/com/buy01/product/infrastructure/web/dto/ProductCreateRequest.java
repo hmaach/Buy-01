@@ -1,4 +1,4 @@
-package com.buy01.product.application.web.dto;
+package com.buy01.product.infrastructure.web.dto;
 
 import java.util.List;
 

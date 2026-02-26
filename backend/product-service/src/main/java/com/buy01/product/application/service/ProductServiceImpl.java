@@ -1,6 +1,10 @@
-package com.buy01.product.domain.service;
+package com.buy01.product.application.service;
 
 import java.time.Instant;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
 
 import com.buy01.product.domain.model.Product;
 import com.buy01.product.domain.ports.inbound.ProductUseCase;
@@ -8,11 +12,16 @@ import com.buy01.product.domain.ports.outbound.ProductRepositoryPort;
 
 import reactor.core.publisher.Mono;
 
+@Service
 public class ProductServiceImpl implements ProductUseCase {
     private final ProductRepositoryPort productRepository;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    @Value("${kafka.topic:product-created-topic}")
+    private String topic;
 
-    public ProductServiceImpl(ProductRepositoryPort pr) {
+    public ProductServiceImpl(ProductRepositoryPort pr, KafkaTemplate<String, Object> kt) {
         this.productRepository = pr;
+        this.kafkaTemplate = kt;
     }
 
     @Override
@@ -38,7 +47,6 @@ public class ProductServiceImpl implements ProductUseCase {
                     Product updatedProduct = existing.toBuilder()
                             .name(update.getName())
                             .description(update.getDescription())
-                            .mediaIds(update.getMediaIds())
                             .price(update.getPrice())
                             .quantity(update.getQuantity())
                             .updatedAt(Instant.now())

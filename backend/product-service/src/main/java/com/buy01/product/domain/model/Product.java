@@ -1,17 +1,15 @@
 package com.buy01.product.domain.model;
 
 import java.time.Instant;
-import java.util.List;
 
 public class Product {
 
     private final String id;
     private final String name;
     private final String description;
-    private final Float price;
+    private final double price;
     private final Integer quantity;
     private final String userId;
-    private final List<String> mediaIds;
     private final Instant createdAt;
     private final Instant updatedAt;
 
@@ -22,7 +20,6 @@ public class Product {
         this.price = builder.price;
         this.quantity = builder.quantity;
         this.userId = builder.userId;
-        this.mediaIds = builder.mediaIds;
         this.createdAt = builder.createdAt;
         this.updatedAt = builder.updatedAt;
     }
@@ -39,7 +36,7 @@ public class Product {
         return description;
     }
 
-    public Float getPrice() {
+    public double getPrice() {
         return price;
     }
 
@@ -51,9 +48,6 @@ public class Product {
         return userId;
     }
 
-    public List<String> getMediaIds() {
-        return mediaIds;
-    }
 
     public Instant getCreatedAt() {
         return createdAt;
@@ -86,10 +80,9 @@ public class Product {
         private String id;
         private String name;
         private String description;
-        private Float price;
+        private double price;
         private Integer quantity;
         private String userId;
-        private List<String> mediaIds;
         private Instant createdAt;
         private Instant updatedAt;
 
@@ -103,7 +96,6 @@ public class Product {
             this.price = product.price;
             this.quantity = product.quantity;
             this.userId = product.userId;
-            this.mediaIds = product.mediaIds;
             this.createdAt = product.createdAt;
             this.updatedAt = product.updatedAt;
         }
@@ -123,7 +115,7 @@ public class Product {
             return this;
         }
 
-        public Builder price(Float price) {
+        public Builder price(double price) {
             this.price = price;
             return this;
         }
@@ -138,10 +130,6 @@ public class Product {
             return this;
         }
 
-        public Builder mediaIds(List<String> mediaIds) {
-            this.mediaIds = mediaIds;
-            return this;
-        }
 
         public Builder createdAt(Instant createdAt) {
             this.createdAt = createdAt;

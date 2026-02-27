@@ -1,0 +1,32 @@
+<configuration>
+    <!-- Include default Spring Boot logging rules first -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    
+    <!-- 1. HIDE THE LONG MONGODB METADATA INFO -->
+    <logger name="org.mongodb.driver" level="WARN" />
+
+    <!-- 2. HIDE THE "RESOLVED EXCEPTION" WARNINGS -->
+    <logger name="org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver" level="OFF" />
+    <logger name="org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver" level="OFF" />
+    <logger name="org.springframework.security.authorization.AuthorizationDeniedException" level="OFF" />
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%clr{faint} %clr(%-5p) %clr(:){faint} %m%n%rEx{0,
+                java.lang.reflect.Method,
+                org.springframework,
+                org.mongodb,
+                com.mongodb,
+                sun.reflect,
+                net.sf.cglib,
+                org.apache.catalina,
+                org.apache.tomcat,
+                java.base}
+            </pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+</configuration>

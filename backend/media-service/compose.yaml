@@ -1,1 +1,19 @@
-services: {}
+services:
+  mongodb:
+    container_name: ${MEDIA_MONGO_DB_NAME}
+    image: mongo:latest
+    command: mongod --port 27018 
+    ports:
+      - "${MEDIA_MONGO_LOCAL_PORT}:27018"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MEDIA_MONGO_DB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MEDIA_MONGO_DB_PWD}
+      MONGO_INITDB_DATABASE: ${MEDIA_MONGO_DB_NAME}
+    volumes:
+      - media-mongo-data:/data/db
+
+
+volumes:
+  media-mongo-data:
+
+# docker exec -it $MEDIA_MONGO_DB_NAME mongosh --port 27018 -u $MEDIA_MONGO_DB_USER -p $MEDIA_MONGO_DB_PWD --authenticationDatabase admin

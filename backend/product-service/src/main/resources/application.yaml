@@ -1,3 +1,10 @@
 spring:
   application:
     name: product
+  mongodb:
+    uri: "mongodb://${PRODUCT_MONGO_DB_USER:rserraf}:${PRODUCT_MONGO_DB_PWD:PDB}@localhost:${PRODUCT_MONGO_LOCAL_PORT:27017}/${PRODUCT_MONGO_DB_NAME:product_database}?authSource=admin"
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+server:
+  port: 8082

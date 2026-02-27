@@ -7,6 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ProductApplication {
 
 	public static void main(String[] args) {
+		 String dbName = System.getenv("MONGO_DB_NAME");
+        System.out.println("--- DEBUG: Database Name is: [" + dbName + "] ---");
 		SpringApplication.run(ProductApplication.class, args);
 	}
 

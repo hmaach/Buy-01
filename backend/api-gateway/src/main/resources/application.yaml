@@ -29,16 +29,14 @@ spring:
               uri: lb://MEDIA-SERVICE
               predicates:
                 - Path=/media/**
+        error:
+          include-message: always
+          include-binding-errors: always
+          include-stacktrace: always
 
 logging:
   level:
     org.springframework.web: DEBUG
-
-server:
-  error:
-    include-message: always
-    include-binding-errors: always
-    include-stacktrace: always
 
 eureka:
   client:

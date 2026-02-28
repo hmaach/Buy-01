@@ -15,18 +15,22 @@ spring:
   cloud:
     gateway:
       routes:
-
         - id: user-service
-          uri: http://localhost:8081
+          uri: lb://user-service
           predicates:
             - Path=/users/**
 
         - id: product-service
-          uri: http://localhost:8082
+          uri: lb://product-service
           predicates:
             - Path=/products/**
 
         - id: media-service
-          uri: http://localhost:8083
+          uri: lb://media-service
           predicates:
             - Path=/media/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka

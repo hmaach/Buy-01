@@ -1,9 +1,0 @@
-logging:
-  level:
-    org.springframework.cloud.gateway: TRACE
-    com.ecommerce.gateway: TRACE
-
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://discovery-server:8761/eureka/

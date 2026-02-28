@@ -14,23 +14,33 @@ spring:
 
   cloud:
     gateway:
-      routes:
-        - id: user-service
-          uri: lb://user-service
-          predicates:
-            - Path=/users/**
+      server:
+        webflux:
+          routes:
+            - id: user-service
+              uri: lb://USER-SERVICE
+              predicates:
+                - Path=/users/**
+            - id: product-service
+              uri: lb://PRODUCT-SERVICE
+              predicates:
+                - Path=/products/**
+            - id: media-service
+              uri: lb://MEDIA-SERVICE
+              predicates:
+                - Path=/media/**
 
-        - id: product-service
-          uri: lb://product-service
-          predicates:
-            - Path=/products/**
+logging:
+  level:
+    org.springframework.web: DEBUG
 
-        - id: media-service
-          uri: lb://media-service
-          predicates:
-            - Path=/media/**
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: always
 
 eureka:
   client:
     service-url:
-      defaultZone: http://discovery-server:8761/eureka
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}

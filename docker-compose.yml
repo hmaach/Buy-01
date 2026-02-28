@@ -1,8 +1,8 @@
 services:
   # servers
-  discovery-service:
-    build: ./backend/discovery-service/
-    container_name: discovery-service
+  discovery-server:
+    build: ./backend/discovery-server/
+    container_name: discovery-server
     ports:
       - "${DISCOVERY_PORT}:8761"
     networks:
@@ -14,7 +14,7 @@ services:
     container_name: api-gateway
     restart: unless-stopped
     depends_on:
-      - discovery-service
+      - discovery-server
       - user-service
     ports:
       - "${GATEWAY_PORT}:8080"

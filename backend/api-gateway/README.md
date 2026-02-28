@@ -39,7 +39,7 @@ API Gateway for the e-commerce microservices platform.
 
 ```bash
 # 1. Start Eureka Discovery Service
-cd ../discovery-service
+cd ../discovery-server
 mvn spring-boot:run
 
 # 2. Start User Service

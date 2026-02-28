@@ -1,4 +1,28 @@
 services:
+  # servers
+  discovery-service:
+    build: ./backend/discovery-service/
+    container_name: discovery-service
+    ports:
+      - "${DISCOVERY_PORT}:8761"
+    networks:
+      - ecommerce-network
+
+  # API GATEWAY
+  api-gateway:
+    build: ./backend/api-gateway
+    container_name: api-gateway
+    restart: unless-stopped
+    depends_on:
+      - discovery-service
+      - user-service
+    ports:
+      - "${GATEWAY_PORT}:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - ecommerce-network
+
   # USER DATABASE
   mongo-user:
     image: mongo:7
@@ -68,20 +92,6 @@ services:
       MONGO_PASSWORD: ${USER_MONGO_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION}
-    networks:
-      - ecommerce-network
-
-  # API GATEWAY
-  api-gateway:
-    build: ./backend/api-gateway
-    container_name: api-gateway
-    restart: unless-stopped
-    depends_on:
-      - user-service
-    ports:
-      - "${GATEWAY_PORT}:8080"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
     networks:
       - ecommerce-network
 

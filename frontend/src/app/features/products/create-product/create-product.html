@@ -1,0 +1,125 @@
+<div class="page-container">
+  <div class="max-width-wrapper">
+    
+    <header class="page-header">
+      <div class="header-titles">
+        <h1>Product & Media Management</h1>
+        <p class="subtitle">
+          Update listing details for <span class="highlight">Wireless Audio Max 2</span>
+        </p>
+      </div>
+      <div class="header-actions">
+        <button mat-icon-button (click)="toggleTheme()">
+          <mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        </button>
+        <div class="status-badge">
+          <div class="pulse-dot"></div>
+          <span>Live Preview</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-grid">
+      <mat-card class="product-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar color="primary">edit_note</mat-icon>
+          <mat-card-title>Edit Product Details</mat-card-title>
+          <mat-card-subtitle>REACTIVE FORM</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <form [formGroup]="productForm" class="product-form">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Product Name</mat-label>
+              <input matInput formControlName="name">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea matInput rows="5" formControlName="description"></textarea>
+            </mat-form-field>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Price (USD)</mat-label>
+                <span matPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="price">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Category</mat-label>
+                <mat-select formControlName="category">
+                  <mat-option value="electronics">Electronics</mat-option>
+                  <mat-option value="audio">Audio</mat-option>
+                  <mat-option value="wearables">Wearables</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </form>
+        </mat-card-content>
+
+        <mat-card-actions>
+          <button mat-flat-button color="primary" class="save-btn">
+            <mat-icon>save</mat-icon> Save Changes
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <div class="media-column">
+        <div class="media-viewer-grid">
+          <div class="main-preview card-border">
+            <img [src]="selectedImage" alt="Main Preview">
+            <span class="badge-primary">Primary Image</span>
+            <div class="overlay">
+              <button mat-stroked-button color="basic">
+                <mat-icon>zoom_in</mat-icon> Full View
+              </button>
+            </div>
+          </div>
+
+          <div class="thumbnail-list card-border">
+            <div class="thumb-header">MEDIA LIBRARY</div>
+            <div class="thumb-scroll">
+              @for (img of thumbnails; track img) {
+                <div class="thumb-item" [class.active]="img === selectedImage" (click)="selectedImage = img">
+                  <img [src]="img">
+                </div>
+              }
+              <button class="add-thumb">
+                <mat-icon>add_a_photo</mat-icon>
+                <span>Add New</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="secondary-grid">
+          <div class="upload-zone card-border">
+            <mat-icon>cloud_upload</mat-icon>
+            <p>Drop files here or click to upload</p>
+            <span class="hint">Max 2MB per image</span>
+            <input type="file" class="hidden-input">
+          </div>
+
+          <mat-card class="seo-card card-border">
+            <h3><mat-icon color="accent">analytics</mat-icon> SEO & Visibility</h3>
+            <div class="seo-row">
+              <div class="seo-info">
+                <span class="label">Product Visibility</span>
+                <span class="hint">Published on storefront</span>
+              </div>
+              <mat-slide-toggle color="primary" checked></mat-slide-toggle>
+            </div>
+            <div class="tags-section">
+              <span class="tag-label">META TAGS</span>
+              <mat-chip-set>
+                <mat-chip-row (removed)="removeTag('Wireless')">Wireless <button matChipRemove><mat-icon>cancel</mat-icon></button></mat-chip-row>
+                <mat-chip-row (removed)="removeTag('Audio')">Audio <button matChipRemove><mat-icon>cancel</mat-icon></button></mat-chip-row>
+              </mat-chip-set>
+            </div>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

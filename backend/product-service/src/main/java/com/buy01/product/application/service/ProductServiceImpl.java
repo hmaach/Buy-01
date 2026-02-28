@@ -30,7 +30,7 @@ public class ProductServiceImpl implements ProductUseCase {
         product.validate();
 
         Instant now = Instant.now();
-
+        
         return Mono.just(product)
                 .map(p -> p.toBuilder()
                         .createdAt(now)

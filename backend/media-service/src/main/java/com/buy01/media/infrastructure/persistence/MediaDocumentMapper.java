@@ -10,7 +10,10 @@ public class MediaDocumentMapper {
             d.setId(m.getId());
         }
         d.setImagePath(m.getImagePath());
-        d.setCreatedAt(m.getCreatedAt());
+        if (m.getCreatedAt() != null) {
+            d.setCreatedAt(m.getCreatedAt());
+        }
+
         d.setProductId(m.getProductId());
         d.setStatus(m.getStatus());
         return d;

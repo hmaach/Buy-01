@@ -47,7 +47,7 @@ public class UserController {
                         request.name(),
                         request.email(),
                         request.password(),
-                        Role.USER,
+                        Role.SELLER,
                         null
                 );
 

@@ -17,4 +17,9 @@ spring:
       enabled: false
 
   jwt:
-  secret: ${JWT_SECRET:azertyuiopqsdfghjklmwxcvbn}
+    secret: ${JWT_SECRET:azertyuiopqsdfghjklmwxcvbn}
+    expiration: 86400000
+
+media:
+  service:
+    url: ${MEDIA_SERVICE_URL:http://localhost:8083}

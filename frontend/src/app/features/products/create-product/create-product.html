@@ -1,125 +1,167 @@
-<div class="page-container">
-  <div class="max-width-wrapper">
-    
-    <header class="page-header">
-      <div class="header-titles">
-        <h1>Product & Media Management</h1>
-        <p class="subtitle">
-          Update listing details for <span class="highlight">Wireless Audio Max 2</span>
-        </p>
-      </div>
-      <div class="header-actions">
-        <button mat-icon-button (click)="toggleTheme()">
-          <mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
-        </button>
-        <div class="status-badge">
-          <div class="pulse-dot"></div>
-          <span>Live Preview</span>
+<div class="container">
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <h1>Product & Stock Management</h1>
+            <p>
+                Update your listing details and manage assets for
+                <span class="highlight">Wireless Audio Max 2</span>
+            </p>
         </div>
-      </div>
+        <div class="status-pill">
+            <span class="dot live"></span>
+            Live Preview
+        </div>
     </header>
 
-    <div class="content-grid">
-      <mat-card class="product-card">
-        <mat-card-header>
-          <mat-icon mat-card-avatar color="primary">edit_note</mat-icon>
-          <mat-card-title>Edit Product Details</mat-card-title>
-          <mat-card-subtitle>REACTIVE FORM</mat-card-subtitle>
-        </mat-card-header>
+    <div class="main-grid">
 
-        <mat-card-content>
-          <form [formGroup]="productForm" class="product-form">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Product Name</mat-label>
-              <input matInput formControlName="name">
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Description</mat-label>
-              <textarea matInput rows="5" formControlName="description"></textarea>
-            </mat-form-field>
-
-            <div class="form-row">
-              <mat-form-field appearance="outline">
-                <mat-label>Price (USD)</mat-label>
-                <span matPrefix>$&nbsp;</span>
-                <input matInput type="number" formControlName="price">
-              </mat-form-field>
-
-              <mat-form-field appearance="outline">
-                <mat-label>Category</mat-label>
-                <mat-select formControlName="category">
-                  <mat-option value="electronics">Electronics</mat-option>
-                  <mat-option value="audio">Audio</mat-option>
-                  <mat-option value="wearables">Wearables</mat-option>
-                </mat-select>
-              </mat-form-field>
+        <!-- Left column - Form -->
+        <section class="card form-card">
+            <div class="card-header">
+                <h2>
+                    <span class="material-symbols-outlined">edit_note</span>
+                    Create Product Details
+                </h2>
+                <span class="badge">Create Product Form</span>
             </div>
-          </form>
-        </mat-card-content>
 
-        <mat-card-actions>
-          <button mat-flat-button color="primary" class="save-btn">
-            <mat-icon>save</mat-icon> Save Changes
-          </button>
-        </mat-card-actions>
-      </mat-card>
+            <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-content">
 
-      <div class="media-column">
-        <div class="media-viewer-grid">
-          <div class="main-preview card-border">
-            <img [src]="selectedImage" alt="Main Preview">
-            <span class="badge-primary">Primary Image</span>
-            <div class="overlay">
-              <button mat-stroked-button color="basic">
-                <mat-icon>zoom_in</mat-icon> Full View
-              </button>
-            </div>
-          </div>
-
-          <div class="thumbnail-list card-border">
-            <div class="thumb-header">MEDIA LIBRARY</div>
-            <div class="thumb-scroll">
-              @for (img of thumbnails; track img) {
-                <div class="thumb-item" [class.active]="img === selectedImage" (click)="selectedImage = img">
-                  <img [src]="img">
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" formControlName="name" placeholder="Enter product name" />
+                    <div *ngIf="name?.touched && name?.hasError('required')" class="error">
+                        Product name is required
+                    </div>
                 </div>
-              }
-              <button class="add-thumb">
-                <mat-icon>add_a_photo</mat-icon>
-                <span>Add New</span>
-              </button>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea formControlName="description" rows="6"></textarea>
+                    <div *ngIf="description?.touched && description?.hasError('required')" class="error">
+                        Description is required
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label>Price (USD)</label>
+                        <div class="input-prefix">
+                            <span class="prefix">$</span>
+                            <input type="number" formControlName="price" step="0.01" min="0" />
+                        </div>
+                    </div>
+
+                    <div class="form-group half">
+                        <label>Quantity</label>
+                        <input type="number" formControlName="quantity" min="0" />
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary" [disabled]="form.invalid || form.pristine">
+                        <span class="material-symbols-outlined">save</span>
+                        Save Changes
+                    </button>
+                </div>
+
+            </form>
+        </section>
+
+        <!-- Right column - Images + Upload -->
+        <div class="right-column">
+
+            <div class="image-grid">
+
+
+                <!-- Main image card -->
+                <div class="main-image-card card image-hover" (drop)="onDrop($event, 'main')"
+                    (dragover)="onDragOver($event)" (dragenter)="onDragOver($event)">
+
+                    <span class="image-label">Primary Image</span>
+
+                    <img [src]="displayedMain" alt="Main product preview" />
+
+                </div>
+
+                <!-- Thumbnails card -->
+                <div class="thumbnails-card card">
+                    <div class="thumbnails-header">Media Library</div>
+                    <div class="thumbnails-grid" (drop)="onDrop($event, 'thumbnails')" (dragover)="onDragOver($event)"
+                        (dragenter)="onDragOver($event)">
+
+                        @for (url of displayedThumbs; track $index) {
+                        <div class="thumb-item relative">
+                            <img [src]="url" alt="Product thumbnail" />
+
+                            <!-- Only show delete button for newly uploaded previews (not initial ones) -->
+                            @if ($index < thumbnailPreviews.length) { <button class="delete-btn"
+                                (click)="removeThumbnail($index)">
+                                <span class="material-symbols-outlined">close</span>
+                                </button>
+                                }
+                        </div>
+                        }
+
+                        <!-- Add new button (also acts as drop zone) -->
+                        <label class="thumb-add" for="thumbnails-upload">
+                            <span class="material-symbols-outlined">add_a_photo</span>
+                            <span>Add New</span>
+                        </label>
+
+                        <!-- Hidden input for multiple thumbnails -->
+                        <input id="thumbnails-upload" type="file" accept="image/*" multiple
+                            (change)="onThumbnailsSelected($event)" hidden />
+                    </div>
+                </div>
             </div>
-          </div>
+
+            <!-- Drag & drop area -->
+            <div class="upload-zone">
+                <div class="upload-content">
+                    <span class="material-symbols-outlined upload-icon">cloud_upload</span>
+                    <h3>Drop files here or click to upload</h3>
+                    <p class="small">Max 2MB per image</p>
+                    <p class="small warning">Image only validation</p>
+                </div>
+
+                <input type="file" class="file-input" accept="image/*" (change)="onMainImageSelected($event)" />
+            </div>
+
         </div>
 
-        <div class="secondary-grid">
-          <div class="upload-zone card-border">
-            <mat-icon>cloud_upload</mat-icon>
-            <p>Drop files here or click to upload</p>
-            <span class="hint">Max 2MB per image</span>
-            <input type="file" class="hidden-input">
-          </div>
-
-          <mat-card class="seo-card card-border">
-            <h3><mat-icon color="accent">analytics</mat-icon> SEO & Visibility</h3>
-            <div class="seo-row">
-              <div class="seo-info">
-                <span class="label">Product Visibility</span>
-                <span class="hint">Published on storefront</span>
-              </div>
-              <mat-slide-toggle color="primary" checked></mat-slide-toggle>
-            </div>
-            <div class="tags-section">
-              <span class="tag-label">META TAGS</span>
-              <mat-chip-set>
-                <mat-chip-row (removed)="removeTag('Wireless')">Wireless <button matChipRemove><mat-icon>cancel</mat-icon></button></mat-chip-row>
-                <mat-chip-row (removed)="removeTag('Audio')">Audio <button matChipRemove><mat-icon>cancel</mat-icon></button></mat-chip-row>
-              </mat-chip-set>
-            </div>
-          </mat-card>
-        </div>
-      </div>
     </div>
-  </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="tech-badges">
+            <div class="badge-item">
+                <div class="icon-bg green">
+                    <span class="material-symbols-outlined">storage</span>
+                </div>
+                <div>
+                    <span class="badge-title">Spring Boot</span>
+                    <span class="badge-subtitle">Media Service Online</span>
+                </div>
+            </div>
+
+            <div class="badge-item">
+                <div class="icon-bg blue">
+                    <span class="material-symbols-outlined">javascript</span>
+                </div>
+                <div>
+                    <span class="badge-title">Angular v20+ </span>
+                    <span class="badge-subtitle">Reactive Engine</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="secure-info">
+            <span class="material-symbols-outlined">lock</span>
+            Secure Enterprise Connection
+        </div>
+    </footer>
+
 </div>

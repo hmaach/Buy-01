@@ -1,5 +1,6 @@
 package com.buy01.user.infrastructure.adapters.in.web.dto.request;
 
-public class LoginRequest {
-    
-}
+public record LoginRequest(
+        String email,
+        String password
+) {}

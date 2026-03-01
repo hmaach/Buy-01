@@ -15,4 +15,6 @@ public interface UserService {
     User updateUser(UUID userId, UpdateUserCommand command);
 
     void deleteUser(UUID userId);
+
+    User findByEmail(String email);
 }

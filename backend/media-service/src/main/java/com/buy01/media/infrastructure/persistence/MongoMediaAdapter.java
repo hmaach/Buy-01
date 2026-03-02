@@ -10,10 +10,10 @@ import com.buy01.media.domain.model.FileStatus;
 import com.buy01.media.domain.model.Media;
 import com.buy01.media.domain.ports.outbound.MediaRepositoryPort;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class MongoMediaAdapter implements MediaRepositoryPort {
     private final SpringDataProductRepository mediaRepository;
 

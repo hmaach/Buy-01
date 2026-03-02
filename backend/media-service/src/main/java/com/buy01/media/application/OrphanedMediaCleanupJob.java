@@ -26,17 +26,20 @@ public class OrphanedMediaCleanupJob {
 
     private static final Duration ORPHAN_AGE = Duration.ofHours(1);
 
-    @Scheduled(fixedRate = 10000) 
+    @Scheduled(fixedRate = 10000)
     // @Scheduled(cron = "0 15 * * * *") // every hour at :15
     public void cleanupOrphanedPendingMedia() {
         Instant threshold = Instant.now().minus(ORPHAN_AGE);
 
         var medias = mediaRepo.findByStatusAndCreatedAtBefore(FileStatus.PENDING, threshold);
+        System.out.println("========><> " + medias.size());
+
         if (medias.isEmpty())
             return;
 
         medias.forEach(media -> {
             var path = Paths.get(media.getImagePath());
+            System.out.println("========> " + path);
             try {
                 Files.deleteIfExists(path);
                 mediaRepo.deleteById(media.getId());

@@ -1,0 +1,33 @@
+<div class="media-container">
+  <header class="media-header">
+    <h1>Media Manager</h1>
+    <p>Upload and manage your images</p>
+  </header>
+
+  <div class="upload-section">
+    <label>Upload New Image (max 2MB)</label>
+    <div class="upload-area" (click)="fileInput.click()">
+      @if (loading()) {
+        <mat-spinner diameter="32"></mat-spinner>
+      } @else {
+        <mat-icon>cloud_upload</mat-icon>
+        <span>Click to upload image</span>
+      }
+    </div>
+    <input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" hidden>
+  </div>
+
+  <div class="media-grid">
+    @for (item of media(); track item.id) {
+      <div class="media-item">
+        <img [src]="item.url" [alt]="item.filename">
+        <div class="media-info">
+          <span class="filename">{{ item.filename }}</span>
+        </div>
+        <button mat-icon-button color="warn" (click)="deleteMedia(item.id)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    }
+  </div>
+</div>

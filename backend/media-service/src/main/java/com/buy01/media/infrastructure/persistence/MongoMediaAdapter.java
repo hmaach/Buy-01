@@ -40,4 +40,10 @@ public class MongoMediaAdapter implements MediaRepositoryPort {
         mediaRepository.deleteById(id);
     }
 
+    @Override
+    public List<Media> findByProductId(String productId) {
+       var medias = mediaRepository.findByProductId(productId);
+        return medias.stream().map(MediaDocumentMapper::toDomain).toList();
+    }
+
 }

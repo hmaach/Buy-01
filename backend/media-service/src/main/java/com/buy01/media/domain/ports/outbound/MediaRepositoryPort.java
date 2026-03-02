@@ -15,4 +15,6 @@ public interface MediaRepositoryPort {
         List<Media> findByStatusAndCreatedAtBefore(FileStatus status, Instant threshold);
 
         void deleteById(String id);
+
+        List<Media> findByProductId(String productId);
 }

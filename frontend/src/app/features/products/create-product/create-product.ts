@@ -2,22 +2,26 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ProductService } from '../../../core/services/product.service';
+import { ProductCreateRequest } from '../../../core/models/api-response.model';
+import { env } from '../../../../environments/environment';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-create-product',
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './create-product.html',
-  styleUrl: './create-product.scss',
+  styleUrls: ['./create-product.scss'],
 })
 export class CreateProduct {
   readonly productService = inject(ProductService);
+  readonly router = inject(Router);
 
   form: FormGroup;
 
   mainImagePreview: string | null = null;
   thumbnailPreviews: string[] = [];
 
-  initialMain = 'https://lh3.googleusercontent.com/aida-public/AB6AXuA4crwCtaLufqLuE7UZE__WfZbPb7sZI4kj8vZuIetR1M2oBhqpkledxwvyvVaOfftLeF--KzHzAjDaGolK0Sb07OSIOmpR7rY8d6vx9-tuo_9pCyycFZCvWeacUoBvwwPAuF9XgaFzsdlrdY_mX-1AmtPz9HlfppvVRvGMICUEvBUtpaixk7ADR9eVObklcnXehukgic-kto9fR-eegr9jCw-qlo4p_q_QN0CEZTDKPYeKXGZWy043Rx2bFetMuuFHtfVpJVmsJfw';
+  initialMain = './empty.png';
   initialThumbs = [];
 
   errorMessage = signal<string | null>(null);
@@ -152,8 +156,7 @@ export class CreateProduct {
     this.productService.createProduct(payload).subscribe({
       next: (productResp) => {
         this.okMessage.set('Product created successfully')
-        console.log('Product created successfully:', productResp);
-        // TODO: navigate away or reset form as required
+        this.router.navigate(['/product', productResp.id]);
       },
       error: (err) => {
         this.errorMessage.set(err.title || "unknow error")
@@ -174,10 +177,10 @@ export class CreateProduct {
   get quantity() { return this.form.get('quantity'); }
   get displayedMain(): string {
     if (this.mainImagePreview) {
-      return `http://localhost:8080/media/${this.mainImagePreview}`
+      return `${env.mediaUrl}/${this.mainImagePreview}`
     }
     return this.initialMain;
   }
-  get displayedThumbs(): string[] { return this.thumbnailPreviews.map(v => `http://localhost:8080/media/${v}`) }
+  get displayedThumbs(): string[] { return this.thumbnailPreviews.map(v => `${env.mediaUrl}/${v}`) }
 
 }

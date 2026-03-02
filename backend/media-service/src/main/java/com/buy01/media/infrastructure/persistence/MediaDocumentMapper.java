@@ -1,5 +1,7 @@
 package com.buy01.media.infrastructure.persistence;
 
+import java.time.Instant;
+
 import com.buy01.media.domain.model.Media;
 
 public class MediaDocumentMapper {
@@ -10,10 +12,7 @@ public class MediaDocumentMapper {
             d.setId(m.getId());
         }
         d.setImagePath(m.getImagePath());
-        if (m.getCreatedAt() != null) {
-            d.setCreatedAt(m.getCreatedAt());
-        }
-
+        d.setCreatedAt(m.getCreatedAt() != null ? m.getCreatedAt() : Instant.now());
         d.setProductId(m.getProductId());
         d.setStatus(m.getStatus());
         return d;

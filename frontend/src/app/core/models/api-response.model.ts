@@ -6,12 +6,12 @@ interface MediaItem {
   serverResponse?: MediaResponse;
 }
 
-interface MediaResponse {
+export interface MediaResponse {
   imagesId: string;
   status: 'PENDING' | 'LINKED'
 }
 
-interface ProductCreateRequest {
+export interface ProductCreateRequest {
   name: string,
   description: string,
   price: number,
@@ -19,3 +19,15 @@ interface ProductCreateRequest {
   imagesIds: string[]
 }
 
+
+export interface Product {
+  name: string,
+  price: number,
+  oldPrice: number,
+  rating: 4.8,
+  reviewsCount: 124,
+  quantity: number,
+  description: string,
+  mainImage: string,
+  thumbnails: string[],
+}

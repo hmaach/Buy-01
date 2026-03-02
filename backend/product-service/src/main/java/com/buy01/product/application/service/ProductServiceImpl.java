@@ -1,15 +1,18 @@
 package com.buy01.product.application.service;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import com.buy01.product.domain.model.Product;
 import com.buy01.product.domain.ports.inbound.ProductUseCase;
 import com.buy01.product.domain.ports.outbound.ProductRepositoryPort;
 import com.buy01.product.infrastructure.messaging.ImagesLinkedEvent;
+import com.buy01.product.infrastructure.web.dto.ProductResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +24,7 @@ import reactor.core.publisher.Mono;
 public class ProductServiceImpl implements ProductUseCase {
     private final ProductRepositoryPort productRepository;
     private final KafkaTemplate<String, ImagesLinkedEvent> kafkaTemplate;
+    private final WebClient mediaWebClient;
 
     private static final String TOPIC_IMAGES_LINKED = "images-linked";
 
@@ -39,25 +43,24 @@ public class ProductServiceImpl implements ProductUseCase {
                     var saved = productRepository.save(p);
                     return saved.map(pp -> pp.toBuilder().imagesIds(imagesIds).build());
                 })
-                .doOnNext(savedProduct -> {
-                    // Send Kafka event only after successful save
-                    if (!imagesIds.isEmpty()) {
-                        ImagesLinkedEvent event = new ImagesLinkedEvent(
-                                savedProduct.getId(),
-                                imagesIds);
-
-                        kafkaTemplate.send(
-                                TOPIC_IMAGES_LINKED,
-                                savedProduct.getId(), 
-                                event);
-
-                        log.info("Kafka event sent: product={}, media count={}",
-                                savedProduct.getId(), imagesIds.size());
-                    } else {
-                        log.debug("No images to link for product {}", savedProduct.getId());
-                    }
-                })
+                .doOnNext(savedProduct -> sendKafkaEvent(savedProduct, imagesIds))
                 .doOnError(e -> log.error("Failed to create product or send event", e));
+    }
+    @Override
+    public Mono<ProductResponse> getProductWithImages(String productId) {
+        Mono<Product> productMono = productRepository.findById(productId);
+
+        productMono.subscribe(p -> System.out.println("=======< "+p.getUserId()));
+
+        Mono<List<String>> imagesMono = mediaWebClient.get()
+                .uri("/media/product/{id}", productId)
+                .retrieve()
+                .bodyToFlux(String.class)
+                .collectList()
+                .onErrorReturn(Collections.emptyList());
+
+        return Mono.zip(productMono, imagesMono)
+                .map(tuple -> new ProductResponse(tuple.getT1(), tuple.getT2()));
     }
 
     public Mono<Product> updateProduct(Product update, String id, String userId) {
@@ -78,6 +81,24 @@ public class ProductServiceImpl implements ProductUseCase {
 
                     return productRepository.save(updatedProduct);
                 });
+    }
+
+    private void sendKafkaEvent(Product savedProduct, List<String> imagesIds) {
+        if (!imagesIds.isEmpty()) {
+            ImagesLinkedEvent event = new ImagesLinkedEvent(
+                    savedProduct.getId(),
+                    imagesIds);
+
+            kafkaTemplate.send(
+                    TOPIC_IMAGES_LINKED,
+                    savedProduct.getId(),
+                    event);
+
+            log.info("Kafka event sent: product={}, media count={}",
+                    savedProduct.getId(), imagesIds.size());
+        } else {
+            log.debug("No images to link for product {}", savedProduct.getId());
+        }
     }
 
 }

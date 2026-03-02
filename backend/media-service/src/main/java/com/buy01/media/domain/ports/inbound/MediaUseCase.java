@@ -1,5 +1,7 @@
 package com.buy01.media.domain.ports.inbound;
 
+import java.util.List;
+
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,4 +14,6 @@ public interface MediaUseCase {
         Resource getImageFile(String mediaId);
 
         MediaType guessContentType(String filename);
+
+        List<String> getProdutImages(String productId);
 }

@@ -1,14 +1,19 @@
 package com.buy01.product.infrastructure.web.controller;
 
+import java.time.Instant;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.buy01.product.domain.model.Product;
 import com.buy01.product.domain.ports.inbound.ProductUseCase;
@@ -27,9 +32,8 @@ public class ProductController {
 
     private final ProductWebMapper mapper;
     private final ProductUseCase productUseCase;
-    
-    String userId = "qwertyuiopasdfdfghhjfghjfh";
 
+    String userId = "qwertyuiopasdfdfghhjfghjfh";
 
     @PostMapping
     // @PreAuthorize("hasRole('SELLER')")
@@ -52,4 +56,16 @@ public class ProductController {
                 .map(mapper::toResponse);
     }
 
+    @GetMapping("/{id}")
+    public Mono<ResponseEntity<?>> getProduct(@PathVariable String id) {
+        return productUseCase.getProductWithImages(id)
+                .<ResponseEntity<?>>map(product -> ResponseEntity.ok(product))
+                .switchIfEmpty(Mono.defer(() -> {
+                    ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                            HttpStatus.NOT_FOUND,
+                            "Product with ID " + id + " not found");
+
+                    return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem));
+                }));
+    }
 }

@@ -13,3 +13,6 @@ spring:
 
 server:
   port: 8082
+
+services:
+  media: "http://localhost:8083"

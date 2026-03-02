@@ -1,0 +1,67 @@
+<mat-toolbar color="primary" class="navbar">
+  <div class="navbar-container">
+    <div class="navbar-brand">
+      <a routerLink="/products" class="brand-link">
+        <mat-icon>shopping_bag</mat-icon>
+        <span>Buy-01</span>
+      </a>
+    </div>
+    
+    <div class="navbar-links">
+      <a mat-button routerLink="/products" routerLinkActive="active">
+        <mat-icon>store</mat-icon>
+        Products
+      </a>
+      
+      @if (isSeller()) {
+        <a mat-button routerLink="/seller/dashboard" routerLinkActive="active">
+          <mat-icon>dashboard</mat-icon>
+          Seller Dashboard
+        </a>
+        <a mat-button routerLink="/seller/media" routerLinkActive="active">
+          <mat-icon>photo_library</mat-icon>
+          Media
+        </a>
+      }
+    </div>
+    
+    <div class="navbar-actions">
+      @if (isLoggedIn()) {
+        <button mat-button [matMenuTriggerFor]="userMenu" class="user-menu-trigger">
+          @if (currentUser()?.avatarUrl) {
+            <img [src]="currentUser()!.avatarUrl" alt="Avatar" class="avatar">
+          } @else {
+            <mat-icon>account_circle</mat-icon>
+          }
+          <span class="username">{{ currentUser()?.username }}</span>
+          <mat-icon>arrow_drop_down</mat-icon>
+        </button>
+        
+        <mat-menu #userMenu="matMenu" xPosition="before">
+          <div class="user-info">
+            <strong>{{ currentUser()?.username }}</strong>
+            <span class="email">{{ currentUser()?.email }}</span>
+            <span class="role-badge">{{ currentUser()?.role }}</span>
+          </div>
+          <mat-divider></mat-divider>
+          <button mat-menu-item routerLink="/profile">
+            <mat-icon>person</mat-icon>
+            <span>My Profile</span>
+          </button>
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Logout</span>
+          </button>
+        </mat-menu>
+      } @else {
+        <a mat-button routerLink="/login">
+          <mat-icon>login</mat-icon>
+          Login
+        </a>
+        <a mat-stroked-button routerLink="/register" class="register-btn">
+          Register
+        </a>
+      }
+    </div>
+  </div>
+</mat-toolbar>

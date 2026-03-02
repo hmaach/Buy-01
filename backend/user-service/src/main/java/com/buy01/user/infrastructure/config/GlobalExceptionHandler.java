@@ -1,4 +1,4 @@
-package com.buy01.user.infrastructure.adapters.in.web;
+package com.buy01.user.infrastructure.config;
 
 import java.nio.file.NoSuchFileException;
 import java.util.Map;
@@ -118,7 +118,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, String>> handleInvalidJson(HttpMessageNotReadableException ex) {
         return ResponseEntity.badRequest()
-                .body(Map.of("error", "Invalid JSON format."));
+                .body(Map.of("error", "Invalid JSON format: " + ex.getMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

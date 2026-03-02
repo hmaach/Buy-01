@@ -1,0 +1,41 @@
+<div class="details-container">
+  @if (product(); as p) {
+    <button mat-button routerLink="/products" class="back-btn">
+      <mat-icon>arrow_back</mat-icon> Back to Products
+    </button>
+
+    <div class="product-details">
+      <div class="images-section">
+        <div class="main-image">
+          <img [src]="p.imageUrls[selectedImageIndex()]" [alt]="p.name">
+        </div>
+        @if (p.imageUrls.length > 1) {
+          <div class="thumbnails">
+            @for (img of p.imageUrls; track $index) {
+              <button class="thumbnail" [class.active]="$index === selectedImageIndex()" (click)="selectImage($index)">
+                <img [src]="img" [alt]="p.name">
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="info-section">
+        <h1>{{ p.name }}</h1>
+        <div class="seller-info">
+          <span>Sold by: <strong>{{ p.sellerName }}</strong></span>
+        </div>
+        <div class="price">${{ p.price }}</div>
+        <p class="description">{{ p.description }}</p>
+        <button mat-flat-button color="primary" class="contact-btn" (click)="contactSeller()">
+          Contact Seller
+        </button>
+      </div>
+    </div>
+  } @else {
+    <div class="not-found">
+      <h2>Product not found</h2>
+      <button mat-flat-button color="primary" routerLink="/products">Browse Products</button>
+    </div>
+  }
+</div>

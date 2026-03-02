@@ -10,8 +10,17 @@
             </p>
         </div>
         <div class="status-pill">
-            <span class="dot live"></span>
-            Live Preview
+            @if(errorMessage() !== null){
+            <span class="dot err"></span>
+            {{errorMessage()}}
+            }@else {
+            <span class="dot ok"></span>
+            @if(okMessage() !== null){
+            {{okMessage()}}
+            }@else {
+            Preview ok
+            }
+            }
         </div>
     </header>
 
@@ -32,17 +41,21 @@
                 <div class="form-group">
                     <label>Product Name</label>
                     <input type="text" formControlName="name" placeholder="Enter product name" />
-                    <div *ngIf="name?.touched && name?.hasError('required')" class="error">
+                    @if(name?.touched && name?.hasError('required')){
+                    <div class="error">
                         Product name is required
                     </div>
+                    }
                 </div>
 
                 <div class="form-group">
                     <label>Description</label>
                     <textarea formControlName="description" rows="6"></textarea>
-                    <div *ngIf="description?.touched && description?.hasError('required')" class="error">
+                    @if(description?.touched && description?.hasError('required')){
+                    <div class="error">
                         Description is required
                     </div>
+                    }
                 </div>
 
                 <div class="form-row">

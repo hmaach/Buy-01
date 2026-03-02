@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.buy01.product.domain.model.Product;
 import com.buy01.product.domain.ports.inbound.ProductUseCase;
-import com.buy01.product.infrastructure.web.dto.ImageLinkedEvent;
 import com.buy01.product.infrastructure.web.dto.ProductCreateRequest;
 import com.buy01.product.infrastructure.web.dto.ProductResponse;
 import com.buy01.product.infrastructure.web.mapper.ProductWebMapper;

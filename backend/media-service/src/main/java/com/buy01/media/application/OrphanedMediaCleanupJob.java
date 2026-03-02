@@ -26,7 +26,7 @@ public class OrphanedMediaCleanupJob {
 
     private static final Duration ORPHAN_AGE = Duration.ofHours(1);
 
-    @Scheduled(fixedRate = 3000) // every hour
+    @Scheduled(fixedRate = 10000) 
     // @Scheduled(cron = "0 15 * * * *") // every hour at :15
     public void cleanupOrphanedPendingMedia() {
         Instant threshold = Instant.now().minus(ORPHAN_AGE);

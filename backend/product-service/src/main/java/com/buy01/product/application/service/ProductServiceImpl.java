@@ -3,7 +3,6 @@ package com.buy01.product.application.service;
 import java.time.Instant;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -30,13 +29,16 @@ public class ProductServiceImpl implements ProductUseCase {
         product.validate();
 
         Instant now = Instant.now();
-        
+
         return Mono.just(product)
                 .map(p -> p.toBuilder()
                         .createdAt(now)
                         .updatedAt(now)
                         .build())
-                .flatMap(productRepository::save)
+                .flatMap(p -> {
+                    var saved = productRepository.save(p);
+                    return saved.map(pp -> pp.toBuilder().imagesIds(imagesIds).build());
+                })
                 .doOnNext(savedProduct -> {
                     // Send Kafka event only after successful save
                     if (!imagesIds.isEmpty()) {
@@ -46,7 +48,7 @@ public class ProductServiceImpl implements ProductUseCase {
 
                         kafkaTemplate.send(
                                 TOPIC_IMAGES_LINKED,
-                                savedProduct.getId(), // key = product ID (good for partitioning)
+                                savedProduct.getId(), 
                                 event);
 
                         log.info("Kafka event sent: product={}, media count={}",

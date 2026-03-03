@@ -1,15 +1,15 @@
 services:
   mongodb:
-    container_name: ${MONGO_DB_NAME:-product_database}
+    container_name: ${PRODUCT_MONGO_DB_NAME}
     image: mongo:latest
     ports:
-      - "${MONGO_LOCAL_PORT:-27017}:${MONGO_DOCKER_PORT:-27017}"
+      - "${PRODUCT_MONGO_LOCAL_PORT}:${PRODUCT_MONGO_DOCKER_PORT}"
     environment:
-      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME:-product_database}
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_DB_USER:-rserraf}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_DB_PWD:-PDB}
+      MONGO_INITDB_DATABASE: ${PRODUCT_MONGO_DB_NAME}
+      MONGO_INITDB_ROOT_USERNAME: ${PRODUCT_MONGO_DB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${PRODUCT_MONGO_DB_PWD}
     volumes:
-      - mongo-data:/data/db
+      - product-mongo-data:/data/db
 
 volumes:
-  mongo-data:
+  product-mongo-data:

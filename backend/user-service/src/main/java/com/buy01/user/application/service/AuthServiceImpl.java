@@ -1,5 +1,7 @@
 package com.buy01.user.application.service;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
 import com.buy01.user.application.command.CreateUserCommand;
@@ -61,14 +63,14 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public User getCurrentUser(String email) {
-        return userRepository.findByEmail(email)
+    public User getCurrentUser(UUID id) {
+        return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
     }
 
     @Override
-    public User updateCurrentUser(String email, String name, String avatar) {
-        User user = userRepository.findByEmail(email)
+    public User updateCurrentUser(UUID id, String name, String avatar) {
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         user.update(name, avatar);

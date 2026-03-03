@@ -1,5 +1,7 @@
 package com.buy01.user.domain.port.in;
 
+import java.util.UUID;
+
 import com.buy01.user.application.command.CreateUserCommand;
 import com.buy01.user.application.command.LoginCommand;
 import com.buy01.user.domain.model.User;
@@ -10,7 +12,7 @@ public interface AuthService {
 
     String login(LoginCommand command);
 
-    User getCurrentUser(String email);
+    User getCurrentUser(UUID id);
 
-    User updateCurrentUser(String email, String name, String avatar);
+    User updateCurrentUser(UUID id, String name, String avatar);
 }

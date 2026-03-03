@@ -18,6 +18,7 @@ import com.buy01.user.domain.model.User;
 import com.buy01.user.domain.port.in.AuthService;
 import com.buy01.user.domain.port.in.UserService;
 import com.buy01.user.infrastructure.adapters.in.web.dto.response.UserResponse;
+import com.buy01.user.infrastructure.security.JwtAuthenticationFilter.UserPrincipal;
 import com.buy01.user.infrastructure.web.client.MediaServiceClient;
 
 @RestController
@@ -41,9 +42,8 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getCurrentUser(Authentication authentication) {
-        String email = authentication.getPrincipal().toString();
-        System.out.println("Authenticated user email: " + email);
-        User user = authService.getCurrentUser(email);
+        UserPrincipal currUser = (UserPrincipal) authentication.getPrincipal();
+        User user = authService.getCurrentUser(currUser.id());
         return ResponseEntity.ok(UserResponse.from(user));
     }
 
@@ -58,26 +58,26 @@ public class UserController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) MultipartFile avatar
     ) {
-        String email = authentication.getName();
-        User currentUser = authService.getCurrentUser(email);
+        UserPrincipal currUser = (UserPrincipal) authentication.getPrincipal();
+        User user = authService.getCurrentUser(currUser.id());
 
         String avatarUrl = null;
         // Only sellers can upload avatar
-        if (currentUser.getRole() == Role.SELLER && avatar != null && !avatar.isEmpty()) {
+        if (currUser.role() == Role.SELLER && avatar != null && !avatar.isEmpty()) {
             try {
                 avatarUrl = mediaServiceClient.uploadAvatar(avatar);
             } catch (Exception e) {
             }
         }
 
-        User updatedUser = authService.updateCurrentUser(email, name, avatarUrl);
+        User updatedUser = authService.updateCurrentUser(currUser.id(), name, avatarUrl);
         return ResponseEntity.ok(UserResponse.from(updatedUser));
     }
 
     @DeleteMapping("/me")
     public void deleteUser(Authentication authentication) {
-        String email = authentication.getName();
-        User user = authService.getCurrentUser(email);
+        UserPrincipal currUser = (UserPrincipal) authentication.getPrincipal();
+        User user = authService.getCurrentUser(currUser.id());
         userService.deleteUser(user.getId());
     }
 }

@@ -26,11 +26,11 @@ export class ProductDetailsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      const product = this.productService.getProductById(id);
-      this.product.set(product || null);
-    }
+    // const id = this.route.snapshot.paramMap.get('id');
+    // if (id) {
+    //   const product = this.productService.getProductById(id);
+    //   this.product.set(product || null);
+    // }
   }
 
   selectImage(index: number) {

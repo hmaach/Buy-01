@@ -26,21 +26,21 @@ export class SellerDashboardComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    const user = this.authService.user();
-    if (user) {
-      this.products.set(this.productService.getSellerProducts(user.id));
-    }
+    // const user = this.authService.user();
+    // if (user) {
+    //   this.products.set(this.productService.getSellerProducts(user.id));
+    // }
   }
 
   async deleteProduct(id: string) {
-    if (confirm('Are you sure you want to delete this product?')) {
-      try {
-        await this.productService.deleteProduct(id);
-        this.snackBar.open('Product deleted', 'Close', { duration: 3000 });
-        this.ngOnInit();
-      } catch (error: any) {
-        this.snackBar.open(error.message, 'Close', { duration: 3000 });
-      }
-    }
+    // if (confirm('Are you sure you want to delete this product?')) {
+    //   try {
+    //     await this.productService.deleteProduct(id);
+    //     this.snackBar.open('Product deleted', 'Close', { duration: 3000 });
+    //     this.ngOnInit();
+    //   } catch (error: any) {
+    //     this.snackBar.open(error.message, 'Close', { duration: 3000 });
+    //   }
+    // }
   }
 }

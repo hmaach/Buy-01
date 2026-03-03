@@ -50,19 +50,19 @@ export class ProductFormComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.productId = this.route.snapshot.paramMap.get('id');
-    if (this.productId && this.productId !== 'new') {
-      this.isEdit = true;
-      const product = this.productService.getProductById(this.productId);
-      if (product) {
-        this.form.patchValue({
-          name: product.name,
-          description: product.description,
-          price: product.price
-        });
-        this.imagePreviews.set(product.imageUrls);
-      }
-    }
+    // this.productId = this.route.snapshot.paramMap.get('id');
+    // if (this.productId && this.productId !== 'new') {
+    //   this.isEdit = true;
+    //   const product = this.productService.getProductById(this.productId);
+    //   if (product) {
+    //     this.form.patchValue({
+    //       name: product.name,
+    //       description: product.description,
+    //       price: product.price
+    //     });
+    //     this.imagePreviews.set(product.imageUrls);
+    //   }
+    // }
   }
 
   onFilesSelected(event: Event): void {
@@ -97,38 +97,38 @@ export class ProductFormComponent implements OnInit {
   }
 
   async onSubmit() {
-    if (this.form.invalid) return;
+    // if (this.form.invalid) return;
 
-    this.loading.set(true);
+    // this.loading.set(true);
 
-    try {
-      const { name, description, price } = this.form.value;
-      const images = this.imagePreviews().map(url => {
-        // Convert data URL to File for mock
-        const arr = url.split(',');
-        const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
-        const bstr = atob(arr[1]);
-        let n = bstr.length;
-        const u8arr = new Uint8Array(n);
-        while (n--) {
-          u8arr[n] = bstr.charCodeAt(n);
-        }
-        return new File([u8arr], 'image.jpg', { type: mime });
-      });
+    // try {
+    //   const { name, description, price } = this.form.value;
+    //   const images = this.imagePreviews().map(url => {
+    //     // Convert data URL to File for mock
+    //     const arr = url.split(',');
+    //     const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
+    //     const bstr = atob(arr[1]);
+    //     let n = bstr.length;
+    //     const u8arr = new Uint8Array(n);
+    //     while (n--) {
+    //       u8arr[n] = bstr.charCodeAt(n);
+    //     }
+    //     return new File([u8arr], 'image.jpg', { type: mime });
+    //   });
 
-      if (this.isEdit && this.productId) {
-        await this.productService.updateProduct(this.productId, { name, description, price, images });
-        this.snackBar.open('Product updated', 'Close', { duration: 3000 });
-      } else {
-        await this.productService.addProduct({ name, description, price, images });
-        this.snackBar.open('Product created', 'Close', { duration: 3000 });
-      }
+    //   if (this.isEdit && this.productId) {
+    //     await this.productService.updateProduct(this.productId, { name, description, price, images });
+    //     this.snackBar.open('Product updated', 'Close', { duration: 3000 });
+    //   } else {
+    //     await this.productService.addProduct({ name, description, price, images });
+    //     this.snackBar.open('Product created', 'Close', { duration: 3000 });
+    //   }
 
-      this.router.navigate(['/seller/dashboard']);
-    } catch (error: any) {
-      this.snackBar.open(error.message || 'An error occurred', 'Close', { duration: 3000 });
-    } finally {
-      this.loading.set(false);
-    }
+    //   this.router.navigate(['/seller/dashboard']);
+    // } catch (error: any) {
+    //   this.snackBar.open(error.message || 'An error occurred', 'Close', { duration: 3000 });
+    // } finally {
+    //   this.loading.set(false);
+    // }
   }
 }

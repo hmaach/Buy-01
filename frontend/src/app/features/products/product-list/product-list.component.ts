@@ -20,6 +20,6 @@ export class ProductListComponent implements OnInit {
   constructor(private productService: ProductService) {}
 
   ngOnInit() {
-    this.products.set(this.productService.getAllProducts());
+    // this.products.set(this.productService.getAllProducts());
   }
 }

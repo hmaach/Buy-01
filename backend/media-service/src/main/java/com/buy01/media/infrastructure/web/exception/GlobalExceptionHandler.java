@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.server.MissingRequestValueException;
 
 import com.buy01.media.infrastructure.web.exception.Errors.Faileduploadedfile;
@@ -26,7 +27,7 @@ public class GlobalExceptionHandler {
             .add(SignatureException.class, UNAUTHORIZED, "Invalid JWT Signature")
             .add(ExpiredJWTException.class, UNAUTHORIZED, "JWT Token Expired")
             .add(AuthorizationDeniedException.class, FORBIDDEN, "Access Denied")
-            // .add(NoResourceFoundException.class, BAD_REQUEST, "Missing Argument")
+            .add(MissingServletRequestPartException.class, BAD_REQUEST, "Missing Argument")
             .add(HttpMessageNotReadableException.class, BAD_REQUEST, "JSON Not Valid")
             .add(IllegalArgumentException.class, BAD_REQUEST, "Bad Argument")
             .add(NotFoundException.class, NOT_FOUND, "Validation Error")

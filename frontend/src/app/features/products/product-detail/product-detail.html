@@ -1,0 +1,107 @@
+<div class="container">
+  @if(!product()){
+    <h1>loading...</h1>
+  }@else{
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb">
+        <ol>
+          <li class="current">{{ product()?.name }}</li>
+        </ol>
+      </nav>
+
+      <!-- use a static class name instead of evaluating product() inside it -->
+      <div class="product-grid">
+      <!-- Images Section -->
+      <div class="images-section">
+        <div class="main-image-wrapper">
+          <img [src]="displayedMain" [alt]="product()?.name" class="main-image" />
+        </div>
+
+        <div class="thumbnails">
+          @for (thumb of product()?.thumbnails; track $index) {
+          <button class="thumbnail-btn" [class.active]="selectedImageIndex === $index"
+            (click)="selectThumbnail($index)">
+            <img [src]="thumb" [alt]="product()?.name + ' view ' + ($index + 1)" />
+          </button>
+          }
+        </div>
+      </div>
+
+      <!-- product() Info Section -->
+      <div class="info-section">
+        <div class="badges">
+          <span class="badge new">New Arrival</span>
+          <div class="rating">
+            @for (_ of [1,2,3,4]; track $index) {
+            <span class="material-symbols-outlined filled">star</span>
+            }
+            <span class="material-symbols-outlined half-filled">star_half</span>
+            <span class="review-count">{{ product()?.rating }} ({{ product()?.reviewsCount }} reviews)</span>
+          </div>
+        </div>
+
+        <h1 class="product-title">{{ product()?.name }}</h1>
+
+        <div class="price-block">
+          <span class="current-price">${{ product()?.price?.toFixed(2) }}</span>
+          <span class="old-price">${{ product()?.oldPrice?.toFixed(2) }}</span>
+        </div>
+
+        <div class="stock-info">
+          <span class="stock-dot"></span>
+          <span>In Stock - {{ product()?.quantity }} units remaining</span>
+        </div>
+
+        <div class="description">
+          {{ product()?.description }}
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" (click)="buyNow()">
+            <span class="material-symbols-outlined">shopping_bag</span>
+            Buy Now
+          </button>
+        </div>
+
+        <hr class="divider" />
+
+        <div class="features">
+          <div class="feature-item">
+            <div class="feature-icon">
+              <span class="material-symbols-outlined">local_shipping</span>
+            </div>
+            <div>
+              <h4>Free Shipping</h4>
+              <p>On all orders over $150. Delivery within 3-5 business days.</p>
+            </div>
+          </div>
+
+          <div class="feature-item">
+            <div class="feature-icon">
+              <span class="material-symbols-outlined">verified</span>
+            </div>
+            <div>
+              <h4>2 Year Warranty</h4>
+              <p>Standard hardware warranty coverage for all manufacturing defects.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="secure-checkout">
+          <div class="secure-left">
+            <span class="material-symbols-outlined">lock</span>
+            <span>Secure checkout with SSL</span>
+          </div>
+          <div class="payment-icons">
+            <div class="payment-card">VISA</div>
+            <div class="payment-card">AMEX</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  }
+
+</div>

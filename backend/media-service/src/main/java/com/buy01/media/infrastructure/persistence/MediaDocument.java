@@ -25,7 +25,7 @@ public class MediaDocument {
 
     private FileStatus status;
 
-    @CreatedDate
+    // @CreatedDate
     @Field("created_at")
     private Instant createdAt;
 }

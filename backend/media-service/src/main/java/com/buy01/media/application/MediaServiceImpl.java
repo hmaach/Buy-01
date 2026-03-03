@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -118,6 +119,10 @@ public class MediaServiceImpl implements MediaUseCase {
             tryDeleteFile(path);
             throw new Faileduploadedfile("Failed to save media metadata: " + e.getMessage());
         }
+    }
+
+    public List<String> getProdutImages(String ProductId) {
+        return repository.findByProductId(ProductId).stream().map(p -> p.getId()).toList();
     }
 
     private String getExtension(String filename) {

@@ -1,6 +1,7 @@
 package com.buy01.product.domain.model;
 
 import java.time.Instant;
+import java.util.List;
 
 public class Product {
 
@@ -10,6 +11,7 @@ public class Product {
     private final double price;
     private final Integer quantity;
     private final String userId;
+    private final List<String> imagesIds;
     private final Instant createdAt;
     private final Instant updatedAt;
 
@@ -22,6 +24,7 @@ public class Product {
         this.userId = builder.userId;
         this.createdAt = builder.createdAt;
         this.updatedAt = builder.updatedAt;
+        this.imagesIds = builder.imagesIds;
     }
 
     public String getId() {
@@ -48,6 +51,9 @@ public class Product {
         return userId;
     }
 
+    public List<String> getImagesIds() {
+        return imagesIds;
+    }
 
     public Instant getCreatedAt() {
         return createdAt;
@@ -83,6 +89,7 @@ public class Product {
         private double price;
         private Integer quantity;
         private String userId;
+        private List<String> imagesIds;
         private Instant createdAt;
         private Instant updatedAt;
 
@@ -130,6 +137,10 @@ public class Product {
             return this;
         }
 
+        public Builder imagesIds(List<String> ids) {
+            this.imagesIds = ids;
+            return this;
+        }
 
         public Builder createdAt(Instant createdAt) {
             this.createdAt = createdAt;

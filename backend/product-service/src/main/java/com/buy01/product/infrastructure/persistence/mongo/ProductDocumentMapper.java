@@ -26,6 +26,7 @@ public class ProductDocumentMapper {
                 .name(d.getName())
                 .description(d.getDescription())
                 .price(d.getPrice())
+                .quantity(d.getQuantity())
                 .userId(d.getUserId())
                 .createdAt(d.getCreatedAt())
                 .updatedAt(d.getUpdatedAt())

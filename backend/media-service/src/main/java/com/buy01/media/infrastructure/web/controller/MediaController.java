@@ -29,14 +29,20 @@ public class MediaController {
     public MediaController(MediaUseCase muc) {
         this.mediaService = muc;
     }
-    
+
     @GetMapping("/{id}")
     public ResponseEntity<Resource> getImage(@PathVariable String id) {
         Resource resource = mediaService.getImageFile(id);
         return ResponseEntity.ok()
-                .contentType(mediaService.guessContentType(resource.getFilename())) 
+                .contentType(mediaService.guessContentType(resource.getFilename()))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
                 .body(resource);
+    }
+
+    @GetMapping("/product/{id}")
+    public ResponseEntity<List<String>> getProdutImages(@PathVariable String id) {
+        var productMediaIds = mediaService.getProdutImages(id);
+        return ResponseEntity.ok(productMediaIds);
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

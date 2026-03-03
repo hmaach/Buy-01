@@ -1,0 +1,26 @@
+<div class="products-container">
+  <header class="products-header">
+    <h1>Our Products</h1>
+    <p>Discover the latest technology</p>
+  </header>
+
+  <div class="products-grid">
+    @for (product of products(); track product.id) {
+      <mat-card class="product-card">
+        <div class="product-image">
+          <img [src]="product.imageUrls[0]" [alt]="product.name">
+        </div>
+        <mat-card-content>
+          <h3>{{ product.name }}</h3>
+          <p class="description">{{ product.description | slice:0:80 }}...</p>
+          <div class="price">${{ product.price }}</div>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-flat-button color="primary" [routerLink]="['/products', product.id]">
+            View Details
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    }
+  </div>
+</div>

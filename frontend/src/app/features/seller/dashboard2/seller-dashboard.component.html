@@ -1,0 +1,45 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Seller Dashboard</h1>
+    <a mat-raised-button color="primary" routerLink="/seller/products/new">
+      <mat-icon>add</mat-icon>
+      Add Product
+    </a>
+  </div>
+  
+  @if (products().length === 0) {
+    <mat-card class="empty-state">
+      <mat-card-content>
+        <mat-icon class="empty-icon">inventory_2</mat-icon>
+        <h2>No Products Yet</h2>
+        <p>Start selling by adding your first product</p>
+        <a mat-stroked-button color="primary" routerLink="/seller/products/new">
+          <mat-icon>add</mat-icon>
+          Add Your First Product
+        </a>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <div class="products-grid">
+      @for (product of products(); track product.id) {
+        <mat-card class="product-card">
+          <img mat-card-image [src]="product.imageUrls[0]" [alt]="product.name">
+          <mat-card-header>
+            <mat-card-title>{{ product.name }}</mat-card-title>
+            <mat-card-subtitle>{{ product.price | currency }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-actions align="end">
+            <a mat-button [routerLink]="['/seller/products', product.id, 'edit']">
+              <mat-icon>edit</mat-icon>
+              Edit
+            </a>
+            <button mat-button color="warn" (click)="deleteProduct(product.id)">
+              <mat-icon>delete</mat-icon>
+              Delete
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

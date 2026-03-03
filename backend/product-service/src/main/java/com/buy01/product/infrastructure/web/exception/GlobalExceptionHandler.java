@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.reactive.resource.NoResourceFoundException;
+import org.springframework.web.server.MethodNotAllowedException;
 
 import com.nimbusds.jwt.proc.ExpiredJWTException;
 
@@ -32,6 +33,7 @@ public class GlobalExceptionHandler {
             .add(IllegalArgumentException.class, BAD_REQUEST, "Bad Argument")
             .add(NotFoundException.class, NOT_FOUND, "Validation Error")
             .add(UsernameNotFoundException.class, NOT_FOUND, "User Not Found")
+            .add(MethodNotAllowedException.class, METHOD_NOT_ALLOWED, "Method Not Allowed")
             .add(WebExchangeBindException.class, BAD_REQUEST, "Validation Failed",
                     ex -> "Fields: " + ((WebExchangeBindException) ex).getBindingResult().getFieldErrorCount())
             .build();
@@ -52,6 +54,7 @@ public class GlobalExceptionHandler {
                 template.detailGenerator().apply(ex));
         pd.setTitle(template.title());
         System.err.println(ex + "\n");
+        ex.printStackTrace();
         return Mono.just(pd);
     }
 }

@@ -18,6 +18,8 @@ import com.buy01.user.infrastructure.adapters.in.web.dto.request.RegisterRequest
 import com.buy01.user.infrastructure.adapters.in.web.dto.response.LoginResponse;
 import com.buy01.user.infrastructure.adapters.in.web.dto.response.UserResponse;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/users/auth")
 public class AuthController {
@@ -30,7 +32,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<UserResponse> register(@RequestBody @Valid RegisterRequest request) {
         CreateUserCommand command = new CreateUserCommand(
                 request.name(),
                 request.email(),
@@ -44,7 +46,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
         LoginCommand command = new LoginCommand(request.email(), request.password());
         String token = authService.login(command);
 

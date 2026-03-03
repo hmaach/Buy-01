@@ -1,5 +1,7 @@
 package com.buy01.user.infrastructure.web.client;
 
+import java.util.UUID;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,5 +12,5 @@ import org.springframework.web.multipart.MultipartFile;
 public interface MediaServiceClient {
 
     @PostMapping(value = "/media/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    String uploadAvatar(@RequestPart("file") MultipartFile file);
+    UUID uploadAvatar(@RequestPart("file") MultipartFile file);
 }

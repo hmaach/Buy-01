@@ -33,15 +33,20 @@ public class JwtUtil implements TokenGeneratorPort {
     public String generateToken(UUID userId, String email, Role role) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expiration);
+        try {
 
-        return Jwts.builder()
-                .setSubject(userId.toString())
-                .claim("email", email)
-                .claim("role", role.name())
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(getSigningKey())
-                .compact();
+            return Jwts.builder()
+                    .setSubject(userId.toString())
+                    .claim("email", email)
+                    .claim("role", role.name())
+                    .setIssuedAt(now)
+                    .setExpiration(expiryDate)
+                    .signWith(getSigningKey())
+                    .compact();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
     }
 
     @Override
@@ -51,7 +56,7 @@ public class JwtUtil implements TokenGeneratorPort {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-        
+
         return UUID.fromString(claims.getSubject());
     }
 
@@ -62,7 +67,7 @@ public class JwtUtil implements TokenGeneratorPort {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-        
+
         return claims.get("email", String.class);
     }
 
@@ -73,7 +78,7 @@ public class JwtUtil implements TokenGeneratorPort {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-        
+
         return Role.valueOf(claims.get("role", String.class));
     }
 

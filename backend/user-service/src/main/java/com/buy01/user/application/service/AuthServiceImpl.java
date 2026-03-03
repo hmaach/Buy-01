@@ -1,9 +1,11 @@
 package com.buy01.user.application.service;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
+import com.buy01.user.application.command.CreateUserCommand;
 import com.buy01.user.application.command.LoginCommand;
-import com.buy01.user.application.command.RegisterCommand;
 import com.buy01.user.domain.exception.InvalidCredentialsException;
 import com.buy01.user.domain.exception.UserAlreadyExistsException;
 import com.buy01.user.domain.exception.UserNotFoundException;
@@ -31,13 +33,13 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public User register(RegisterCommand command) {
+    public User register(CreateUserCommand command) {
         if (userRepository.existsByEmail(command.email())) {
             throw new UserAlreadyExistsException("User with email " + command.email() + " already exists");
         }
 
         String encodedPassword = passwordEncoder.encode(command.password());
-        
+
         User user = User.create(
                 command.name(),
                 command.email(),
@@ -60,19 +62,5 @@ public class AuthServiceImpl implements AuthService {
         return tokenGenerator.generateToken(user.getId(), user.getEmail(), user.getRole());
     }
 
-    @Override
-    public User getCurrentUser(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
-    }
 
-    @Override
-    public User updateCurrentUser(String email, String name, String avatar) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
-        
-        user.update(name, avatar);
-        
-        return userRepository.save(user);
-    }
 }

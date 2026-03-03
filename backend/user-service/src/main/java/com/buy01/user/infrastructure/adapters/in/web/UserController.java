@@ -2,36 +2,36 @@ package com.buy01.user.infrastructure.adapters.in.web;
 
 import java.util.UUID;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.buy01.user.domain.model.Role;
 import com.buy01.user.domain.model.User;
-import com.buy01.user.domain.port.in.AuthService;
 import com.buy01.user.domain.port.in.UserService;
+import com.buy01.user.infrastructure.adapters.in.web.dto.request.UpdateUserRequest;
 import com.buy01.user.infrastructure.adapters.in.web.dto.response.UserResponse;
 import com.buy01.user.infrastructure.security.JwtAuthenticationFilter.UserPrincipal;
 import com.buy01.user.infrastructure.web.client.MediaServiceClient;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
-    private final AuthService authService;
     private final MediaServiceClient mediaServiceClient;
 
-    public UserController(UserService userService, AuthService authService, MediaServiceClient mediaServiceClient) {
+    public UserController(UserService userService, MediaServiceClient mediaServiceClient) {
         this.userService = userService;
-        this.authService = authService;
         this.mediaServiceClient = mediaServiceClient;
     }
 
@@ -43,41 +43,39 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getCurrentUser(Authentication authentication) {
         UserPrincipal currUser = (UserPrincipal) authentication.getPrincipal();
-        User user = authService.getCurrentUser(currUser.id());
-        return ResponseEntity.ok(UserResponse.from(user));
+        User user = userService.findById(currUser.id());
+        return ResponseEntity.ok(UserResponse.from(user, null));
     }
 
     @GetMapping("/id/{id}")
     public UserResponse getUser(@PathVariable UUID id) {
-        return UserResponse.from(userService.findById(id));
+        return UserResponse.from(userService.findById(id), null);
     }
 
-    @PutMapping("/me")
+    @PutMapping(value = "/me", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserResponse> updateCurrentUser(
             Authentication authentication,
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) MultipartFile avatar
+            @Valid @ModelAttribute UpdateUserRequest request
     ) {
         UserPrincipal currUser = (UserPrincipal) authentication.getPrincipal();
-        User user = authService.getCurrentUser(currUser.id());
 
-        String avatarUrl = null;
+        UUID avatarid = null;
         // Only sellers can upload avatar
-        if (currUser.role() == Role.SELLER && avatar != null && !avatar.isEmpty()) {
+        if (currUser.role() == Role.SELLER && request.avatar() != null && !request.avatar().isEmpty()) {
             try {
-                avatarUrl = mediaServiceClient.uploadAvatar(avatar);
+                avatarid = mediaServiceClient.uploadAvatar(request.avatar());
             } catch (Exception e) {
             }
         }
 
-        User updatedUser = authService.updateCurrentUser(currUser.id(), name, avatarUrl);
-        return ResponseEntity.ok(UserResponse.from(updatedUser));
+        User updatedUser = userService.updateUser(currUser.id(), request.toCommand(avatarid));
+        return ResponseEntity.ok(UserResponse.from(updatedUser, null));
     }
 
     @DeleteMapping("/me")
     public void deleteUser(Authentication authentication) {
         UserPrincipal currUser = (UserPrincipal) authentication.getPrincipal();
-        User user = authService.getCurrentUser(currUser.id());
+        User user = userService.findById(currUser.id());
         userService.deleteUser(user.getId());
     }
 }

@@ -12,7 +12,7 @@ public class UserEntityMapper {
         e.setEmail(user.getEmail());
         e.setPassword(user.getPassword());
         e.setRole(user.getRole());
-        e.setAvatar(user.getAvatar());
+        e.setAvatarId(user.getAvatarId());
         e.setCreatedAt(user.getCreatedAt());
         e.setUpdatedAt(user.getUpdatedAt());
         return e;
@@ -25,7 +25,7 @@ public class UserEntityMapper {
         user.setEmail(e.getEmail());
         user.setPassword(e.getPassword());
         user.setRole(e.getRole());
-        user.setAvatar(e.getAvatar());
+        user.setAvatarId(e.getAvatarId());
         user.setCreatedAt(e.getCreatedAt());
         user.setUpdatedAt(e.getUpdatedAt());
         return user;

@@ -42,7 +42,7 @@ public class AuthController {
         );
 
         User user = authService.register(command);
-        return ResponseEntity.status(HttpStatus.CREATED).body(UserResponse.from(user));
+        return ResponseEntity.status(HttpStatus.CREATED).body(UserResponse.from(user,null));
     }
 
     @PostMapping("/login")

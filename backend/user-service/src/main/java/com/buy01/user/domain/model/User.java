@@ -4,25 +4,26 @@ import java.time.Instant;
 import java.util.UUID;
 
 public class User {
-    
+
     private UUID id;
     private String name;
     private String email;
     private String password;
     private Role role;
-    private String avatar;
+    private UUID avatarId;
     private Instant createdAt;
     private Instant updatedAt;
 
-    public User() {}
+    public User() {
+    }
 
-    public User(UUID id, String name, String email, String password, Role role, String avatar, Instant createdAt, Instant updatedAt) {
+    public User(UUID id, String name, String email, String password, Role role, UUID avatarId, Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
-        this.avatar = avatar;
+        this.avatarId = avatarId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -67,12 +68,12 @@ public class User {
         this.role = role;
     }
 
-    public String getAvatar() {
-        return avatar;
+    public UUID getAvatarId() {
+        return avatarId;
     }
 
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
+    public void setAvatarId(UUID avatarId) {
+        this.avatarId = avatarId;
     }
 
     public Instant getCreatedAt() {
@@ -94,21 +95,21 @@ public class User {
     public static User create(String name, String email, String password, Role role) {
         Instant now = Instant.now();
         return new User(
-            UUID.randomUUID(),
-            name,
-            email,
-            password,
-            role,
-            null,
-            now,
-            now
+                UUID.randomUUID(),
+                name,
+                email,
+                password,
+                role,
+                null,
+                now,
+                now
         );
     }
 
-    public void update(String name, String avatar) {
+    public void update(String name, UUID avatarId) {
         this.name = name;
-        if (avatar != null) {
-            this.avatar = avatar;
+        if (avatarId != null) {
+            this.avatarId = avatarId;
         }
         this.updatedAt = Instant.now();
     }

@@ -62,19 +62,5 @@ public class AuthServiceImpl implements AuthService {
         return tokenGenerator.generateToken(user.getId(), user.getEmail(), user.getRole());
     }
 
-    @Override
-    public User getCurrentUser(UUID id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
-    }
 
-    @Override
-    public User updateCurrentUser(UUID id, String name, String avatar) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
-
-        user.update(name, avatar);
-
-        return userRepository.save(user);
-    }
 }

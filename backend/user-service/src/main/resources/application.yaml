@@ -1,6 +1,13 @@
 server:
   port: 8081
 
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+      register-with-eureka: true
+      fetch-registry: true
+
 spring:
   application:
     name: user-service
@@ -10,5 +17,9 @@ spring:
       enabled: false
 
   jwt:
-  secret: ${JWT_SECRET:azertyuiopqsdfghjklmwxcvbn}
+    secret: ${JWT_SECRET:azertyuiopqsdfghjklmwxcvbn}
+    expiration: 86400000
 
+media:
+  service:
+    url: ${MEDIA_SERVICE_URL:http://localhost:8083}

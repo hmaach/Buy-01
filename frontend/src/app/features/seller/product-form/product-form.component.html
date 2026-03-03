@@ -1,0 +1,78 @@
+<div class="form-container">
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>{{ isEdit ? 'Edit Product' : 'Add Product' }}</mat-card-title>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Product Name</mat-label>
+          <input matInput formControlName="name" placeholder="Enter product name">
+          <mat-error *ngIf="form.get('name')?.hasError('required')">
+            Name is required
+          </mat-error>
+          <mat-error *ngIf="form.get('name')?.hasError('minlength')">
+            Name must be at least 3 characters
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="4" placeholder="Describe your product"></textarea>
+          <mat-error *ngIf="form.get('description')?.hasError('required')">
+            Description is required
+          </mat-error>
+          <mat-error *ngIf="form.get('description')?.hasError('minlength')">
+            Description must be at least 10 characters
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Price</mat-label>
+          <input matInput type="number" formControlName="price" placeholder="0.00">
+          <span matTextPrefix>$&nbsp;</span>
+          <mat-error *ngIf="form.get('price')?.hasError('required')">
+            Price is required
+          </mat-error>
+          <mat-error *ngIf="form.get('price')?.hasError('min')">
+            Price must be greater than 0
+          </mat-error>
+        </mat-form-field>
+
+        <div class="upload-section">
+          <label>Product Images (max 2MB each)</label>
+          <div class="upload-area" (click)="fileInput.click()">
+            <mat-icon>cloud_upload</mat-icon>
+            <span>Click to upload images</span>
+          </div>
+          <input #fileInput type="file" accept="image/*" multiple (change)="onFilesSelected($event)" hidden>
+          
+          @if (imagePreviews().length > 0) {
+            <div class="image-previews">
+              @for (preview of imagePreviews(); track $index) {
+                <div class="preview-item">
+                  <img [src]="preview" alt="Preview">
+                  <button mat-icon-button type="button" (click)="removeImage($index)">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-actions">
+          <button mat-button type="button" routerLink="/seller/dashboard">Cancel</button>
+          <button mat-flat-button color="primary" type="submit" [disabled]="loading() || form.invalid">
+            @if (loading()) {
+              <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+              {{ isEdit ? 'Update' : 'Create' }} Product
+            }
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

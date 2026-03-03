@@ -56,7 +56,7 @@ buy01-platform/
 │   │   │   ├── configmap.yaml
 │   │   │   └── secrets.yaml
 │   │   ├── services/
-│   │   │   ├── discovery-service/
+│   │   │   ├── discovery-server/
 │   │   │   ├── api-gateway/
 │   │   │   ├── user-service/
 │   │   │   ├── product-service/
@@ -91,7 +91,7 @@ buy01-platform/
 │
 ├── backend/                                    # All backend services
 │   │
-│   ├── discovery-service/                      # Eureka Server (Port 8761)
+│   ├── discovery-server/                      # Eureka Server (Port 8761)
 │   │   ├── src/
 │   │   │   ├── main/
 │   │   │   │   ├── java/com/buy01/discovery/

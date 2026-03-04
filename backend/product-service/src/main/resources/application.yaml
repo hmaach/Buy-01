@@ -24,6 +24,10 @@ eureka:
 services:
   media: "http://localhost:8083"
 
+security:
+  jwt:
+    public-key: ${JWT_PUBLIC_KEY}
+
 management:
   endpoints:
     web:

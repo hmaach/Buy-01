@@ -13,21 +13,20 @@ import { ProductService } from '../../../core/services/product.service';
 export class ProductDetail implements OnInit {
 
   readonly productService = inject(ProductService);
+  errorMessage = signal<string | null>(null)
   product = signal<Product | null>(null);
   id = input.required<string>();
 
   selectedImageIndex = 0;
   ngOnInit(): void {
     this.productService.getProduct(this.id()).subscribe({
-      next: (p) => {
-        this.product.set(p)        
-      },
-      error: (e) => console.error(e)
+      next: (p) => this.product.set(p),
+      error: (e) => this.errorMessage.set(e.error.title || "unkown error")
     })
   }
 
   get displayedMain(): string {
-    
+
     const product = this.product();
     console.log(product?.mainImage, product?.thumbnails);
     if (!product || !product.thumbnails || product.thumbnails.length === 0) {

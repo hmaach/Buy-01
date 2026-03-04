@@ -1,18 +1,24 @@
 <div class="container">
   @if(!product()){
+  <div class="message-error-container">
+    @if(errorMessage()){
+    <h1>{{errorMessage()}}</h1>
+    }@else{
     <h1>loading...</h1>
+    }
+  </div>
   }@else{
-    <!-- Main Content -->
-    <main class="main-content">
-      <!-- Breadcrumb -->
-      <nav class="breadcrumb">
-        <ol>
-          <li class="current">{{ product()?.name }}</li>
-        </ol>
-      </nav>
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+      <ol>
+        <li class="current">{{ product()?.name }}</li>
+      </ol>
+    </nav>
 
-      <!-- use a static class name instead of evaluating product() inside it -->
-      <div class="product-grid">
+    <!-- use a static class name instead of evaluating product() inside it -->
+    <div class="product-grid">
       <!-- Images Section -->
       <div class="images-section">
         <div class="main-image-wrapper">

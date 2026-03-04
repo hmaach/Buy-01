@@ -51,6 +51,10 @@ $shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   }
 }
 
+$color-text-default: #676f6f;
+$color-error: #c52222;
+$color-success: #22c543;
+
 .status-pill {
   display: flex;
   align-items: center;
@@ -60,17 +64,23 @@ $shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   border: 1px solid $border;
   background: white;
   box-shadow: $shadow-sm;
-  // font-size: 0.95rem;
   font-weight: 800;
-  // text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #676f6f;
+
+  // Default text color
+  color: $color-text-default;
+  transition: color 0.2s ease;
+
+  &:has(.dot.err) {
+    color: $color-error;
+  }
 
   .dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
     position: relative;
+    flex-shrink: 0;
 
     &::after {
       content: '';
@@ -86,11 +96,11 @@ $shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
     }
 
     &.ok {
-      background: #22c543;
+      background: $color-success;
     }
 
     &.err {
-      background: #c52222;
+      background: $color-error;
     }
   }
 }

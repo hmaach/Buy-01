@@ -1,0 +1,51 @@
+<main class="main-content">
+  <div class="content-grid">
+
+    <!-- Products Area -->
+    <div class="products-area">
+      <div class="toolbar">
+        <div>
+          <h1 class="page-title">New Products</h1>
+          <p class="result-count">Showing {{ products.length }} products</p>
+        </div>
+      </div>
+
+      <!-- Product Cards Grid -->
+      <div class="products-grid">
+        @for (product of products; track product.id) {
+        <div class="product-card">
+          <div class="image-wrapper">
+            <img [src]="product.image" [alt]="product.name" class="product-image" />
+
+            @if (product.badge) {
+            <span class="badge" [class.new]="product.badge === 'New'">
+              {{ product.badge }}
+            </span>
+            }
+          </div>
+
+          <div class="rating">
+            @for (n of [1,2,3,4,5]; track n) {
+            <span class="star material-symbols-outlined" [class.filled]="n <= 3" [class.half]="n === 4 && 4 % 1 !== 0">
+              star
+            </span>
+            }
+            <span class="review-count">(34)</span>
+          </div>
+
+          <h3 class="product-name">{{ product.name }}</h3>
+
+          <div class="price">
+            <span class="current-price">${{ product.price.toFixed(2) }}</span>
+          </div>
+
+          <button class="add-to-cart-btn" (click)="addToCart(product)">
+            <span class="material-symbols-outlined">shopping_bag</span>
+            See more Detail
+          </button>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+</main>

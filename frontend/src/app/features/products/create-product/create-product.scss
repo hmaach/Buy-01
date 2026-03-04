@@ -362,7 +362,7 @@ $shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
 
   .thumbnails-grid {
     padding: 0.5rem;
-    display: grid;
+    // display: grid;
     gap: 0.5rem;
     flex: 1;
     grid-template-columns: repeat(2, 1fr);

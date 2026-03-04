@@ -45,7 +45,7 @@ public class MediaServiceImpl implements MediaUseCase {
         if (doc.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Media not found");
         }
-
+        
         String pathStr = doc.get().getImagePath();
         if (pathStr == null || pathStr.trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Media has no stored path");

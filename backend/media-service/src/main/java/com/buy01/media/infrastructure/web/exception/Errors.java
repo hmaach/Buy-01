@@ -7,4 +7,9 @@ public class Errors {
             super(message);
         }
     }
+    public static class NotFound extends RuntimeException {
+        public NotFound(String message) {
+            super(message);
+        }
+    }
 }

@@ -1,120 +1,111 @@
-// package com.buy01.gateway.filter;
+package com.buy01.gateway.filter;
 
-// import io.jsonwebtoken.Claims;
-// import io.jsonwebtoken.Jwts;
-// import io.jsonwebtoken.security.Keys;
-// import org.springframework.beans.factory.annotation.Value;
-// import org.springframework.cloud.gateway.filter.GatewayFilter;
-// import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
-// import org.springframework.http.HttpHeaders;
-// import org.springframework.http.HttpStatus;
-// import org.springframework.http.server.reactive.ServerHttpRequest;
-// import org.springframework.http.server.reactive.ServerHttpResponse;
-// import org.springframework.stereotype.Component;
-// import org.springframework.web.server.ServerWebExchange;
-// import reactor.core.publisher.Mono;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.gateway.filter.GatewayFilter;
+import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
 
-// import javax.crypto.SecretKey;
-// import java.nio.charset.StandardCharsets;
+import com.buy01.gateway.security.JwtUtil;
 
-// @Component
-// public class AuthenticationFilter extends AbstractGatewayFilterFactory<AuthenticationFilter.Config> {
+import reactor.core.publisher.Mono;
 
-//     @Value("${jwt.secret}")
-//     private String jwtSecret;
+@Component
+public class AuthenticationFilter extends AbstractGatewayFilterFactory<AuthenticationFilter.Config> {
 
-//     public AuthenticationFilter() {
-//         super(Config.class);
-//     }
+    @Autowired
+    private JwtUtil jwtUtil;
 
-//     @Override
-//     public GatewayFilter apply(Config config) {
-//         return (exchange, chain) -> {
-//             ServerHttpRequest request = exchange.getRequest();
+    public AuthenticationFilter() {
+        super(Config.class);
+    }
 
-//             // Check if Authorization header exists
-//             if (!request.getHeaders().containsHeader(HttpHeaders.AUTHORIZATION)) {
-//                 return onError(exchange, "Missing authorization header", HttpStatus.UNAUTHORIZED);
-//             }
+    @Override
+    public GatewayFilter apply(Config config) {
+        return (exchange, chain) -> {
+            ServerHttpRequest request = exchange.getRequest();
 
-//             String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+            // Check if Authorization header exists
+            if (!request.getHeaders().containsHeader(HttpHeaders.AUTHORIZATION)) {
+                return onError(exchange, "Missing authorization header", HttpStatus.UNAUTHORIZED);
+            }
 
-//             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-//                 return onError(exchange, "Invalid authorization header", HttpStatus.UNAUTHORIZED);
-//             }
+            String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 
-//             String token = authHeader.substring(7);
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return onError(exchange, "Invalid authorization header", HttpStatus.UNAUTHORIZED);
+            }
 
-//             try {
-//                 // Validate and extract claims from JWT
-//                 Claims claims = validateToken(token);
+            String token = authHeader.substring(7);
 
-//                 // Check role if required
-//                 if (config.getRequiredRole() != null) {
-//                     String userRole = claims.get("role", String.class);
-//                     if (!config.getRequiredRole().equals(userRole)) {
-//                         return onError(exchange, "Insufficient permissions", HttpStatus.FORBIDDEN);
-//                     }
-//                 }
+            try {
+                // Validate token using JwtUtil
+                if (!jwtUtil.validateToken(token)) {
+                    return onError(exchange, "Invalid or expired token", HttpStatus.UNAUTHORIZED);
+                }
 
-//                 // Add user info to headers for downstream services
-//                 ServerHttpRequest modifiedRequest = request.mutate()
-//                         .header("X-User-Id", claims.getSubject())
-//                         .header("X-User-Role", claims.get("role", String.class))
-//                         .build();
+                String userId = jwtUtil.extractUserId(token);
+                String role = jwtUtil.extractRole(token);
 
-//                 return chain.filter(exchange.mutate().request(modifiedRequest).build());
+                // Check role if required
+                if (config.getRequiredRole() != null) {
+                    if (!config.getRequiredRole().equals(role)) {
+                        return onError(exchange, "Insufficient permissions", HttpStatus.FORBIDDEN);
+                    }
+                }
 
-//             } catch (Exception e) {
-//                 return onError(exchange, "Invalid or expired token: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
-//             }
-//         };
-//     }
+                // Add user info to headers for downstream services
+                ServerHttpRequest modifiedRequest = request.mutate()
+                        .header("X-User-Id", userId)
+                        .header("X-User-Role", role)
+                        .build();
 
-//     private Claims validateToken(String token) {
-//         SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+                return chain.filter(exchange.mutate().request(modifiedRequest).build());
 
-//         return Jwts.parserBuilder()
-//                 .setSigningKey(key)
-//                 .build()
-//                 .parseClaimsJws(token)
-//                 .getBody();
-//     }
+            } catch (Exception e) {
+                return onError(exchange, "Invalid or expired token: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
+            }
+        };
+    }
 
-//     private Mono<Void> onError(ServerWebExchange exchange, String error, HttpStatus httpStatus) {
-//         ServerHttpResponse response = exchange.getResponse();
-//         response.setStatusCode(httpStatus);
-//         response.getHeaders().add("Content-Type", "application/json");
+    private Mono<Void> onError(ServerWebExchange exchange, String error, HttpStatus httpStatus) {
+        ServerHttpResponse response = exchange.getResponse();
+        response.setStatusCode(httpStatus);
+        response.getHeaders().add("Content-Type", "application/json");
 
-//         String errorJson = String.format(
-//                 "{\"error\": \"%s\", \"status\": %d}",
-//                 error,
-//                 httpStatus.value()
-//         );
+        String errorJson = String.format(
+                "{\"error\": \"%s\", \"status\": %d}",
+                error,
+                httpStatus.value()
+        );
 
-//         return response.writeWith(
-//                 Mono.just(response.bufferFactory().wrap(errorJson.getBytes()))
-//         );
-//     }
+        return response.writeWith(
+                Mono.just(response.bufferFactory().wrap(errorJson.getBytes()))
+        );
+    }
 
-//     // Configuration class
-//     public static class Config {
+    // Configuration class
+    public static class Config {
 
-//         private String requiredRole;
+        private String requiredRole;
 
-//         public Config() {
-//         }
+        public Config() {
+        }
 
-//         public Config(String requiredRole) {
-//             this.requiredRole = requiredRole;
-//         }
+        public Config(String requiredRole) {
+            this.requiredRole = requiredRole;
+        }
 
-//         public String getRequiredRole() {
-//             return requiredRole;
-//         }
+        public String getRequiredRole() {
+            return requiredRole;
+        }
 
-//         public void setRequiredRole(String requiredRole) {
-//             this.requiredRole = requiredRole;
-//         }
-//     }
-// }
+        public void setRequiredRole(String requiredRole) {
+            this.requiredRole = requiredRole;
+        }
+    }
+}

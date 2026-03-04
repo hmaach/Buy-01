@@ -12,7 +12,7 @@ spring:
   cloud:
     gateway:
       server:
-        webflux:
+        webflux: 
           routes:
             - id: user-service
               uri: lb://USER-SERVICE
@@ -31,6 +31,15 @@ spring:
           include-binding-errors: always
           include-stacktrace: always
 
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+
+security:
+  jwt:
+    public-key: ${JWT_PUBLIC_KEY}
+
 logging:
   level:
     org.springframework.web: DEBUG
@@ -43,8 +52,3 @@ management:
   endpoint:
     health:
       show-details: always
-
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}

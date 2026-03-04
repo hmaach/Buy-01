@@ -13,14 +13,20 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.server.MissingRequestValueException;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.buy01.media.infrastructure.web.exception.Errors.Faileduploadedfile;
+import com.buy01.media.infrastructure.web.exception.Errors.NotFound;
 import com.nimbusds.jwt.proc.ExpiredJWTException;
+
+import lombok.extern.slf4j.Slf4j;
 
 import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     private static final Map<Class<? extends Throwable>, ProblemTemplate> TEMPLATES = new ProblemTemplate.Registry()
@@ -34,6 +40,8 @@ public class GlobalExceptionHandler {
             .add(UsernameNotFoundException.class, NOT_FOUND, "User Not Found")
             .add(MissingRequestValueException.class, BAD_REQUEST, "Missing Argument")
             .add(Faileduploadedfile.class, CONFLICT, "Failed to uploaded file")
+            .add(NotFound.class, NOT_FOUND, "Not Found")
+            .add(NoResourceFoundException.class, NOT_FOUND, "Path Not Found")
             .add(WebExchangeBindException.class, BAD_REQUEST, "Validation Failed",
                     ex -> "Fields: " + ((WebExchangeBindException) ex).getBindingResult().getFieldErrorCount())
             .build();
@@ -43,17 +51,25 @@ public class GlobalExceptionHandler {
             Throwable::getMessage,
             "Internal Server Error");
 
+    @ExceptionHandler(ResponseStatusException.class)
+    public ProblemDetail handleResponseStatusException(ResponseStatusException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(ex.getStatusCode(), ex.getReason());
+        problemDetail.setTitle("Application Error");
+        return problemDetail;
+    }
+
     @ExceptionHandler(Exception.class)
     public ProblemDetail handle(Exception ex) {
         ProblemTemplate template = TEMPLATES.get(ex.getClass());
         if (template == null) {
+            System.err.println(ex + "\n");
+            log.warn("Exception not handled happen: ", ex);
             template = DEFAULT_TEMPLATE;
         }
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(
                 template.status(),
                 template.detailGenerator().apply(ex));
         pd.setTitle(template.title());
-        System.err.println(ex + "\n");
         return pd;
     }
 }

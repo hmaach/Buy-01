@@ -4,9 +4,12 @@ import { roleGuard } from './core/auth/guards/role.guard';
 
 export const routes: Routes = [
   {
-    path: '',
-    redirectTo: 'products',
-    pathMatch: 'full'
+    path: "",
+    loadComponent: () => import('./features/products/create-product/create-product').then(m => m.CreateProduct)
+  },
+  {
+    path: 'product/:id',
+    loadComponent: () => import('./features/products/product-detail/product-detail').then(m => m.ProductDetail)
   },
   {
     path: 'login',

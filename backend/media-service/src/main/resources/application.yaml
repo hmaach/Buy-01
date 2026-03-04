@@ -1,8 +1,6 @@
-<<<<<<< HEAD
-=======
 spring:
   application:
-    name: media
+    name: media-service
   servlet:
     multipart:
       max-file-size: 2MB
@@ -14,14 +12,13 @@ spring:
       consumer:
         group-id: media-service-group
         auto-offset-reset: earliest
-        enable-auto-commit: true           # usually true for simple cases
+        enable-auto-commit: true          
         key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
         value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
         properties:
           spring.json.trusted.packages: "*"           # very important      # allow deserializing your event classes
           spring.json.value.default.type: com.buy01.media.infrastructure.web.dto.ImagesLinkedEvent
 
->>>>>>> product-service
 server:
   port: 8083
 
@@ -31,29 +28,3 @@ eureka:
       defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
       register-with-eureka: true
       fetch-registry: true
-
-spring:
-  application:
-    name: media-service
-    spring:
-
-  data:
-    mongodb:
-      host: ${MEDIA_MONGO_HOST:localhost}
-      port: ${MEDIA_MONGO_PORT:27018}
-      database: ${MEDIA_MONGO_DB:media_db}
-      username: ${MEDIA_MONGO_USERNAME:media_service}
-      password: ${MEDIA_MONGO_PASSWORD:media_password}
-      authentication-database: admin
-
-  kafka:
-    bootstrap-servers: localhost:9092
-    consumer:
-      group-id: media-service-group
-      auto-offset-reset: earliest
-      enable-auto-commit: true # usually true for simple cases
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: "*" # very important      # allow deserializing your event classes
-        spring.json.value.default.type: com.buy01.media.infrastructure.web.dto.ImagesLinkedEvent

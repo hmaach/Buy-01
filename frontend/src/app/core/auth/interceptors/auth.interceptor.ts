@@ -1,6 +1,7 @@
 import { HttpInterceptorFn, HttpRequest, HttpHandlerFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
+import { env } from '../../../../environments/environment';
 
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
@@ -10,9 +11,12 @@ export const authInterceptor: HttpInterceptorFn = (
   const token = authService.getToken();
 
   console.log(`[HTTP] ${req.method} ${req.url}`);
+  const modifiedReq = req.clone({
+    url: `${env.backendUrl}${req.url}`,
+  });
 
   if (token) {
-    const authReq = req.clone({
+    const authReq = modifiedReq.clone({
       setHeaders: {
         Authorization: `Bearer ${token}`
       }
@@ -21,5 +25,5 @@ export const authInterceptor: HttpInterceptorFn = (
     return next(authReq);
   }
 
-  return next(req);
+  return next(modifiedReq);
 };

@@ -1,3 +1,6 @@
+const backendUrl = "http://localhost:8080";
+
 export const env = {
-    mediaUrl: "http://localhost:8080/media"
+    backendUrl: backendUrl,
+    mediaUrl: `${backendUrl}/media`
 }

@@ -22,6 +22,7 @@ MVN_CMD := ./mvnw
 # Default target
 help:
 	@echo "Available targets:"
+	@echo "  make keys           -> generate RSA keys for JWT signing in .env"
 	@echo "  make install        -> clean install all backend services"
 	@echo "  make clean          -> clean all backend services"
 	@echo "  make rebuild        -> clean install all services"
@@ -59,3 +60,12 @@ docker-up:
 
 docker-down:
 	docker compose down
+
+# ==============================
+# Key Generation
+# ==============================
+.PHONY: keys
+
+keys:
+	@echo "Generating RSA keys..."
+	@./scripts/generate-keys.sh

@@ -22,6 +22,10 @@ spring:
         spring.json.trusted.packages: "*" # very important      # allow deserializing your event classes
         spring.json.value.default.type: com.buy01.media.infrastructure.web.dto.ImagesLinkedEvent
 
+security:
+  jwt:
+    public-key: ${JWT_PUBLIC_KEY}
+
 management:
   endpoints:
     web:

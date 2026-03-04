@@ -9,9 +9,6 @@ spring:
     compose:
       enabled: false
 
-  jwt:
-  secret: ${JWT_SECRET:azertyuiopqsdfghjklmwxcvbn}
-
   cloud:
     gateway:
       server:

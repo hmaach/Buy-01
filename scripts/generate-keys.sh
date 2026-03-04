@@ -11,8 +11,18 @@ PUBLIC_KEY_FILE="$TEMP_DIR/public_key.pem"
 openssl genpkey -algorithm RSA -out "$PRIVATE_KEY_FILE" -pkeyopt rsa_keygen_bits:2048
 openssl rsa -pubout -in "$PRIVATE_KEY_FILE" -out "$PUBLIC_KEY_FILE"
 
-PRIVATE_KEY=$(cat "$PRIVATE_KEY_FILE" | base64 -w 0)
-PUBLIC_KEY=$(cat "$PUBLIC_KEY_FILE" | base64 -w 0)
+# Convert to DER
+openssl pkcs8 -topk8 -inform PEM -outform DER \
+-in "$PRIVATE_KEY_FILE" \
+-out "$TEMP_DIR/private_key.der" \
+-nocrypt
+
+openssl rsa -in "$PRIVATE_KEY_FILE" -pubout -outform DER \
+-out "$TEMP_DIR/public_key.der"
+
+# Now base64 raw DER (correct)
+PRIVATE_KEY=$(base64 -w 0 "$TEMP_DIR/private_key.der")
+PUBLIC_KEY=$(base64 -w 0 "$TEMP_DIR/public_key.der")
 
 rm -rf "$TEMP_DIR"
 

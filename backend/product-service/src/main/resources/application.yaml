@@ -1,3 +1,6 @@
+server:
+  port: 8082
+
 spring:
   application:
     name: product-service
@@ -11,8 +14,21 @@ spring:
       properties:
         spring.json.add.type.headers: false
 
-server:
-  port: 8082
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+      register-with-eureka: true
+      fetch-registry: true
 
 services:
   media: "http://localhost:8083"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always

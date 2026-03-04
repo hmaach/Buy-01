@@ -1,11 +1,8 @@
 package com.buy01.product.infrastructure.web.controller;
 
-import java.time.Instant;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,7 +10,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.buy01.product.domain.model.Product;
 import com.buy01.product.domain.ports.inbound.ProductUseCase;
@@ -34,6 +30,11 @@ public class ProductController {
     private final ProductUseCase productUseCase;
 
     String userId = "qwertyuiopasdfdfghhjfghjfh";
+
+    @GetMapping()
+    public String test() {
+        return "Product service is working";
+    }
 
     @PostMapping
     // @PreAuthorize("hasRole('SELLER')")

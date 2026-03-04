@@ -33,3 +33,12 @@ spring:
 media:
   service:
     url: ${MEDIA_SERVICE_URL:http://localhost:8083}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always

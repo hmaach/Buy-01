@@ -30,6 +30,11 @@ public class MediaController {
         this.mediaService = muc;
     }
 
+    @GetMapping
+    public String test() {
+        return "media service is working";
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Resource> getImage(@PathVariable String id) {
         Resource resource = mediaService.getImageFile(id);

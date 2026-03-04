@@ -158,8 +158,8 @@ export class CreateProduct {
         this.okMessage.set('Product created successfully')
         this.router.navigate(['/product', productResp.id]);
       },
-      error: (err) => {
-        this.errorMessage.set(err.title || "unknow error")
+      error: (err) => {        
+        this.errorMessage.set(err.error.title  || "unknown error") 
         console.error('Error during upload/create chain:', err);
       }
     });

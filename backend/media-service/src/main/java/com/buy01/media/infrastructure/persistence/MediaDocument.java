@@ -2,7 +2,6 @@ package com.buy01.media.infrastructure.persistence;
 
 import java.time.Instant;
 
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -25,7 +24,6 @@ public class MediaDocument {
 
     private FileStatus status;
 
-    // @CreatedDate
     @Field("created_at")
     private Instant createdAt;
 }

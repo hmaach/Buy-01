@@ -40,7 +40,7 @@
 
                 <div class="form-group">
                     <label>Product Name</label>
-                    <input type="text" formControlName="name" placeholder="Enter product name" />
+                    <input type="text" formControlName="name" placeholder="Enter product name" maxlength="100" />
                     @if(name?.touched && name?.hasError('required')){
                     <div class="error">
                         Product name is required
@@ -50,7 +50,7 @@
 
                 <div class="form-group">
                     <label>Description</label>
-                    <textarea formControlName="description" rows="6"></textarea>
+                    <textarea formControlName="description" rows="6" maxlength="500"></textarea>
                     @if(description?.touched && description?.hasError('required')){
                     <div class="error">
                         Description is required

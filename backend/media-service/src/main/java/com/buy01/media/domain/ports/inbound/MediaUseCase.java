@@ -13,7 +13,7 @@ public interface MediaUseCase {
 
         Resource getImageFile(String mediaId);
 
-        MediaType guessContentType(String filename);
+        MediaType detectContentType(Resource resource);
 
         List<String> getProdutImages(String productId);
 }

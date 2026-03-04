@@ -1,8 +1,10 @@
 package com.buy01.media.infrastructure.web.controller;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.core.io.Resource;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -39,7 +41,8 @@ public class MediaController {
     public ResponseEntity<Resource> getImage(@PathVariable String id) {
         Resource resource = mediaService.getImageFile(id);
         return ResponseEntity.ok()
-                .contentType(mediaService.guessContentType(resource.getFilename()))
+                .contentType(mediaService.detectContentType(resource))
+                .cacheControl(CacheControl.maxAge(1, TimeUnit.DAYS).cachePublic())
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
                 .body(resource);
     }

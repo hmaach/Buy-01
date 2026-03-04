@@ -27,7 +27,9 @@ export class ProductDetail implements OnInit {
   }
 
   get displayedMain(): string {
+    
     const product = this.product();
+    console.log(product?.mainImage, product?.thumbnails);
     if (!product || !product.thumbnails || product.thumbnails.length === 0) {
       return "./empty.png";
     }

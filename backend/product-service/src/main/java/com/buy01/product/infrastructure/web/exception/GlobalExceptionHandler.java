@@ -16,13 +16,16 @@ import org.springframework.web.server.MethodNotAllowedException;
 
 import com.nimbusds.jwt.proc.ExpiredJWTException;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
     private static final Map<Class<? extends Throwable>, ProblemTemplate> TEMPLATES = new ProblemTemplate.Registry()
             .add(SignatureException.class, UNAUTHORIZED, "Invalid JWT Signature")
@@ -35,7 +38,11 @@ public class GlobalExceptionHandler {
             .add(UsernameNotFoundException.class, NOT_FOUND, "User Not Found")
             .add(MethodNotAllowedException.class, METHOD_NOT_ALLOWED, "Method Not Allowed")
             .add(WebExchangeBindException.class, BAD_REQUEST, "Validation Failed",
-                    ex -> "Fields: " + ((WebExchangeBindException) ex).getBindingResult().getFieldErrorCount())
+                    ex -> ((WebExchangeBindException) ex).getBindingResult().getFieldErrors()
+                            .stream()
+                            .map(fe -> fe.getField() + ": "
+                                    + (fe.getDefaultMessage() != null ? fe.getDefaultMessage() : fe.toString()))
+                            .collect(Collectors.joining("; ")))
             .build();
 
     private static final ProblemTemplate DEFAULT_TEMPLATE = new ProblemTemplate(
@@ -47,14 +54,13 @@ public class GlobalExceptionHandler {
     public Mono<ProblemDetail> handle(Exception ex) {
         ProblemTemplate template = TEMPLATES.get(ex.getClass());
         if (template == null) {
+            log.warn("Exception not handled: {}", ex.getClass().getSimpleName(), ex);
             template = DEFAULT_TEMPLATE;
         }
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(
                 template.status(),
                 template.detailGenerator().apply(ex));
         pd.setTitle(template.title());
-        System.err.println(ex + "\n");
-        ex.printStackTrace();
         return Mono.just(pd);
     }
 }

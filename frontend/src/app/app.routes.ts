@@ -13,7 +13,11 @@ export const routes: Routes = [
   },
   {
     path: "products/new",
-    loadComponent: () => import('./features/products/create-product/create-product').then(m => m.CreateProduct)
+    loadComponent: () => import('./features/products/create-product/create-product').then(m => m.ProductForm)
+  },
+  {
+    path: "products/:id/edit",
+    loadComponent: () => import('./features/products/create-product/create-product').then(m => m.ProductForm)
   },
   {
     path: 'products/list',

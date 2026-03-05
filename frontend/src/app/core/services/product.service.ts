@@ -1,9 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { MediaResponse, Product, ProductListDto } from '../models/api-response.model';
+import { MediaResponse } from '../models/api-response.model';
 import { env } from '../../../environments/environment';
-import { ProductList } from '../../features/products/product-list/product-list';
+import { Product, ProductCreateRequest, ProductListDto } from '../models/product.model';
 
 @Injectable({
   providedIn: 'root',
@@ -13,9 +13,6 @@ export class ProductService {
 
   private parentPath = `/products`;
 
-  uploadImages(formData: FormData): Observable<MediaResponse[]> {
-    return this.http.post<MediaResponse[]>('/media', formData);
-  }
 
   createProduct(payload: any): Observable<any> {
     return this.http.post<any>(this.parentPath, payload);
@@ -33,10 +30,10 @@ export class ProductService {
         rating: 4.8,
         reviewsCount: 124,
         thumbnails: actualIds,
-        mainImage: `${env.mediaUrl}/${actualIds[0]}`,
+        mainImage: actualIds[0],
         oldPrice: r.price + 20.4,
       }
-      product.thumbnails = product.thumbnails.map(v => `${env.mediaUrl}/${v}`)
+      product.thumbnails = product.thumbnails
       return product;
     }));
   }
@@ -55,6 +52,9 @@ export class ProductService {
         }))
       )
     );
+  }
+  updateProduct(id: string, changes: ProductCreateRequest): Observable<ProductCreateRequest> {
+    return this.http.patch<ProductCreateRequest>(`${this.parentPath}/${id}`, changes);
   }
 
   private isNew(createdAt?: string): boolean {

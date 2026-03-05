@@ -27,6 +27,7 @@ import com.buy01.media.domain.model.Media;
 import com.buy01.media.domain.ports.inbound.MediaUseCase;
 import com.buy01.media.domain.ports.outbound.MediaRepositoryPort;
 import com.buy01.media.infrastructure.web.exception.Errors.Faileduploadedfile;
+import com.buy01.media.infrastructure.web.exception.Errors.NotFound;
 
 @Service
 public class MediaServiceImpl implements MediaUseCase {
@@ -175,5 +176,21 @@ public class MediaServiceImpl implements MediaUseCase {
         productIds.forEach(id -> urlMap.putIfAbsent(id, null));
 
         return urlMap;
+    }
+
+    @Override
+    public void deleteById(String id) {
+        if (id == null) {
+            throw new IllegalArgumentException("id is ");
+        }
+        var media = repository.findById(id);
+
+        if (media.isEmpty()) {
+            throw new NotFound("media with id " + id + "no found");
+        }
+        repository.deleteById(id);
+        var path = Paths.get(media.get().getImagePath());
+        tryDeleteFile(path);
+        System.out.println(".........> delete " + path);
     }
 }

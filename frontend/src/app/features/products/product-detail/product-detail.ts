@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, input, OnInit, signal } from '@angular/core';
-import { Product } from '../../../core/models/api-response.model';
 import { ProductService } from '../../../core/services/product.service';
+import { Product } from '../../../core/models/product.model';
+import { env } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-product-detail',
@@ -32,7 +33,8 @@ export class ProductDetail implements OnInit {
     if (!product || !product.thumbnails || product.thumbnails.length === 0) {
       return "./empty.png";
     }
-    return product.thumbnails[this.selectedImageIndex] || product.mainImage;
+    var id = product.thumbnails[this.selectedImageIndex] || product.mainImage;
+    return `${env.mediaUrl}/${id}`;
   }
 
   selectThumbnail(index: number): void {
@@ -42,5 +44,9 @@ export class ProductDetail implements OnInit {
   buyNow(): void {
     console.log('Buy now:', this.product.name);
     // Redirect or handle checkout
+  }
+  imageUrl(id: string) {
+    if (!id) return './empty.png';
+    return `${env.mediaUrl}/${id}`;
   }
 }

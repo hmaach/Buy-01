@@ -1,12 +1,12 @@
 package com.buy01.product.infrastructure.web.controller;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -45,7 +45,7 @@ public class ProductController {
                 .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response));
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     // @PreAuthorize("hasRole('SELLER')")
     public Mono<ProductResponse> updateProduct(
             @PathVariable String id,

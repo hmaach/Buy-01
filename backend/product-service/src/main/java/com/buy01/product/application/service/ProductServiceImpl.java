@@ -1,19 +1,16 @@
 package com.buy01.product.application.service;
 
 import java.time.Instant;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import com.buy01.product.domain.model.Product;
 import com.buy01.product.domain.ports.inbound.ProductUseCase;
 import com.buy01.product.domain.ports.outbound.ProductRepositoryPort;
 import com.buy01.product.infrastructure.messaging.ImagesLinkedEvent;
-import com.buy01.product.infrastructure.persistence.mongo.ProductDocument;
 import com.buy01.product.infrastructure.web.dto.ProductList;
 import com.buy01.product.infrastructure.web.dto.ProductResponse;
 
@@ -69,7 +66,8 @@ public class ProductServiceImpl implements ProductUseCase {
                             .build();
 
                     return productRepository.save(updatedProduct);
-                });
+                })
+                .doOnNext(savedProduct -> sendKafkaEvent(savedProduct, update.getImagesIds()));
     }
 
     @Override
@@ -92,10 +90,7 @@ public class ProductServiceImpl implements ProductUseCase {
                     }
 
                     List<String> ids = products.stream().map(Product::getId).toList();
-                    System.out.println("ids: " + ids);
-
                     var images = imageService.getImagesBatch(ids);
-                    images.subscribe(v -> System.out.println("/////////>  " + v));
 
                     return images.map(urlMap -> products.stream()
                             .map(p -> new ProductList(
@@ -103,7 +98,7 @@ public class ProductServiceImpl implements ProductUseCase {
                                     p.getName(),
                                     p.getPrice(),
                                     p.getCreatedAt(),
-                                    urlMap.getOrDefault(p.getId(), "https://via.placeholder.com/300")))
+                                    urlMap.getOrDefault(p.getId(), "")))
                             .collect(Collectors.toList()))
                             .flatMapMany(Flux::fromIterable);
                 });

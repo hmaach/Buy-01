@@ -20,4 +20,6 @@ public interface MediaUseCase {
         List<String> getProdutImages(String productId);
 
         Map<String, String> findImageUrlsByProductIds(Collection<String> productIds);
+
+        void deleteById(String id);
 }

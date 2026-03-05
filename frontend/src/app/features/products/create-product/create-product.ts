@@ -1,113 +1,153 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ProductService } from '../../../core/services/product.service';
-import { ProductCreateRequest } from '../../../core/models/api-response.model';
+import { ActivatedRoute, Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { ProductService } from '../../../core/services/product.service'; // adjust path
 import { env } from '../../../../environments/environment';
-import { Router } from '@angular/router';
+import { MediaService } from '../../../core/services/media.service';
 
 @Component({
-  selector: 'app-create-product',
+  selector: 'app-product-form',
+  standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './create-product.html',
-  styleUrls: ['./create-product.scss'],
+  templateUrl: './product-form.html',
+  styleUrls: ['./product-form.scss']
 })
-export class CreateProduct {
+export class ProductForm {
+  private fb = inject(FormBuilder);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
   readonly productService = inject(ProductService);
-  readonly router = inject(Router);
+  readonly mediaService = inject(MediaService);
 
-  form: FormGroup;
-
-  mainImagePreview: string | null = null;
-  thumbnailPreviews: string[] = [];
-
-  initialMain = './empty.png';
-  initialThumbs = [];
-
+  isEditMode = signal(false);
+  isLoading = signal(false);
   errorMessage = signal<string | null>(null);
   okMessage = signal<string | null>(null);
+  productId = signal<string | null>(null);
 
-  constructor(private fb: FormBuilder) {
-    this.form = this.fb.group({
-      name: ['Wireless Audio Max 2', [Validators.required, Validators.minLength(3)]],
-      description: [
-        'Next-generation spatial audio headphones...',
-        [Validators.required, Validators.minLength(20)]
-      ],
-      price: [299.00, [Validators.required, Validators.min(0.01)]],
-      quantity: [48, [Validators.required, Validators.min(0)]],
+  mainImagePreview = signal<string | null>(null);
+  thumbnailPreviews = signal<string[]>([]);
+
+  readonly initialMain = './empty.png';
+
+  form: FormGroup = this.fb.group({
+    name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
+    description: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(500)]],
+    price: [0, [Validators.required, Validators.min(0.01)]],
+    quantity: [0, [Validators.required, Validators.min(0)]],
+  });
+
+  pageTitle = computed(() => this.isEditMode() ? 'Edit Product Details' : 'Create Product Details');
+  submitText = computed(() => this.isEditMode() ? 'Update Product' : 'Create Product');
+
+  constructor() {
+    effect(() => {
+      const id = this.route.snapshot.paramMap.get('id');
+      if (id) {
+        this.productId.set(id);
+        this.loadProduct(id);
+      } else {
+        this.resetForm();
+      }
     });
   }
 
-  ngOnInit() {
-    // Optional: if editing existing product, load initial previews here
+  private loadProduct(id: string) {
+    this.isLoading.set(true);
+    this.productService.getProduct(id).subscribe({
+      next: (product) => {
+        this.form.patchValue({
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          quantity: product.quantity,
+        });
+
+        this.mainImagePreview.set(product.mainImage || null);
+        this.thumbnailPreviews.set(product.thumbnails.splice(1) || []);
+
+        this.isEditMode.set(true);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.errorMessage.set('Failed to load product');
+        this.isLoading.set(false);
+      }
+    });
   }
 
-  // ───────────────────────────────────────────────
-  //  Main Image Upload / Replace
-  // ───────────────────────────────────────────────
-  onMainImageSelected(event: Event): void {
+  private resetForm() {
+    this.form.reset({ name: '', description: '', price: 0, quantity: 0 });
+    this.mainImagePreview.set(null);
+    this.thumbnailPreviews.set([]);
+    this.isEditMode.set(false);
     this.errorMessage.set(null);
+    this.okMessage.set(null);
+  }
+
+  onMainImageSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
+    const mainImageId = this.mainImagePreview();
     if (!input.files?.length) return;
 
     const file = input.files[0];
-    if (!this.isValidImage(file)) return;
-
-    const formData = new FormData();
-    if (file) {
-      formData.append('files', file);
+    if (!mainImageId) {
+      this.uploadImage(file, true);
+      return;
     }
-    this.productService.uploadImages(formData).subscribe({
-      next: (v) => this.mainImagePreview = v[0].imagesId,
-      error: (e) => console.error(e),
+    this.mediaService.deleteImage(mainImageId).subscribe({
+      next: () => this.uploadImage(file, true),
+      error: () => this.errorMessage.set('Delete Image failed'),
     })
   }
 
-  // ───────────────────────────────────────────────
-  //  Multiple Thumbnails (Media Library) Add
-  // ───────────────────────────────────────────────
+  onMainImageDrop(event: DragEvent): void {
+    event.preventDefault();
+    const file = event.dataTransfer?.files[0];
+    if (file) this.uploadImage(file, true);
+  }
+
   onThumbnailsSelected(event: Event): void {
-    this.errorMessage.set(null);
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
-
-
-    const formData = new FormData();
-    Array.from(input.files).forEach(file => {
-      if (this.isValidImage(file)) {
-        formData.append('files', file);
-      }
-    });
-    this.productService.uploadImages(formData).subscribe({
-      next: (v) => this.thumbnailPreviews.push(...v.map(e => e.imagesId)),
-      error: (e) => console.error(e),
-    })
+    Array.from(input.files).forEach(file => this.uploadImage(file, false));
     input.value = '';
   }
 
-  onDrop(event: DragEvent, target: 'main' | 'thumbnails'): void {
-    // event.preventDefault();
-    // event.stopPropagation();
+  private uploadImage(file: File, isMain: boolean): void {
+    if (!this.isValidImage(file)) return;
 
-    // if (!event.dataTransfer?.files?.length) return;
+    const formData = new FormData();
+    formData.append('files', file);
 
-    // const files = Array.from(event.dataTransfer.files);
+    this.mediaService.uploadImages(formData).subscribe({
+      next: (res) => {
+        const id = res[0]?.imagesId;
+        if (id) {
+          if (isMain) {
+            this.mainImagePreview.set(id);
+          } else {
+            this.thumbnailPreviews.update(prev => [...prev, id]);
+          }
+        }
+      },
+      error: () => this.errorMessage.set('Image upload failed')
+    });
+  }
 
-    // if (target === 'main') {
-    //   // For main → take first valid image only
-    //   const file = files.find(f => this.isValidImage(f));
-    //   if (file) {
-    //     this.mainImagePreview = { file, url: URL.createObjectURL(file) };
-    //   }
-    // } else {
-    //   // For thumbnails → add multiple
-    //   files.forEach(file => {
-    //     if (this.isValidImage(file)) {
-    //       this.thumbnailPreviews.push({ file, url: URL.createObjectURL(file) });
-    //     }
-    //   });
-    // }
+  removeThumbnail(index: number): void {
+    var id = this.thumbnailPreviews()[index];
+    this.mediaService.deleteImage(id).subscribe({
+      next: () => {
+        this.thumbnailPreviews.update(prev => {
+          const newList = [...prev];
+          newList.splice(index, 1);
+          return newList;
+        });
+      },
+      error: () => this.errorMessage.set('Delete Image failed'),
+    })
   }
 
   onDragOver(event: DragEvent): void {
@@ -117,66 +157,69 @@ export class CreateProduct {
 
   private isValidImage(file: File): boolean {
     const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-    const maxSize = 2 * 1024 * 1024; // 2MB
-
+    const maxSize = 2 * 1024 * 1024;
     if (!validTypes.includes(file.type)) {
-      this.errorMessage.set('Only images allowed (jpg, png, webp, gif)');
+      this.errorMessage.set('Only JPG, PNG, WebP, GIF allowed');
       return false;
     }
-
     if (file.size > maxSize) {
-      this.errorMessage.set('File too large — max 2MB');
+      this.errorMessage.set('File too large (max 2MB)');
       return false;
     }
-
     return true;
   }
 
-  removeThumbnail(index: number): void {
-    const removed = this.thumbnailPreviews.splice(index, 1)[0];
-    URL.revokeObjectURL(removed); // free memory
+  // ── Form getters ─────────────────────────────────────────
+  get name() { return this.form.get('name'); }
+  get description() { return this.form.get('description'); }
+  get price() { return this.form.get('price'); }
+  get quantity() { return this.form.get('quantity'); }
+
+  get displayedMain(): string {
+    return this.mainImagePreview()
+      ? `${env.mediaUrl}/${this.mainImagePreview()}`
+      : this.initialMain;
   }
 
+  get displayedThumbs(): string[] {
+    return this.thumbnailPreviews().map(id => `${env.mediaUrl}/${id}`);
+  }
+
+  // ── Submit ───────────────────────────────────────────────
   onSubmit(): void {
-    this.errorMessage.set(null);
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
-    const payload: ProductCreateRequest = {
-      ...this.form.value,
-      imagesIds: [this.mainImagePreview, ...this.thumbnailPreviews]
-    };
-    console.table(payload.imagesIds);
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+    this.okMessage.set(null);
 
-    this.productService.createProduct(payload).subscribe({
-      next: (productResp) => {
-        this.okMessage.set('Product created successfully')
-        this.router.navigate(['/products', productResp.id]);
+    const imagesIds = [
+      this.mainImagePreview(),
+      ...this.thumbnailPreviews()
+    ].filter((id): id is string => !!id);
+
+    const payload = {
+      ...this.form.value,
+      imagesIds
+    };
+
+    const observable = this.isEditMode()
+      ? this.productService.updateProduct(this.productId()!, payload)
+      : this.productService.createProduct(payload);
+
+    observable.subscribe({
+      next: (resp) => {
+        this.okMessage.set(this.isEditMode() ? 'Product updated successfully' : 'Product created successfully');
+        this.isLoading.set(false);
+        this.router.navigate(['/products', resp.id || this.productId()]);
       },
       error: (err) => {
-        this.errorMessage.set(err.error.title || "unknown error")
-        console.error('Error during upload/create chain:', err);
+        this.errorMessage.set(err.error?.message || 'Operation failed');
+        this.isLoading.set(false);
       }
     });
   }
-
-  ngOnDestroy(): void {
-    if (this.mainImagePreview) URL.revokeObjectURL(this.mainImagePreview);
-    this.thumbnailPreviews.forEach(p => URL.revokeObjectURL(p));
-  }
-
-  get name() { return this.form.get('name'); }
-  get description() { return this.form.get('description'); }
-  get price() { return this.form.get('price'); }
-  get quantity() { return this.form.get('quantity'); }
-  get displayedMain(): string {
-    if (this.mainImagePreview) {
-      return `${env.mediaUrl}/${this.mainImagePreview}`
-    }
-    return this.initialMain;
-  }
-  get displayedThumbs(): string[] { return this.thumbnailPreviews.map(v => `${env.mediaUrl}/${v}`) }
-
 }

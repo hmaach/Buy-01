@@ -29,7 +29,7 @@
           @for (thumb of product()?.thumbnails; track $index) {
           <button class="thumbnail-btn" [class.active]="selectedImageIndex === $index"
             (click)="selectThumbnail($index)">
-            <img [src]="thumb" [alt]="product()?.name + ' view ' + ($index + 1)" />
+            <img [src]="imageUrl(thumb)" [alt]="product()?.name + ' view ' + ($index + 1)" />
           </button>
           }
         </div>

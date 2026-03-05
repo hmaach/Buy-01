@@ -14,6 +14,7 @@ public class ProductWebMapper {
                 .name(request.name())
                 .description(request.description())
                 .price(request.price())
+                .imagesIds(request.imagesIds())
                 .quantity(request.quantity())
                 .userId(userId)
                 .build();

@@ -1,9 +1,9 @@
 import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, signal, viewChild, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProductService } from '../../../core/services/product.service';
-import { ProductListDto } from '../../../core/models/api-response.model';
 import { env } from '../../../../environments/environment';
 import { Router } from '@angular/router';
+import { ProductListDto } from '../../../core/models/product.model';
 
 @Component({
   selector: 'app-product-list',

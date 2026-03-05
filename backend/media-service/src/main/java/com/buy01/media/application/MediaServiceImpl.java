@@ -5,10 +5,13 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.tika.Tika;
 import org.springframework.core.io.Resource;
@@ -139,9 +142,6 @@ public class MediaServiceImpl implements MediaUseCase {
         return repository.findByProductId(ProductId).stream().map(p -> p.getId()).toList();
     }
 
-
-
-
     private String getExtension(String filename) {
         int dotIndex = filename.lastIndexOf('.');
         return dotIndex > 0 ? filename.substring(dotIndex) : "";
@@ -160,5 +160,20 @@ public class MediaServiceImpl implements MediaUseCase {
         } catch (IOException e) {
             System.out.println("Failed to delete file: " + path + " - " + e.getMessage());
         }
+    }
+
+    @Override
+    public Map<String, String> findImageUrlsByProductIds(Collection<String> productIds) {
+        List<Media> images = repository.findByProductIdIn(productIds);
+
+        Map<String, String> urlMap = images.stream()
+                .collect(Collectors.toMap(
+                        Media::getProductId,
+                        Media::getId,
+                        (oldVal, newVal) -> oldVal));
+
+        productIds.forEach(id -> urlMap.putIfAbsent(id, null));
+
+        return urlMap;
     }
 }

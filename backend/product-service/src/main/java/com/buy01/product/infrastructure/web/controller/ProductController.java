@@ -70,10 +70,10 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getProductsList(@RequestParam(required = false) Instant lastProduct) {
-        if (lastProduct == null)
-            lastProduct = Instant.now();
-        productUseCase.getProductsList(lastProduct);
-        return ResponseEntity.ok(null);
+    public ResponseEntity<?> getProductsList(@RequestParam(required = false) Instant beforeTime) {
+        if (beforeTime == null)
+            beforeTime = Instant.now();
+        var prodctList = productUseCase.getProductsList(beforeTime);
+        return ResponseEntity.ok(prodctList);
     }
 }

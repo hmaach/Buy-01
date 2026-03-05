@@ -1,8 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { MediaResponse, Product } from '../models/api-response.model';
+import { MediaResponse, Product, ProductListDto } from '../models/api-response.model';
 import { env } from '../../../environments/environment';
+import { ProductList } from '../../features/products/product-list/product-list';
 
 @Injectable({
   providedIn: 'root',
@@ -38,5 +39,37 @@ export class ProductService {
       product.thumbnails = product.thumbnails.map(v => `${env.mediaUrl}/${v}`)
       return product;
     }));
+  }
+
+  getListOfProducts(beforeTime?: string): Observable<ProductListDto[]> {
+    let url = this.parentPath;
+    if (beforeTime) {
+      url += `?beforeTime=${beforeTime}`;
+    }
+
+    return this.http.get<ProductListDto[]>(url).pipe(
+      map(products =>
+        products.map(p => ({
+          ...p,
+          badge: this.isNew(p.createdAt) ? 'New' : undefined
+        }))
+      )
+    );
+  }
+
+  private isNew(createdAt?: string): boolean {
+    if (!createdAt) return false;
+
+    try {
+      const createdDate = new Date(createdAt);
+      if (isNaN(createdDate.getTime())) return false;
+
+      const now = Date.now();
+      const fiveMinutesAgo = now - 5 * 60 * 1000;
+
+      return createdDate.getTime() >= fiveMinutesAgo;
+    } catch {
+      return false;
+    }
   }
 }

@@ -1,4 +1,11 @@
 <main class="main-content">
+  @if (error()) {
+  <div class="error-message">
+    {{ error() }}
+    <button (click)="loadMore()">Try again</button>
+  </div>
+  }
+
   <div class="content-grid">
 
     <!-- Products Area -->
@@ -6,16 +13,16 @@
       <div class="toolbar">
         <div>
           <h1 class="page-title">New Products</h1>
-          <p class="result-count">Showing {{ products.length }} products</p>
+          <p class="result-count">Showing {{ products().length }} products</p>
         </div>
       </div>
 
       <!-- Product Cards Grid -->
       <div class="products-grid">
-        @for (product of products; track product.id) {
+        @for (product of products(); track product.id) {
         <div class="product-card">
           <div class="image-wrapper">
-            <img [src]="product.image" [alt]="product.name" class="product-image" />
+            <img [src]="this.imageUrl(product.image)" [alt]="product.name" class="product-image" />
 
             @if (product.badge) {
             <span class="badge" [class.new]="product.badge === 'New'">
@@ -39,7 +46,7 @@
             <span class="current-price">${{ product.price.toFixed(2) }}</span>
           </div>
 
-          <button class="add-to-cart-btn" (click)="addToCart(product)">
+          <button class="add-to-cart-btn" (click)="moreDetail(product)">
             <span class="material-symbols-outlined">shopping_bag</span>
             See more Detail
           </button>
@@ -48,4 +55,16 @@
       </div>
     </div>
   </div>
+
+  <!-- Sentinel / Loader -->
+  @if (hasMore() || isLoading()) {
+  <div #sentinel class="loading-area">
+    @if (isLoading()) {
+    <div class="spinner">Loading more products...</div>
+    }
+    @if (!hasMore() && products().length > 0) {
+    <div class="end-message">No more products</div>
+    }
+  </div>
+  }
 </main>

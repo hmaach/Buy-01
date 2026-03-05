@@ -31,3 +31,12 @@ export interface Product {
   mainImage: string,
   thumbnails: string[],
 }
+
+export interface ProductListDto {
+  id: string,
+  name: string,
+  price: number,
+  image: string,
+  createdAt: string;
+  badge?: 'New'
+}

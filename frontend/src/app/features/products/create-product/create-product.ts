@@ -83,11 +83,9 @@ export class CreateProduct {
       next: (v) => this.thumbnailPreviews.push(...v.map(e => e.imagesId)),
       error: (e) => console.error(e),
     })
-    // Reset input so same file can be selected again if needed
     input.value = '';
   }
 
-  // Drag & Drop support (for both zones)
   onDrop(event: DragEvent, target: 'main' | 'thumbnails'): void {
     // event.preventDefault();
     // event.stopPropagation();
@@ -134,7 +132,6 @@ export class CreateProduct {
     return true;
   }
 
-  // Optional: remove a thumbnail preview
   removeThumbnail(index: number): void {
     const removed = this.thumbnailPreviews.splice(index, 1)[0];
     URL.revokeObjectURL(removed); // free memory
@@ -156,16 +153,15 @@ export class CreateProduct {
     this.productService.createProduct(payload).subscribe({
       next: (productResp) => {
         this.okMessage.set('Product created successfully')
-        this.router.navigate(['/product', productResp.id]);
+        this.router.navigate(['/products', productResp.id]);
       },
-      error: (err) => {        
-        this.errorMessage.set(err.error.title  || "unknown error") 
+      error: (err) => {
+        this.errorMessage.set(err.error.title || "unknown error")
         console.error('Error during upload/create chain:', err);
       }
     });
   }
 
-  // Cleanup memory when component destroys
   ngOnDestroy(): void {
     if (this.mainImagePreview) URL.revokeObjectURL(this.mainImagePreview);
     this.thumbnailPreviews.forEach(p => URL.revokeObjectURL(p));

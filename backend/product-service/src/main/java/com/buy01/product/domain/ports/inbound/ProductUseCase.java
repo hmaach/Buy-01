@@ -17,5 +17,5 @@ public interface ProductUseCase {
 
     Mono<ProductResponse> getProductWithImages(String productId);
 
-    Flux<ProductList> getProductsList(Instant lastProduct);
+    Flux<ProductList> getProductsList(Instant beforeTime);
 }

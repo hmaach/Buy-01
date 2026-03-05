@@ -1,13 +1,10 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { Product } from '../../../core/models/product.model';
+import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, signal, viewChild, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-interface ProductListDto {
-  id: string,
-  name: string,
-  price: number,
-  image: string,
-  badge?: 'New'
-}
+import { ProductService } from '../../../core/services/product.service';
+import { ProductListDto } from '../../../core/models/api-response.model';
+import { env } from '../../../../environments/environment';
+import { Router } from '@angular/router';
+
 @Component({
   selector: 'app-product-list',
   standalone: true,
@@ -15,42 +12,77 @@ interface ProductListDto {
   templateUrl: './product-list.html',
   styleUrls: ['./product-list.scss']
 })
-export class ProductList implements OnInit {
+export class ProductList implements OnInit, OnDestroy, AfterViewInit {
+  private productService = inject(ProductService);
+  private router = inject(Router);
 
-  products: ProductListDto[] = [
-    {
-      id: "1",
-      name: 'Wireless Audio Max 2',
-      price: 299.00,
-      image: 'https://images.unsplash.com/photo-1605640840607-14ac428ac0a8?w=800',
-      badge: 'New',
-    },
-    {
-      id: "2",
-      name: 'Pro Earbuds v3',
-      price: 149.00,
-      image: 'https://images.unsplash.com/photo-1605640840607-14ac428ac0a8?w=800',
-    },
-    {
-      id: "3",
-      name: 'Studio Monitor Pro',
-      price: 399.00,
-      image: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=800',
-    },
-    {
-      id: "4",
-      name: 'Active Sport Wireless',
-      price: 129.00,
-      image: 'https://images.unsplash.com/photo-1613040809024-b4ef374e73c2?w=800',
-    },
-  ];
+  products = signal<ProductListDto[]>([]);
+  isLoading = signal(false);
+  hasMore = signal(true);
+  error = signal<string | null>(null);
 
-  addToCart(product: ProductListDto) {
-    console.log(`Added to cart: ${product.name} - $${product.price}`);
-    // Here you would call cart service
+  private beforeTime = signal<string>('');
+  private observer!: IntersectionObserver;
+
+  readonly sentinel = viewChild.required<ElementRef<HTMLDivElement>>('sentinel');
+
+  ngAfterViewInit() {
+    const el = this.sentinel();
+    if (el?.nativeElement) {
+      this.observer.observe(el.nativeElement);
+    }
   }
 
   ngOnInit() {
-    // this.products.set(this.productService.getAllProducts());
+    this.loadMore();
+
+    this.observer = new IntersectionObserver(
+      entries => {
+        if (entries[0]?.isIntersecting && this.hasMore() && !this.isLoading()) {
+          this.loadMore();
+        }
+      },
+      { threshold: 0.1, rootMargin: '200px' }
+    );
+  }
+
+  ngOnDestroy() {
+    this.observer?.disconnect();
+  }
+
+  loadMore() {
+    if (this.isLoading()) return;
+
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    this.productService.getListOfProducts(this.beforeTime()).subscribe({
+      next: (newProducts) => {
+        if (newProducts.length === 0) {
+          this.hasMore.set(false);
+        } else {
+          this.products.update(current => [...current, ...newProducts]);
+
+          const lastProduct = newProducts[newProducts.length - 1];
+          this.beforeTime.set(lastProduct?.createdAt ?? '');
+        }
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        this.error.set('Failed to load products');
+        this.isLoading.set(false);
+        console.error(err);
+      }
+    });
+  }
+
+  moreDetail(product: ProductListDto) {
+    this.router.navigate(['products', product.id]);
+  }
+
+  imageUrl(id: string) {
+    if (!id) return './empty.png';
+    return `${env.mediaUrl}/${id}`;
   }
 }
+

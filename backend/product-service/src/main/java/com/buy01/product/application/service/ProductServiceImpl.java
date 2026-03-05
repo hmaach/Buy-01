@@ -92,16 +92,19 @@ public class ProductServiceImpl implements ProductUseCase {
                     }
 
                     List<String> ids = products.stream().map(Product::getId).toList();
+                    System.out.println("ids: " + ids);
 
-                    return imageService.getImagesBatch(ids)
-                            .map(urlMap -> products.stream()
-                                    .map(p -> new ProductList(
-                                            p.getId(),
-                                            p.getName(),
-                                            p.getPrice(),
-                                            p.getCreatedAt(),
-                                            urlMap.getOrDefault(p.getId(), "https://via.placeholder.com/300")))
-                                    .collect(Collectors.toList()))
+                    var images = imageService.getImagesBatch(ids);
+                    images.subscribe(v -> System.out.println("/////////>  " + v));
+
+                    return images.map(urlMap -> products.stream()
+                            .map(p -> new ProductList(
+                                    p.getId(),
+                                    p.getName(),
+                                    p.getPrice(),
+                                    p.getCreatedAt(),
+                                    urlMap.getOrDefault(p.getId(), "https://via.placeholder.com/300")))
+                            .collect(Collectors.toList()))
                             .flatMapMany(Flux::fromIterable);
                 });
     }

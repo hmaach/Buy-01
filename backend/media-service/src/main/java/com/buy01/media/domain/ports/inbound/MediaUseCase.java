@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.buy01.media.domain.model.Media;
 
 public interface MediaUseCase {
-        Media uploadImage(MultipartFile file);
+        Media uploadImage(MultipartFile file, String userId);
 
         Resource getImageFile(String mediaId);
 
@@ -21,5 +21,5 @@ public interface MediaUseCase {
 
         Map<String, String> findImageUrlsByProductIds(Collection<String> productIds);
 
-        void deleteById(String id);
+        void deleteById(String id, String userId);
 }

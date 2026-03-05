@@ -33,6 +33,7 @@ import com.buy01.media.infrastructure.web.mapper.MediaMapper;
 public class MediaController {
 
     private final MediaUseCase mediaService;
+    String userId = "qwertyuiopasdfdfghhjfghjfh=";
 
     public MediaController(MediaUseCase muc) {
         this.mediaService = muc;
@@ -72,7 +73,7 @@ public class MediaController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteImages(@PathVariable String id) {
-        mediaService.deleteById(id);
+        mediaService.deleteById(id, userId);
         return ResponseEntity.noContent().build();
     }
 
@@ -81,7 +82,7 @@ public class MediaController {
     public List<MediaResponse> uploadImages(@RequestParam("files") MultipartFile[] files) {
         return List.of(files).stream()
                 .map(file -> {
-                    var media = mediaService.uploadImage(file);
+                    var media = mediaService.uploadImage(file, userId);
                     return MediaMapper.toResponse(media);
                 })
                 .toList();

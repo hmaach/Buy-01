@@ -1,14 +1,18 @@
 package com.buy01.product.infrastructure.web.controller;
 
+import java.time.Instant;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.buy01.product.domain.model.Product;
@@ -31,11 +35,6 @@ public class ProductController {
 
     String userId = "qwertyuiopasdfdfghhjfghjfh";
 
-    @GetMapping()
-    public String test() {
-        return "Product service is working";
-    }
-
     @PostMapping
     // @PreAuthorize("hasRole('SELLER')")
     public Mono<ResponseEntity<ProductResponse>> createProduct(
@@ -46,7 +45,7 @@ public class ProductController {
                 .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response));
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     // @PreAuthorize("hasRole('SELLER')")
     public Mono<ProductResponse> updateProduct(
             @PathVariable String id,
@@ -68,5 +67,13 @@ public class ProductController {
 
                     return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem));
                 }));
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getProductsList(@RequestParam(required = false) Instant beforeTime) {
+        if (beforeTime == null)
+            beforeTime = Instant.now();
+        var prodctList = productUseCase.getProductsList(beforeTime);
+        return ResponseEntity.ok(prodctList);
     }
 }

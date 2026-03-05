@@ -12,7 +12,7 @@
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%clr{faint} %clr(%-5p) %clr(:){faint} %m%n%rEx{0,
+            <pattern>%clr{faint} %clr(%-5p) %clr([${spring.application.name:-media-service}]){cyan} %clr(:){faint} %m%n%rEx{0,
                 java.lang.reflect.Method,
                 org.springframework,
                 org.mongodb,

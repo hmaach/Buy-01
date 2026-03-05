@@ -1,0 +1,188 @@
+<div class="container">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <h1>Product & Stock Management</h1>
+      <p>
+        @if (isEditMode()) {
+        Update your listing details and manage assets for
+        <span class="highlight">{{ form.value.name || 'this product' }}</span>
+        } @else {
+        Create a new product listing
+        }
+      </p>
+    </div>
+    <div class="status-pill">
+      @if (errorMessage()) {
+      <span class="dot err"></span>
+      {{ errorMessage() }}
+      } @else {
+      <span class="dot ok"></span>
+      @if (okMessage()) {
+      {{ okMessage() }}
+      } @else {
+      Preview ok
+      }
+      }
+    </div>
+  </header>
+
+  <div class="main-grid">
+
+    <!-- Left column - Form -->
+    <section class="card form-card">
+      <div class="card-header">
+        <h2>
+          <span class="material-symbols-outlined">edit_note</span>
+          {{ isEditMode() ? 'Edit Product Details' : 'Create Product Details' }}
+        </h2>
+        <span class="badge">{{ isEditMode() ? 'Edit Product Form' : 'Create Product Form' }}</span>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-content">
+
+        <div class="form-group">
+          <label>Product Name</label>
+          <input type="text" formControlName="name" placeholder="Enter product name" maxlength="100" />
+          @if (name?.touched && name?.hasError('required')) {
+          <div class="error">Product name is required</div>
+          }
+          @if (name?.touched && name?.hasError('minlength')) {
+          <div class="error">Name must be at least 3 characters</div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea formControlName="description" rows="6" maxlength="500"></textarea>
+          @if (description?.touched && description?.hasError('required')) {
+          <div class="error">Description is required</div>
+          }
+          @if (description?.touched && description?.hasError('minlength')) {
+          <div class="error">Description must be at least 20 characters</div>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-group half">
+            <label>Price (USD)</label>
+            <div class="input-prefix">
+              <span class="prefix">$</span>
+              <input type="number" formControlName="price" step="0.01" min="0" />
+            </div>
+            @if (price?.touched && price?.hasError('required')) {
+            <div class="error">Price is required</div>
+            }
+            @if (price?.touched && price?.hasError('min')) {
+            <div class="error">Price must be greater than 0</div>
+            }
+          </div>
+
+          <div class="form-group half">
+            <label>Quantity</label>
+            <input type="number" formControlName="quantity" min="0" />
+            @if (quantity?.touched && quantity?.hasError('required')) {
+            <div class="error">Quantity is required</div>
+            }
+            @if (quantity?.touched && quantity?.hasError('min')) {
+            <div class="error">Quantity cannot be negative</div>
+            }
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="form.invalid || isLoading()">
+            <span class="material-symbols-outlined">save</span>
+            {{ isEditMode() ? 'Update Product' : 'Create Product' }}
+          </button>
+        </div>
+
+      </form>
+    </section>
+
+    <!-- Right column - Images + Upload -->
+    <div class="right-column">
+
+      <div class="image-grid">
+
+        <!-- Main image card -->
+        <div class="main-image-card card image-hover" (dragover)="onDragOver($event)" (dragenter)="onDragOver($event)">
+          <span class="image-label">Primary Image</span>
+          <img [src]="displayedMain" alt="Main product preview" />
+        </div>
+
+        <!-- Thumbnails card -->
+        <div class="thumbnails-card card">
+          <div class="thumbnails-header">Media Library</div>
+          <div class="thumbnails-grid" (dragover)="onDragOver($event)" (dragenter)="onDragOver($event)">
+
+            @for (url of displayedThumbs; track $index) {
+            <div class="thumb-item relative">
+              <img [src]="url" alt="Product thumbnail" />
+              <!-- Show delete only for newly added thumbnails in edit mode too -->
+              <button class="delete-btn" (click)="removeThumbnail($index)">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            }
+
+            <!-- Add new button / drop zone -->
+            <label class="thumb-add" for="thumbnails-upload">
+              <span class="material-symbols-outlined">add_a_photo</span>
+              <span>Add New</span>
+            </label>
+
+            <input id="thumbnails-upload" type="file" accept="image/*" multiple (change)="onThumbnailsSelected($event)"
+              hidden />
+          </div>
+        </div>
+      </div>
+
+      <!-- Drag & drop area for main image -->
+      <div class="upload-zone" (dragover)="onDragOver($event)" (dragenter)="onDragOver($event)"
+        (drop)="onMainImageDrop($event)">
+        <div class="upload-content">
+          <span class="material-symbols-outlined upload-icon">cloud_upload</span>
+          <h3>Drop files here or click to upload primary image</h3>
+          <p class="small">Max 2MB per image · jpg, png, webp, gif</p>
+        </div>
+
+        <input type="file" class="file-input" accept="image/*" (change)="onMainImageSelected($event)" />
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="tech-badges">
+      <div class="badge-item">
+        <div class="icon-bg green">
+          <span class="material-symbols-outlined">storage</span>
+        </div>
+        <div>
+          <span class="badge-title">Spring Boot</span>
+          <span class="badge-subtitle">Media Service Online</span>
+        </div>
+      </div>
+
+      <div class="badge-item">
+        <div class="icon-bg blue">
+          <span class="material-symbols-outlined">javascript</span>
+        </div>
+        <div>
+          <span class="badge-title">Angular v20+</span>
+          <span class="badge-subtitle">Reactive Engine</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="secure-info">
+      <span class="material-symbols-outlined">lock</span>
+      Secure Enterprise Connection
+    </div>
+  </footer>
+
+</div>

@@ -1,6 +1,7 @@
 package com.buy01.media.domain.ports.outbound;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,4 +18,6 @@ public interface MediaRepositoryPort {
         void deleteById(String id);
 
         List<Media> findByProductId(String productId);
+
+        List<Media> findByProductIdIn(Collection<String> productIds);
 }

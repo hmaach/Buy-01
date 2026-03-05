@@ -1,10 +1,13 @@
 package com.buy01.product.infrastructure.persistence.mongo;
 
+import java.time.Instant;
+
 import org.springframework.stereotype.Component;
 
 import com.buy01.product.domain.model.Product;
 import com.buy01.product.domain.ports.outbound.ProductRepositoryPort;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -31,5 +34,11 @@ public class MongoProductAdapter implements ProductRepositoryPort {
     @Override
     public void deleteById(String id) {
         springRepo.deleteById(id);
+    }
+
+    @Override
+    public Flux<Product> findTop10ByCreatedAtBeforeOrderByCreatedAtDesc(Instant lastProduct) {
+        var productList = springRepo.findTop10ByCreatedAtBeforeOrderByCreatedAtDesc(lastProduct);
+        return productList.map(mapper::toDomain);
     }
 }

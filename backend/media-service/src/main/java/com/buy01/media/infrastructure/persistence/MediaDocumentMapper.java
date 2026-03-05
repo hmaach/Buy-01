@@ -23,6 +23,7 @@ public class MediaDocumentMapper {
                 .id(d.getId())
                 .imagePath(d.getImagePath())
                 .createdAt(d.getCreatedAt())
+                .productId(d.getProductId())
                 .status(d.getStatus())
                 .build();
 

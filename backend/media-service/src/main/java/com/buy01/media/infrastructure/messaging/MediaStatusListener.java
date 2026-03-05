@@ -16,30 +16,27 @@ public class MediaStatusListener {
 
     private final MediaRepositoryPort mediaRepository;
 
-    @KafkaListener(
-        topics = "${kafka.topics.images-linked:images-linked}",
-        groupId = "media-service-group",
-        containerFactory = "kafkaListenerContainerFactory"
-    )
+    @KafkaListener(topics = "${kafka.topics.images-linked:images-linked}", groupId = "media-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void onImagesLinked(ImagesLinkedEvent event) {
-        log.info("Kafka: Processing link event for product: {}, media count: {}", 
-                 event.productId(), event.mediaIds().size());
+        log.info("Kafka: Processing link event for product: {}, media count: {}",
+                event.productId(), event.mediaIds().size());
 
         for (String mediaId : event.mediaIds()) {
             try {
                 mediaRepository.findById(mediaId)
-                    .ifPresent(media -> {
-                        if (media.getStatus() == FileStatus.PENDING) {
-                            media.setStatus(FileStatus.LINKED);
-                            media.setProductId(event.productId());
-                            mediaRepository.save(media);
-                            log.debug("Kafka: Updated media {} to LINKED", mediaId);
-                        }
-                    });
+                        .ifPresent(media -> {
+                            if (media.getStatus() == FileStatus.PENDING) {
+                                media.setStatus(FileStatus.LINKED);
+                                media.setProductId(event.productId());
+                                mediaRepository.save(media);
+                                log.debug("Kafka: Updated media {} to LINKED", mediaId);
+                            }
+                        });
             } catch (Exception e) {
                 log.error("Kafka: Failed to update media id: {}", mediaId, e);
                 // TODO optional: send to DLQ or retry
             }
         }
     }
+
 }

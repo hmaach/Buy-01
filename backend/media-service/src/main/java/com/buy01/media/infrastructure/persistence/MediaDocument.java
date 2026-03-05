@@ -22,6 +22,9 @@ public class MediaDocument {
     @Field("product_id")
     private String productId;
 
+    @Field("user_id")
+    private String userId;
+
     private FileStatus status;
 
     @Field("created_at")

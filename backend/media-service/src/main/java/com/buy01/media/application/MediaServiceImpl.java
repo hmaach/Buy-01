@@ -18,6 +18,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -90,7 +91,7 @@ public class MediaServiceImpl implements MediaUseCase {
     }
 
     @Override
-    public Media uploadImage(MultipartFile file) {
+    public Media uploadImage(MultipartFile file, String userId) {
         if (file.isEmpty()) {
             throw new Faileduploadedfile("File is empty");
         }
@@ -127,6 +128,7 @@ public class MediaServiceImpl implements MediaUseCase {
 
         Media media = Media.builder()
                 .imagePath(storagePath)
+                .userId(userId)
                 .status(FileStatus.PENDING)
                 .build();
 
@@ -179,15 +181,18 @@ public class MediaServiceImpl implements MediaUseCase {
     }
 
     @Override
-    public void deleteById(String id) {
+    public void deleteById(String id, String userId) {
         if (id == null) {
             throw new IllegalArgumentException("id is ");
         }
         var media = repository.findById(id);
-
         if (media.isEmpty()) {
             throw new NotFound("media with id " + id + "no found");
         }
+        if (!media.get().getUserId().equals(userId)) {
+            throw new AccessDeniedException("Not Allowd to delete image");
+        }
+
         repository.deleteById(id);
         var path = Paths.get(media.get().getImagePath());
         tryDeleteFile(path);

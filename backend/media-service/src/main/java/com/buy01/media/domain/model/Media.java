@@ -7,6 +7,7 @@ public class Media {
     private final String id;
     private final String imagePath;
     private String productId;
+    private final String userId;
     private FileStatus status;
     private final Instant createdAt;
 
@@ -16,6 +17,7 @@ public class Media {
         this.productId = builder.productId;
         this.status = builder.status;
         this.createdAt = builder.createdAt;
+        this.userId = builder.userId;
     }
 
     public static Builder builder() {
@@ -32,6 +34,10 @@ public class Media {
 
     public String getProductId() {
         return productId;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 
     public FileStatus getStatus() {
@@ -54,6 +60,7 @@ public class Media {
         private String id;
         private String imagePath;
         private String productId;
+        private String userId;
         private FileStatus status;
         private Instant createdAt;
 
@@ -72,6 +79,11 @@ public class Media {
 
         public Builder productId(String productId) {
             this.productId = productId;
+            return this;
+        }
+
+        public Builder userId(String userId) {
+            this.userId = userId;
             return this;
         }
 

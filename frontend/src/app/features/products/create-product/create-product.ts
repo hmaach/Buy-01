@@ -2,7 +2,7 @@ import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { ProductService } from '../../../core/services/product.service'; // adjust path
+import { ProductService } from '../../../core/services/product.service';
 import { env } from '../../../../environments/environment';
 import { MediaService } from '../../../core/services/media.service';
 

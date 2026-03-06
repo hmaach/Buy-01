@@ -60,3 +60,9 @@ management:
   endpoint:
     health:
       show-details: always
+
+gateway:
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    capacity: ${RATE_LIMIT_CAPACITY:100}
+    refill-minutes: ${RATE_LIMIT_REFILL_MINUTES:1}

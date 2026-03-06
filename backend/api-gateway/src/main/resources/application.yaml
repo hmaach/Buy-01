@@ -12,20 +12,28 @@ spring:
   cloud:
     gateway:
       server:
-        webflux: 
+        webflux:
           routes:
             - id: user-service
               uri: lb://USER-SERVICE
               predicates:
                 - Path=/users/**
+              filters:
+                - Authentication
+
             - id: product-service
               uri: lb://PRODUCT-SERVICE
               predicates:
                 - Path=/products/**
+              filters:
+                - Authentication
+
             - id: media-service
               uri: lb://MEDIA-SERVICE
               predicates:
                 - Path=/media/**
+              filters:
+                - Authentication
         error:
           include-message: always
           include-binding-errors: always

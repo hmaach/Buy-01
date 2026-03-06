@@ -11,6 +11,7 @@ import com.buy01.product.domain.model.Product;
 import com.buy01.product.domain.ports.inbound.ProductUseCase;
 import com.buy01.product.domain.ports.outbound.ProductRepositoryPort;
 import com.buy01.product.infrastructure.messaging.ImagesLinkedEvent;
+import com.buy01.product.infrastructure.web.dto.ProductDeletedEvent;
 import com.buy01.product.infrastructure.web.dto.ProductList;
 import com.buy01.product.infrastructure.web.dto.ProductResponse;
 
@@ -29,6 +30,7 @@ public class ProductServiceImpl implements ProductUseCase {
     private final ImageService imageService;
 
     private static final String TOPIC_IMAGES_LINKED = "images-linked";
+    private static final String TOPIC_PRODUCT_DELETED = "product-deleted";
 
     @Override
     public Mono<Product> createProduct(Product product, List<String> imagesIds) {
@@ -45,7 +47,7 @@ public class ProductServiceImpl implements ProductUseCase {
                     var saved = productRepository.save(p);
                     return saved.map(pp -> pp.toBuilder().imagesIds(imagesIds).build());
                 })
-                .doOnNext(savedProduct -> sendKafkaEvent(savedProduct, imagesIds))
+                .doOnNext(savedProduct -> sendKafkaImageLinked(savedProduct, imagesIds))
                 .doOnError(e -> log.error("Failed to create product or send event", e));
     }
 
@@ -67,7 +69,7 @@ public class ProductServiceImpl implements ProductUseCase {
 
                     return productRepository.save(updatedProduct);
                 })
-                .doOnNext(savedProduct -> sendKafkaEvent(savedProduct, update.getImagesIds()));
+                .doOnNext(savedProduct -> sendKafkaImageLinked(savedProduct, update.getImagesIds()));
     }
 
     @Override
@@ -104,10 +106,25 @@ public class ProductServiceImpl implements ProductUseCase {
                 });
     }
 
-    private void sendKafkaEvent(Product savedProduct, List<String> imagesIds) {
+    @Override
+    public void deleteProduct(String id, String userId) {
+        productRepository.findById(id)
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Product not found")))
+                .flatMap(existing -> {
+                    if (!existing.getUserId().equals(userId)) {
+                        return Mono.error(new SecurityException("Not your product"));
+                    }
+                    productRepository.deleteById(id);
+                    return Mono.empty();
+                })
+                .doOnNext(savedProduct -> {})
+                .doOnError(e -> log.error("Failed to delete product", e));
+    }
+
+    private void sendKafkaImageLinked(Product savedProduct, List<String> imagesIds) {
         if (!imagesIds.isEmpty()) {
             ImagesLinkedEvent event = new ImagesLinkedEvent(
-                    savedProduct.getId(),
+                    savedProduct.getId(),   
                     imagesIds);
 
             kafkaTemplate.send(
@@ -121,4 +138,21 @@ public class ProductServiceImpl implements ProductUseCase {
             log.debug("No images to link for product {}", savedProduct.getId());
         }
     }
+        private void sendKafkaProductDeleted(Product savedProduct, List<String> imagesIds) {
+        if (!imagesIds.isEmpty()) {
+            ProductDeletedEvent event = new ProductDeletedEvent(
+                    savedProduct.getId());
+
+            kafkaTemplate.send(
+                    TOPIC_PRODUCT_DELETED ,
+                    savedProduct.getId(),
+                    event);
+
+            log.info("Kafka event sent: product={}, media count={}",
+                    savedProduct.getId(), imagesIds.size());
+        } else {
+            log.debug("No images to link for product {}", savedProduct.getId());
+        }
+    }
+
 }

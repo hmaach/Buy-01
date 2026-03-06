@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,13 +36,6 @@ public class ProductController {
     private final ProductWebMapper mapper;
     private final ProductUseCase productUseCase;
 
-    String userId = "qwertyuiopasdfdfghhjfghjfh";
-
-    // @GetMapping("/test")
-    // public String test() {
-    //     return "Product service is working";
-    // }
-
     @GetMapping("/user")
     public UserPrincipal testUser(Authentication authentication) {
         UserPrincipal currUser = (UserPrincipal) authentication.getPrincipal();
@@ -50,8 +45,9 @@ public class ProductController {
     @PostMapping
     // @PreAuthorize("hasRole('SELLER')")
     public Mono<ResponseEntity<ProductResponse>> createProduct(
-            @Valid @RequestBody ProductCreateRequest request) {
-        Product product = mapper.toDomain(request, userId);
+            @Valid @RequestBody ProductCreateRequest request,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        Product product = mapper.toDomain(request, principal.id());
         return productUseCase.createProduct(product, request.imagesIds())
                 .map(mapper::toResponse)
                 .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response));
@@ -61,10 +57,11 @@ public class ProductController {
     // @PreAuthorize("hasRole('SELLER')")
     public Mono<ProductResponse> updateProduct(
             @PathVariable String id,
-            @Valid @RequestBody ProductCreateRequest request) {
+            @Valid @RequestBody ProductCreateRequest request,
+            @AuthenticationPrincipal UserPrincipal principal) {
 
-        Product update = mapper.toDomain(request, userId);
-        return productUseCase.updateProduct(update, id, userId)
+        Product update = mapper.toDomain(request, principal.id());
+        return productUseCase.updateProduct(update, id, principal.id())
                 .map(mapper::toResponse);
     }
 
@@ -88,5 +85,16 @@ public class ProductController {
         }
         var prodctList = productUseCase.getProductsList(beforeTime);
         return ResponseEntity.ok(prodctList);
+    }
+
+    @DeleteMapping("/{id}")
+    // @PreAuthorize("hasRole('SELLER')")
+    public Mono<Void> deleteProduct(
+            @PathVariable String id,
+            @AuthenticationPrincipal UserPrincipal principal) {
+
+        productUseCase.deleteProduct(id, principal.id());
+        
+        return Mono.just(null);
     }
 }

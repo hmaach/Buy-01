@@ -36,10 +36,10 @@ public class ProductController {
 
     String userId = "qwertyuiopasdfdfghhjfghjfh";
 
-    @GetMapping()
-    public String test() {
-        return "Product service is working";
-    }
+    // @GetMapping("/test")
+    // public String test() {
+    //     return "Product service is working";
+    // }
 
     @GetMapping("/user")
     public UserPrincipal testUser(Authentication authentication) {
@@ -83,8 +83,9 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<?> getProductsList(@RequestParam(required = false) Instant beforeTime) {
-        if (beforeTime == null)
+        if (beforeTime == null) {
             beforeTime = Instant.now();
+        }
         var prodctList = productUseCase.getProductsList(beforeTime);
         return ResponseEntity.ok(prodctList);
     }

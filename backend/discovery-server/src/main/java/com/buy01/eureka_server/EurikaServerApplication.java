@@ -1,4 +1,4 @@
-package com.wordium_backend.eurika_server;
+package com.buy01.eureka_server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,8 +8,8 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 @EnableEurekaServer
 public class EurikaServerApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(EurikaServerApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(EurikaServerApplication.class, args);
+    }
 
 }

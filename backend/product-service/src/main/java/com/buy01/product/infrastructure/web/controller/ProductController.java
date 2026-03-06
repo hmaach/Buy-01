@@ -5,6 +5,7 @@ import java.time.Instant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -36,15 +37,12 @@ public class ProductController {
 
     String userId = "qwertyuiopasdfdfghhjfghjfh";
 
-    // @GetMapping("/test")
-    // public String test() {
-    //     return "Product service is working";
-    // }
-
     @GetMapping("/user")
-    public UserPrincipal testUser(Authentication authentication) {
+    // @PreAuthorize("hasRole('SELLER')")
+    // @PreAuthorize("hasRole('CLIENT')")
+    public Mono<UserPrincipal> testUser(Authentication authentication) {
         UserPrincipal currUser = (UserPrincipal) authentication.getPrincipal();
-        return currUser;
+        return Mono.just(currUser);
     }
 
     @PostMapping

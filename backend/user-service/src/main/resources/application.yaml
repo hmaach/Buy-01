@@ -16,10 +16,6 @@ spring:
     compose:
       enabled: false
 
-  jwt:
-    secret: ${JWT_SECRET:azertyusdjfgjksdflujhdslkfjhsdkfuhskihdfkshdkfhsdkufhksjdhfkjsdhkjsdhfkjsiopqsdfghjklmwxcvbn}
-    expiration: 86400000
-
   spring:
   data:
     mongodb:
@@ -29,6 +25,13 @@ spring:
       username: ${USER_MONGO_USERNAME:user_service}
       password: ${USER_MONGO_PASSWORD:user_password}
       authentication-database: admin
+
+security:
+  jwt:
+    private-key: ${JWT_PRIVATE_KEY}
+    public-key: ${JWT_PUBLIC_KEY}
+    expiration: ${JWT_EXPIRATION:3600000}
+    refresh-expiration: ${JWT_REFRESH_EXPIRATION:86400000}
 
 media:
   service:

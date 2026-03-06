@@ -33,7 +33,6 @@ services:
     networks:
       - ecommerce-network
 
-
   # API GATEWAY
   api-gateway:
     build: ./backend/api-gateway
@@ -47,6 +46,7 @@ services:
     environment:
       EUREKA_URL: http://discovery-server:${DISCOVERY_PORT}/eureka
       SPRING_PROFILES_ACTIVE: docker
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
     networks:
       - ecommerce-network
 
@@ -74,7 +74,7 @@ services:
   mongo-media:
     container_name: ${MEDIA_MONGO_DB_NAME}
     image: mongo:7
-    command: mongod --port ${MEDIA_MONGO_DOCKER_PORT} 
+    command: mongod --port ${MEDIA_MONGO_DOCKER_PORT}
     ports:
       - "${MEDIA_MONGO_LOCAL_PORT}:${MEDIA_MONGO_DOCKER_PORT}"
     environment:
@@ -90,7 +90,7 @@ services:
   mongo-product:
     container_name: ${PRODUCT_MONGO_DB_NAME}
     image: mongo:7
-    command: mongod --port ${PRODUCT_MONGO_DOCKER_PORT} 
+    command: mongod --port ${PRODUCT_MONGO_DOCKER_PORT}
     ports:
       - "${PRODUCT_MONGO_LOCAL_PORT}:${PRODUCT_MONGO_DOCKER_PORT}"
     environment:
@@ -120,8 +120,10 @@ services:
       MONGO_DB: ${USER_MONGO_DB}
       MONGO_USERNAME: ${USER_MONGO_USERNAME}
       MONGO_PASSWORD: ${USER_MONGO_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
       JWT_EXPIRATION: ${JWT_EXPIRATION}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
     networks:
       - ecommerce-network
 
@@ -136,4 +138,3 @@ volumes:
   product-mongo-data:
   media-mongo-data:
   kafka-data:
-

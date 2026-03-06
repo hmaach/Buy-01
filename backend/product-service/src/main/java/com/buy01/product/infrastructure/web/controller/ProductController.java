@@ -5,6 +5,7 @@ import java.time.Instant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.buy01.product.domain.model.Product;
 import com.buy01.product.domain.ports.inbound.ProductUseCase;
+import com.buy01.product.infrastructure.security.JwtAuthenticationFilter.UserPrincipal;
 import com.buy01.product.infrastructure.web.dto.ProductCreateRequest;
 import com.buy01.product.infrastructure.web.dto.ProductResponse;
 import com.buy01.product.infrastructure.web.mapper.ProductWebMapper;
@@ -33,6 +35,17 @@ public class ProductController {
     private final ProductUseCase productUseCase;
 
     String userId = "qwertyuiopasdfdfghhjfghjfh";
+
+    // @GetMapping("/test")
+    // public String test() {
+    //     return "Product service is working";
+    // }
+
+    @GetMapping("/user")
+    public UserPrincipal testUser(Authentication authentication) {
+        UserPrincipal currUser = (UserPrincipal) authentication.getPrincipal();
+        return currUser;
+    }
 
     @PostMapping
     // @PreAuthorize("hasRole('SELLER')")
@@ -70,8 +83,9 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<?> getProductsList(@RequestParam(required = false) Instant beforeTime) {
-        if (beforeTime == null)
+        if (beforeTime == null) {
             beforeTime = Instant.now();
+        }
         var prodctList = productUseCase.getProductsList(beforeTime);
         return ResponseEntity.ok(prodctList);
     }

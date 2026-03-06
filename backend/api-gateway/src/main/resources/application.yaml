@@ -9,9 +9,6 @@ spring:
     compose:
       enabled: false
 
-  jwt:
-  secret: ${JWT_SECRET:azertyuiopqsdfghjklmwxcvbn}
-
   cloud:
     gateway:
       server:
@@ -21,18 +18,35 @@ spring:
               uri: lb://USER-SERVICE
               predicates:
                 - Path=/users/**
+              filters:
+                - Authentication
+
             - id: product-service
               uri: lb://PRODUCT-SERVICE
               predicates:
                 - Path=/products/**
+              filters:
+                - Authentication
+
             - id: media-service
               uri: lb://MEDIA-SERVICE
               predicates:
                 - Path=/media/**
+              filters:
+                - Authentication
         error:
           include-message: always
           include-binding-errors: always
           include-stacktrace: always
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+
+security:
+  jwt:
+    public-key: ${JWT_PUBLIC_KEY}
 
 logging:
   level:
@@ -47,7 +61,8 @@ management:
     health:
       show-details: always
 
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+gateway:
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    capacity: ${RATE_LIMIT_CAPACITY:100}
+    refill-minutes: ${RATE_LIMIT_REFILL_MINUTES:1}

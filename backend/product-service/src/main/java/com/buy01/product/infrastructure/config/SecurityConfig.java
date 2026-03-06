@@ -2,39 +2,31 @@ package com.buy01.product.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
-import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
+
+import com.buy01.product.infrastructure.security.JwtAuthenticationFilter;
 
 @Configuration
-@EnableWebFluxSecurity
-@EnableReactiveMethodSecurity
 public class SecurityConfig {
 
-    @Bean
-    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-        http
-                .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
-                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-                .authorizeExchange(exchanges -> exchanges.anyExchange().permitAll()
-                // .pathMatchers("/products", "/products/**").permitAll()
-                );
-
-        return http.build();
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
-    // @Bean
-    // public ReactiveJwtAuthenticationConverter jwtAuthenticationConverter() {
-    // ReactiveJwtAuthenticationConverter converter = new
-    // ReactiveJwtAuthenticationConverter();
+    @Bean
+    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
 
-    // converter.setJwtGrantedAuthoritiesConverter(jwt -> {
-    // return Flux.empty(); // replace with real impl
-    // });
-
-    // return converter;
-    // }
+        return http
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .authorizeExchange(exchange -> exchange
+                .pathMatchers("/users/auth/register", "/users/auth/login").permitAll()
+                .anyExchange().authenticated()
+                )
+                .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+                .build();
+    }
 }

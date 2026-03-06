@@ -8,7 +8,7 @@
 		<version>4.0.0</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.wordium-backend</groupId>
+	<groupId>com.buy-01-backend</groupId>
 	<artifactId>eurika-server</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>eurika-server</name>

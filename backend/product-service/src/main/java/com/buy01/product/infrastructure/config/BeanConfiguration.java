@@ -1,8 +1,8 @@
 package com.buy01.product.infrastructure.config;
 
 import org.bson.Document;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -11,13 +11,16 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class BeanConfiguration {
 
-    @Value("${services.media}")
-    public String mediaServiceUrl;
+    @Bean
+    @LoadBalanced
+    public WebClient.Builder loadBalancedWebClientBuilder() {
+        return WebClient.builder();
+    }
 
     @Bean
-    public WebClient mediaWebClient() {
-        return WebClient.builder()
-                .baseUrl(mediaServiceUrl)
+    public WebClient mediaWebClient(WebClient.Builder builder) {
+        return builder
+                .baseUrl("http://MEDIA-SERVICE")
                 .build();
     }
 
@@ -28,5 +31,4 @@ public class BeanConfiguration {
             System.out.println("MongoDB status: Connected");
         };
     }
-
 }

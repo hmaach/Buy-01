@@ -14,6 +14,7 @@ public class MediaDocumentMapper {
         d.setImagePath(m.getImagePath());
         d.setCreatedAt(m.getCreatedAt() != null ? m.getCreatedAt() : Instant.now());
         d.setProductId(m.getProductId());
+        d.setUserId(m.getUserId());
         d.setStatus(m.getStatus());
         return d;
     }
@@ -23,6 +24,8 @@ public class MediaDocumentMapper {
                 .id(d.getId())
                 .imagePath(d.getImagePath())
                 .createdAt(d.getCreatedAt())
+                .productId(d.getProductId())
+                .userId(d.getUserId())
                 .status(d.getStatus())
                 .build();
 

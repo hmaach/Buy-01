@@ -9,9 +9,9 @@ spring:
       max-file-size: 2MB
       max-request-size: 50MB
   mongodb:
-    uri: "mongodb://${MEDIA_MONGO_DB_USER}:${MEDIA_MONGO_DB_PWD}@localhost:${MEDIA_MONGO_LOCAL_PORT}/${MEDIA_MONGO_DB_NAME}?authSource=admin"
+    uri: "mongodb://${MEDIA_MONGO_DB_USER:rserraf}:${MEDIA_MONGO_DB_PWD:123456}@localhost:${MEDIA_MONGO_LOCAL_PORT:27018}/${MEDIA_MONGO_DB_NAME:mongo-media}?authSource=admin"
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BROKER:localhost:9092}
     consumer:
       group-id: media-service-group
       auto-offset-reset: earliest

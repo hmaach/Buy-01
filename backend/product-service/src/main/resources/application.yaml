@@ -5,9 +5,13 @@ spring:
   application:
     name: product-service
   mongodb:
-    uri: "mongodb://${PRODUCT_MONGO_DB_USER}:${PRODUCT_MONGO_DB_PWD}@localhost:${PRODUCT_MONGO_LOCAL_PORT}/${PRODUCT_MONGO_DB_NAME}?authSource=admin"
+    uri: "mongodb://${PRODUCT_MONGO_DB_USER:rserraf}:${PRODUCT_MONGO_DB_PWD:123456}@localhost:${PRODUCT_MONGO_LOCAL_PORT:27019}/${PRODUCT_MONGO_DB_NAME:mongo-product}?authSource=admin"
+  # cloud:
+  #   loadbalancer:
+  #     cache:
+  #       enabled: false
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BROKER:localhost:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer

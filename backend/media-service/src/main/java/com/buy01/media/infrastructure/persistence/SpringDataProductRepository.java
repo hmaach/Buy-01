@@ -1,6 +1,7 @@
 package com.buy01.media.infrastructure.persistence;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -12,4 +13,5 @@ public interface SpringDataProductRepository extends MongoRepository<MediaDocume
 
     List<MediaDocument> findByProductId(String ProductId);
 
+    List<MediaDocument> findByProductIdIn(Collection<String> productIds);
 }

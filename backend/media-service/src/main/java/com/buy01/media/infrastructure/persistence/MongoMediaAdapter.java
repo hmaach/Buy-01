@@ -1,6 +1,7 @@
 package com.buy01.media.infrastructure.persistence;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,7 +43,13 @@ public class MongoMediaAdapter implements MediaRepositoryPort {
 
     @Override
     public List<Media> findByProductId(String productId) {
-       var medias = mediaRepository.findByProductId(productId);
+        var medias = mediaRepository.findByProductId(productId);
+        return medias.stream().map(MediaDocumentMapper::toDomain).toList();
+    }
+
+    @Override
+    public List<Media> findByProductIdIn(Collection<String> productIds) {
+        var medias = mediaRepository.findByProductIdIn(productIds);
         return medias.stream().map(MediaDocumentMapper::toDomain).toList();
     }
 

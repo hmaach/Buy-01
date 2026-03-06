@@ -5,14 +5,20 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.apache.tika.Tika;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -22,6 +28,7 @@ import com.buy01.media.domain.model.Media;
 import com.buy01.media.domain.ports.inbound.MediaUseCase;
 import com.buy01.media.domain.ports.outbound.MediaRepositoryPort;
 import com.buy01.media.infrastructure.web.exception.Errors.Faileduploadedfile;
+import com.buy01.media.infrastructure.web.exception.Errors.NotFound;
 
 @Service
 public class MediaServiceImpl implements MediaUseCase {
@@ -29,6 +36,13 @@ public class MediaServiceImpl implements MediaUseCase {
 
     private static final long MAX_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
     private static final String UPLOAD_DIR = "uploads/";
+    private final Tika tika = new Tika();
+
+    private static final Set<String> ALLOWED_MIME_TYPES = Set.of(
+            "image/jpeg",
+            "image/png",
+            "image/gif",
+            "image/webp");
 
     public MediaServiceImpl(MediaRepositoryPort repository) throws IOException {
         this.repository = repository;
@@ -45,7 +59,7 @@ public class MediaServiceImpl implements MediaUseCase {
         if (doc.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Media not found");
         }
-        
+
         String pathStr = doc.get().getImagePath();
         if (pathStr == null || pathStr.trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Media has no stored path");
@@ -67,21 +81,17 @@ public class MediaServiceImpl implements MediaUseCase {
     }
 
     @Override
-    public MediaType guessContentType(String filename) {
-        if (filename == null)
+    public MediaType detectContentType(Resource resource) {
+        try {
+            String mimeType = tika.detect(resource.getInputStream());
+            return MediaType.parseMediaType(mimeType);
+        } catch (IOException e) {
             return MediaType.IMAGE_JPEG;
-        String lower = filename.toLowerCase();
-        if (lower.endsWith(".png"))
-            return MediaType.IMAGE_PNG;
-        if (lower.endsWith(".webp"))
-            return MediaType.parseMediaType("image/webp");
-        if (lower.endsWith(".gif"))
-            return MediaType.IMAGE_GIF;
-        return MediaType.IMAGE_JPEG;
+        }
     }
 
     @Override
-    public Media uploadImage(MultipartFile file) {
+    public Media uploadImage(MultipartFile file, String userId) {
         if (file.isEmpty()) {
             throw new Faileduploadedfile("File is empty");
         }
@@ -90,9 +100,17 @@ public class MediaServiceImpl implements MediaUseCase {
             throw new Faileduploadedfile("File size exceeds 2MB limit. Received: " + file.getSize() + " bytes");
         }
 
-        String contentType = file.getContentType();
-        if (contentType == null || !contentType.startsWith("image/")) {
-            throw new Faileduploadedfile("Only image files are allowed");
+        String detectedMimeType;
+        try {
+            detectedMimeType = tika.detect(file.getBytes());
+        } catch (IOException e) {
+            throw new Faileduploadedfile("Could not read file for type detection: " + e.getMessage());
+        }
+
+        if (!ALLOWED_MIME_TYPES.contains(detectedMimeType)) {
+            throw new Faileduploadedfile(
+                    "Invalid file type. Detected: " + detectedMimeType
+                            + ". Only JPEG, PNG, GIF, and WebP are allowed.");
         }
 
         String originalFilename = file.getOriginalFilename();
@@ -110,6 +128,7 @@ public class MediaServiceImpl implements MediaUseCase {
 
         Media media = Media.builder()
                 .imagePath(storagePath)
+                .userId(userId)
                 .status(FileStatus.PENDING)
                 .build();
 
@@ -121,6 +140,7 @@ public class MediaServiceImpl implements MediaUseCase {
         }
     }
 
+    @Override
     public List<String> getProdutImages(String ProductId) {
         return repository.findByProductId(ProductId).stream().map(p -> p.getId()).toList();
     }
@@ -143,5 +163,39 @@ public class MediaServiceImpl implements MediaUseCase {
         } catch (IOException e) {
             System.out.println("Failed to delete file: " + path + " - " + e.getMessage());
         }
+    }
+
+    @Override
+    public Map<String, String> findImageUrlsByProductIds(Collection<String> productIds) {
+        List<Media> images = repository.findByProductIdIn(productIds);
+
+        Map<String, String> urlMap = images.stream()
+                .collect(Collectors.toMap(
+                        Media::getProductId,
+                        Media::getId,
+                        (oldVal, newVal) -> oldVal));
+
+        productIds.forEach(id -> urlMap.putIfAbsent(id, null));
+
+        return urlMap;
+    }
+
+    @Override
+    public void deleteById(String id, String userId) {
+        if (id == null) {
+            throw new IllegalArgumentException("id is ");
+        }
+        var media = repository.findById(id);
+        if (media.isEmpty()) {
+            throw new NotFound("media with id " + id + "no found");
+        }
+        if (!media.get().getUserId().equals(userId)) {
+            throw new AccessDeniedException("Not Allowd to delete image");
+        }
+
+        repository.deleteById(id);
+        var path = Paths.get(media.get().getImagePath());
+        tryDeleteFile(path);
+        System.out.println(".........> delete " + path);
     }
 }

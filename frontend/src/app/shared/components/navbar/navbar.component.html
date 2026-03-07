@@ -2,66 +2,164 @@
   <div class="navbar-container">
     <div class="navbar-brand">
       <a routerLink="/products" class="brand-link">
-        <mat-icon>shopping_bag</mat-icon>
+        <img src="/assets/logo.png" alt="Logo" />
         <span>Buy-01</span>
       </a>
     </div>
-    
-    <div class="navbar-links">
+
+    <nav class="navbar-links">
       <a mat-button routerLink="/products" routerLinkActive="active">
-        <mat-icon>store</mat-icon>
-        Products
+        <lucide-angular [img]="ShoppingCart" [size]="17"></lucide-angular> Products
       </a>
-      
+
       @if (isSeller()) {
-        <a mat-button routerLink="/seller/dashboard" routerLinkActive="active">
-          <mat-icon>dashboard</mat-icon>
-          Seller Dashboard
-        </a>
-        <a mat-button routerLink="/seller/media" routerLinkActive="active">
-          <mat-icon>photo_library</mat-icon>
-          Media
+        <a
+          mat-button
+          routerLink="/seller/dashboard"
+          routerLinkActive="active"
+          class="seller-only-link"
+        >
+          <lucide-angular [img]="LayoutDashboard" [size]="17"></lucide-angular>
+          Dashboard
         </a>
       }
-    </div>
-    
+    </nav>
+
     <div class="navbar-actions">
       @if (isLoggedIn()) {
-        <button mat-button [matMenuTriggerFor]="userMenu" class="user-menu-trigger">
-          @if (currentUser()?.avatarUrl) {
-            <img [src]="currentUser()!.avatarUrl" alt="Avatar" class="avatar">
-          } @else {
-            <mat-icon>account_circle</mat-icon>
-          }
-          <span class="username">{{ currentUser()?.username }}</span>
-          <mat-icon>arrow_drop_down</mat-icon>
+        <button
+          mat-button
+          [matMenuTriggerFor]="userMenu"
+          class="user-menu-trigger"
+          aria-label="Open user menu"
+        >
+          <!-- @if (isSeller()) {
+            <img
+              [src]="
+                currentUser()?.avatarUrl ? currentUser()?.avatarUrl : '/assets/placeholder.png'
+              "
+              [alt]="currentUser()?.name"
+              class="seller-avatar"
+            />
+          } @else { -->
+          <lucide-angular [img]="CircleUserRound" style="transform: translateY(0)"></lucide-angular>
+          <!-- } -->
         </button>
-        
-        <mat-menu #userMenu="matMenu" xPosition="before">
-          <div class="user-info">
-            <strong>{{ currentUser()?.username }}</strong>
-            <span class="email">{{ currentUser()?.email }}</span>
-            <span class="role-badge">{{ currentUser()?.role }}</span>
+
+        <mat-menu #userMenu="matMenu" xPosition="before" style="min-width: 500px">
+          <div class="menu-header" (click)="$event.stopPropagation()">
+            @if (isSeller() && currentUser()?.avatarUrl) {
+              <img
+                [src]="currentUser()?.avatarUrl"
+                [alt]="currentUser()?.name"
+                class="menu-avatar"
+              />
+            } @else {
+              <!-- Initial circle — always shown, no icon -->
+              <div class="menu-avatar-placeholder">
+                {{ currentUser()?.name?.charAt(0) }}
+              </div>
+            }
+
+            <div class="menu-user-details">
+              <span class="menu-user-name">{{ currentUser()?.name }}</span>
+
+              @switch (currentUser()?.role?.toUpperCase()) {
+                @case ('SELLER') {
+                  <span class="role-badge seller">Seller</span>
+                }
+                @case ('ADMIN') {
+                  <span class="role-badge admin">Admin</span>
+                }
+                @default {
+                  <span class="role-badge client">Client</span>
+                }
+              }
+            </div>
           </div>
           <mat-divider></mat-divider>
+
           <button mat-menu-item routerLink="/profile">
-            <mat-icon>person</mat-icon>
+            <lucide-angular [img]="CircleUserRound" [size]="17"></lucide-angular>
             <span>My Profile</span>
           </button>
+
+          @if (isSeller()) {
+            <button mat-menu-item routerLink="/seller/dashboard">
+              <lucide-angular [img]="LayoutDashboard" [size]="17"></lucide-angular>
+              <span>Seller Dashboard</span>
+            </button>
+          }
+
+          <mat-divider></mat-divider>
           <button mat-menu-item (click)="logout()">
-            <mat-icon>logout</mat-icon>
+            <lucide-angular [img]="LogOut" [size]="17"></lucide-angular>
             <span>Logout</span>
           </button>
         </mat-menu>
       } @else {
         <a mat-button routerLink="/login">
-          <mat-icon>login</mat-icon>
+          <lucide-angular [img]="LogIn" [size]="17"></lucide-angular>
           Login
         </a>
-        <a mat-stroked-button routerLink="/register" class="register-btn">
+
+        <a mat-button routerLink="/register">
+          <lucide-angular [img]="UserPlus" [size]="17"></lucide-angular>
           Register
         </a>
       }
+
+      <button
+        mat-icon-button
+        class="hamburger-btn"
+        (click)="toggleMobileMenu()"
+        aria-label="Toggle navigation menu"
+      >
+        @if (mobileMenuOpen) {
+          <lucide-angular [img]="CircleX" [size]="17"></lucide-angular>
+        } @else {
+          <lucide-angular [img]="Menu" [size]="17"></lucide-angular>
+        }
+      </button>
     </div>
   </div>
 </mat-toolbar>
+
+<!-- ── Mobile Drawer ──────────────────────────────── -->
+
+@if (mobileMenuOpen) {
+  <div class="mobile-menu-overlay" [class.open]="mobileMenuOpen" (click)="closeMobileMenu()"></div>
+
+  <div class="mobile-menu-drawer" [class.open]="mobileMenuOpen">
+    <nav class="mobile-links">
+      <a mat-button routerLink="/products" routerLinkActive="active" (click)="closeMobileMenu()">
+        <lucide-angular [img]="ShoppingCart" [size]="17"></lucide-angular>
+        Products
+      </a>
+
+      @if (isSeller()) {
+        <a
+          mat-button
+          routerLink="/seller/dashboard"
+          routerLinkActive="active"
+          (click)="closeMobileMenu()"
+        >
+          <lucide-angular [img]="LayoutDashboard" [size]="17"></lucide-angular>
+          Seller Dashboard
+        </a>
+      }
+
+      @if (!isLoggedIn()) {
+        <div class="mobile-divider"></div>
+        <a mat-button routerLink="/login" (click)="closeMobileMenu()">
+          <lucide-angular [img]="LogIn" [size]="17"></lucide-angular>
+          Login
+        </a>
+        <a mat-button routerLink="/register" (click)="closeMobileMenu()">
+          <lucide-angular [img]="UserPlus" [size]="17"></lucide-angular>
+          Register
+        </a>
+      }
+    </nav>
+  </div>
+}

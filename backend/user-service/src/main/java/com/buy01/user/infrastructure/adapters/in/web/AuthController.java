@@ -13,6 +13,7 @@ import com.buy01.user.application.command.LoginCommand;
 import com.buy01.user.domain.model.Role;
 import com.buy01.user.domain.model.User;
 import com.buy01.user.domain.port.in.AuthService;
+import com.buy01.user.domain.port.out.TokenResult;
 import com.buy01.user.infrastructure.adapters.in.web.dto.request.LoginRequest;
 import com.buy01.user.infrastructure.adapters.in.web.dto.request.RegisterRequest;
 import com.buy01.user.infrastructure.adapters.in.web.dto.response.LoginResponse;
@@ -42,15 +43,21 @@ public class AuthController {
         );
 
         User user = authService.register(command);
-        return ResponseEntity.status(HttpStatus.CREATED).body(UserResponse.from(user,null));
+        return ResponseEntity.status(HttpStatus.CREATED).body(UserResponse.from(user, null));
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
         LoginCommand command = new LoginCommand(request.email(), request.password());
-        String token = authService.login(command);
 
-        return ResponseEntity.ok(new LoginResponse(token));
+        TokenResult tokenResult = authService.login(command);
+
+        return ResponseEntity.ok(
+                new LoginResponse(
+                        tokenResult.token(),
+                        tokenResult.expiresAt().toString()
+                )
+        );
     }
 
 }

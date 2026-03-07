@@ -1,10 +1,11 @@
 package com.buy01.product.infrastructure.security;
 
-import java.util.Collections;
+import java.util.List;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
@@ -24,7 +25,6 @@ public class JwtAuthenticationFilter implements WebFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-
         ServerHttpRequest request = exchange.getRequest();
         String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 
@@ -35,7 +35,6 @@ public class JwtAuthenticationFilter implements WebFilter {
         String token = authHeader.substring(7);
 
         try {
-
             if (!jwtUtil.validateToken(token)) {
                 return chain.filter(exchange);
             }
@@ -46,11 +45,11 @@ public class JwtAuthenticationFilter implements WebFilter {
 
             UserPrincipal principal = new UserPrincipal(userId, email, role);
 
-            UsernamePasswordAuthenticationToken authentication
-                    = new UsernamePasswordAuthenticationToken(principal, null, Collections.emptyList());
+            // Map role to Spring Security authority
+            var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
 
-            System.out.println(authHeader);
-            System.out.println(principal);
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(principal, null, authorities);
 
             return chain.filter(exchange)
                     .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
@@ -60,7 +59,5 @@ public class JwtAuthenticationFilter implements WebFilter {
         }
     }
 
-    public record UserPrincipal(String id, String email, String role) {
-
-    }
+    public record UserPrincipal(String id, String email, String role) {}
 }

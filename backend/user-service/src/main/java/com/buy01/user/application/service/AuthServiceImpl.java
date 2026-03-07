@@ -1,18 +1,16 @@
 package com.buy01.user.application.service;
 
-import java.util.UUID;
-
 import org.springframework.stereotype.Service;
 
 import com.buy01.user.application.command.CreateUserCommand;
 import com.buy01.user.application.command.LoginCommand;
 import com.buy01.user.domain.exception.InvalidCredentialsException;
 import com.buy01.user.domain.exception.UserAlreadyExistsException;
-import com.buy01.user.domain.exception.UserNotFoundException;
 import com.buy01.user.domain.model.User;
 import com.buy01.user.domain.port.in.AuthService;
 import com.buy01.user.domain.port.out.PasswordEncoderPort;
 import com.buy01.user.domain.port.out.TokenGeneratorPort;
+import com.buy01.user.domain.port.out.TokenResult;
 import com.buy01.user.domain.port.out.UserRepositoryPort;
 
 @Service
@@ -51,7 +49,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String login(LoginCommand command) {
+    public TokenResult login(LoginCommand command) {
         User user = userRepository.findByEmail(command.email())
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
 
@@ -61,6 +59,5 @@ public class AuthServiceImpl implements AuthService {
 
         return tokenGenerator.generateToken(user.getId(), user.getEmail(), user.getRole());
     }
-
 
 }

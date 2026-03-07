@@ -10,10 +10,15 @@ export const authInterceptor: HttpInterceptorFn = (
   const authService = inject(AuthService);
   const token = authService.getToken();
 
-  console.log(`[HTTP] ${req.method} ${req.url}`);
-  const modifiedReq = req.clone({
-    url: `${env.backendUrl}${req.url}`,
-  });
+  // Only prepend backend URL for relative paths (not already absolute URLs)
+  let modifiedReq = req;
+  if (!req.url.startsWith('http')) {
+    modifiedReq = req.clone({
+      url: `${env.backendUrl}${req.url}`,
+    });
+  }
+
+  console.log(`[HTTP] ${req.method} ${modifiedReq.url}`);
 
   if (token) {
     const authReq = modifiedReq.clone({

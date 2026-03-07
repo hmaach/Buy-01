@@ -47,7 +47,7 @@ public class ProductServiceImpl implements ProductUseCase {
                     var saved = productRepository.save(p);
                     return saved.map(pp -> pp.toBuilder().imagesIds(imagesIds).build());
                 })
-                .doOnNext(savedProduct -> sendKafkaImageLinked(savedProduct, imagesIds))
+                .doOnNext(savedProduct -> imageService.sendKafkaImageLinked(savedProduct, imagesIds))
                 .doOnError(e -> log.error("Failed to create product or send event", e));
     }
 
@@ -69,7 +69,7 @@ public class ProductServiceImpl implements ProductUseCase {
 
                     return productRepository.save(updatedProduct);
                 })
-                .doOnNext(savedProduct -> sendKafkaImageLinked(savedProduct, update.getImagesIds()));
+                .doOnNext(savedProduct -> imageService.sendKafkaImageLinked(savedProduct, update.getImagesIds()));
     }
 
     @Override
@@ -117,42 +117,9 @@ public class ProductServiceImpl implements ProductUseCase {
                     productRepository.deleteById(id);
                     return Mono.empty();
                 })
-                .doOnNext(savedProduct -> {})
+                .doOnNext(savedProduct -> {
+                })
                 .doOnError(e -> log.error("Failed to delete product", e));
-    }
-
-    private void sendKafkaImageLinked(Product savedProduct, List<String> imagesIds) {
-        if (!imagesIds.isEmpty()) {
-            ImagesLinkedEvent event = new ImagesLinkedEvent(
-                    savedProduct.getId(),   
-                    imagesIds);
-
-            kafkaTemplate.send(
-                    TOPIC_IMAGES_LINKED,
-                    savedProduct.getId(),
-                    event);
-
-            log.info("Kafka event sent: product={}, media count={}",
-                    savedProduct.getId(), imagesIds.size());
-        } else {
-            log.debug("No images to link for product {}", savedProduct.getId());
-        }
-    }
-        private void sendKafkaProductDeleted(Product savedProduct, List<String> imagesIds) {
-        if (!imagesIds.isEmpty()) {
-            ProductDeletedEvent event = new ProductDeletedEvent(
-                    savedProduct.getId());
-
-            kafkaTemplate.send(
-                    TOPIC_PRODUCT_DELETED ,
-                    savedProduct.getId(),
-                    event);
-
-            log.info("Kafka event sent: product={}, media count={}",
-                    savedProduct.getId(), imagesIds.size());
-        } else {
-            log.debug("No images to link for product {}", savedProduct.getId());
-        }
     }
 
 }

@@ -89,12 +89,12 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     // @PreAuthorize("hasRole('SELLER')")
-    public Mono<Void> deleteProduct(
+    public Mono<?> deleteProduct(
             @PathVariable String id,
             @AuthenticationPrincipal UserPrincipal principal) {
 
         productUseCase.deleteProduct(id, principal.id());
-        
-        return Mono.just(null);
+
+        return Mono.just(ResponseEntity.noContent().build());
     }
 }

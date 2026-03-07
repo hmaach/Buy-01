@@ -113,7 +113,7 @@ export class AuthService {
       const payload = JSON.parse(atob(token.split('.')[1]));
       return {
         id: payload.sub || payload.userId || 'unknown',
-        username: payload.name || payload.username || 'User',
+        name: payload.name || payload.name || 'User',
         email: payload.email || 'user@example.com',
         role: payload.role || 'CLIENT',
         avatarUrl: payload.avatar || ''
@@ -122,7 +122,7 @@ export class AuthService {
       // Return minimal user info since we don't get user details from login response
       return {
         id: 'unknown',
-        username: 'User',
+        name: 'User',
         email: 'user@example.com',
         role: 'CLIENT',
         avatarUrl: ''

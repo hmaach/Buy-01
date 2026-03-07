@@ -4,12 +4,12 @@
       <mat-card-title>Welcome Back</mat-card-title>
       <mat-card-subtitle>Sign in to continue</mat-card-subtitle>
     </mat-card-header>
-    
+
     <mat-card-content>
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Email</mat-label>
-          <input matInput formControlName="email" type="email" placeholder="Enter your email">
+          <input matInput formControlName="email" type="email" placeholder="Enter your email" />
           <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
             Email is required
           </mat-error>
@@ -23,9 +23,23 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Password</mat-label>
-          <input matInput formControlName="password" [type]="hidePassword() ? 'password' : 'text'" placeholder="Enter your password">
-          <button mat-icon-button matSuffix type="button" (click)="hidePassword.set(!hidePassword())">
-            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          <input
+            matInput
+            formControlName="password"
+            [type]="hidePassword() ? 'password' : 'text'"
+            placeholder="Enter your password"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="hidePassword.set(!hidePassword())"
+          >
+            @if (hidePassword()) {
+              <lucide-angular [img]="EyeOff" [size]="17"></lucide-angular>
+            } @else {
+              <lucide-angular [img]="Eye" [size]="17"></lucide-angular>
+            }
           </button>
           <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
             Password is required
@@ -38,7 +52,13 @@
           </mat-error>
         </mat-form-field>
 
-        <button mat-flat-button color="primary" type="submit" class="full-width login-btn" [disabled]="loading()">
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          class="full-width login-btn"
+          [disabled]="loading()"
+        >
           @if (loading()) {
             <mat-spinner diameter="20"></mat-spinner>
           } @else {

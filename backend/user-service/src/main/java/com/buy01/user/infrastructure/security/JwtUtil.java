@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.buy01.user.domain.model.Role;
 import com.buy01.user.domain.port.out.TokenGeneratorPort;
+import com.buy01.user.domain.port.out.TokenResult;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -60,13 +61,11 @@ public class JwtUtil implements TokenGeneratorPort {
     }
 
     @Override
-    public String generateToken(UUID userId, String email, Role role) {
+    public TokenResult generateToken(UUID userId, String email, Role role) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expiration);
 
-        System.out.println(privateKey.substring(0, 50));
-
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .setSubject(userId.toString())
                 .claim("email", email)
                 .claim("role", role.name())
@@ -74,6 +73,8 @@ public class JwtUtil implements TokenGeneratorPort {
                 .setExpiration(expiryDate)
                 .signWith(getPrivateKey(), SignatureAlgorithm.RS256)
                 .compact();
+
+        return new TokenResult(token, expiryDate.toInstant());
     }
 
     @Override

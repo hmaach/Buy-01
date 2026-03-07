@@ -16,6 +16,9 @@
           <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
             Please enter a valid email
           </mat-error>
+          <mat-error *ngIf="loginForm.get('email')?.hasError('maxlength')">
+            Email must be at most 255 characters
+          </mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
@@ -30,20 +33,10 @@
           <mat-error *ngIf="loginForm.get('password')?.hasError('minlength')">
             Password must be at least 6 characters
           </mat-error>
+          <mat-error *ngIf="loginForm.get('password')?.hasError('maxlength')">
+            Password must be at most 100 characters
+          </mat-error>
         </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Role</mat-label>
-          <mat-select formControlName="role">
-            <mat-option value="CLIENT">Client</mat-option>
-            <mat-option value="SELLER">Seller</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <div class="login-hint">
-          <p>Demo credentials: <strong>password123</strong></p>
-          <p>Client: client&#64;email.com | Seller: seller&#64;email.com</p>
-        </div>
 
         <button mat-flat-button color="primary" type="submit" class="full-width login-btn" [disabled]="loading()">
           @if (loading()) {

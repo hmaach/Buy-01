@@ -14,14 +14,14 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
-  username: string;
+  name: string;
   email: string;
   password: string;
   role: Role;
-  avatar?: File;
+  avatar?: string;
 }
 
 export interface AuthResponse {
   token: string;
-  user: User;
+  expiresAt: string;
 }

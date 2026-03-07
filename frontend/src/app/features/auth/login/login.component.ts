@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -11,7 +11,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../core/auth/services/auth.service';
-import { Role } from '../../../core/models/user.model';
 
 @Component({
   selector: 'app-login',
@@ -37,18 +36,31 @@ export class LoginComponent {
   loading = signal(false);
   hidePassword = signal(true);
 
-  roles: Role[] = ['CLIENT', 'SELLER'];
-
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     private snackBar: MatSnackBar
   ) {
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      role: ['CLIENT', Validators.required]
+      email: ['', [
+        Validators.required, 
+        Validators.email,
+        Validators.maxLength(255)
+      ]],
+      password: ['', [
+        Validators.required, 
+        Validators.minLength(6),
+        Validators.maxLength(100)
+      ]]
+    });
+
+    // Check for pre-filled email from registration
+    this.route.queryParams.subscribe(params => {
+      if (params['email']) {
+        this.loginForm.patchValue({ email: params['email'] });
+      }
     });
   }
 
@@ -58,17 +70,18 @@ export class LoginComponent {
     this.loading.set(true);
     
     try {
-      const { email, password, role } = this.loginForm.value;
-      const response = await this.authService.login({ email, password }, role);
+      const { email, password } = this.loginForm.value;
       
-      this.snackBar.open('Login successful!', 'Close', { duration: 3000 });
-      
-      // Redirect based on role
-      if (response.user.role === 'SELLER') {
-        this.router.navigate(['/seller/dashboard']);
-      } else {
-        this.router.navigate(['/products']);
-      }
+      this.authService.login({ email, password }).subscribe({
+        next: () => {
+          this.snackBar.open('Login successful!', 'Close', { duration: 3000 });
+          this.router.navigate(['/products']);
+        },
+        error: (error) => {
+          const errorMessage = error.error?.detail || 'Login failed';
+          this.snackBar.open(errorMessage, 'Close', { duration: 3000 });
+        }
+      });
     } catch (error: any) {
       this.snackBar.open(error.message || 'Login failed', 'Close', { duration: 3000 });
     } finally {

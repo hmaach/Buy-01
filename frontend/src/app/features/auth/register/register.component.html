@@ -20,13 +20,16 @@
         </div>
 
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Username</mat-label>
-          <input matInput formControlName="username" placeholder="Choose a username">
-          <mat-error *ngIf="registerForm.get('username')?.hasError('required')">
-            Username is required
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" placeholder="Enter your name">
+          <mat-error *ngIf="registerForm.get('name')?.hasError('required')">
+            Name is required
           </mat-error>
-          <mat-error *ngIf="registerForm.get('username')?.hasError('minlength')">
-            Username must be at least 3 characters
+          <mat-error *ngIf="registerForm.get('name')?.hasError('minlength')">
+            Name must be at least 2 characters
+          </mat-error>
+          <mat-error *ngIf="registerForm.get('name')?.hasError('maxlength')">
+            Name must be at most 100 characters
           </mat-error>
         </mat-form-field>
 

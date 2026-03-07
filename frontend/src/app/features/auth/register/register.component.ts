@@ -47,9 +47,21 @@ export class RegisterComponent {
     private snackBar: MatSnackBar
   ) {
     this.registerForm = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(3)]],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      name: ['', [
+        Validators.required, 
+        Validators.minLength(2),
+        Validators.maxLength(100)
+      ]],
+      email: ['', [
+        Validators.required, 
+        Validators.email,
+        Validators.maxLength(255)
+      ]],
+      password: ['', [
+        Validators.required, 
+        Validators.minLength(6),
+        Validators.maxLength(100)
+      ]],
       role: ['CLIENT', Validators.required],
       avatar: [null]
     });
@@ -83,17 +95,19 @@ export class RegisterComponent {
     this.loading.set(true);
     
     try {
-      const { username, email, password, role, avatar } = this.registerForm.value;
-      await this.authService.register({ username, email, password, role, avatar });
+      const { name, email, password, role } = this.registerForm.value;
       
-      this.snackBar.open('Registration successful!', 'Close', { duration: 3000 });
-      
-      // Redirect based on role
-      if (role === 'SELLER') {
-        this.router.navigate(['/seller/dashboard']);
-      } else {
-        this.router.navigate(['/products']);
-      }
+      this.authService.register({ name, email, password, role }).subscribe({
+        next: () => {
+          this.snackBar.open('Registration successful!', 'Close', { duration: 3000 });
+          // Redirect to login with pre-filled email
+          this.router.navigate(['/login'], { queryParams: { email } });
+        },
+        error: (error) => {
+          const errorMessage = error.error?.detail || 'Registration failed';
+          this.snackBar.open(errorMessage, 'Close', { duration: 3000 });
+        }
+      });
     } catch (error: any) {
       this.snackBar.open(error.message || 'Registration failed', 'Close', { duration: 3000 });
     } finally {

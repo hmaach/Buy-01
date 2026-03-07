@@ -1,137 +1,167 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { User, Role, LoginRequest, RegisterRequest, AuthResponse } from '../../models/user.model';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap, catchError, of, BehaviorSubject } from 'rxjs';
+import { LoginRequest, RegisterRequest, AuthResponse, Role, User } from '../../models/user.model';
+import { env } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly TOKEN_KEY = 'fake_jwt_token';
-  private readonly USER_KEY = 'fake_user';
+  private readonly TOKEN_KEY = 'auth_token';
+  private readonly EXPIRES_AT_KEY = 'auth_expires_at';
+  private readonly USER_KEY = 'auth_user';
 
-  private currentUser = signal<User | null>(null);
+  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  public currentUser$ = this.currentUserSubject.asObservable();
 
-  // Mock users database
-  private mockUsers: User[] = [
-    {
-      id: '1',
-      username: 'client1',
-      email: 'client@email.com',
-      role: 'CLIENT',
-      avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop'
-    },
-    {
-      id: '2',
-      username: 'seller1',
-      email: 'seller@email.com',
-      role: 'SELLER',
-      avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop'
-    }
-  ];
+  private currentUserSignal = signal<User | null>(null);
 
-  constructor(private router: Router) {
-    this.loadUserFromStorage();
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) {
+    this.initializeAuth();
   }
 
-  private loadUserFromStorage(): void {
-    const token = localStorage.getItem(this.TOKEN_KEY);
+  private initializeAuth(): void {
+    const token = this.getToken();
+    const expiresAt = this.getExpiresAt();
     const userJson = localStorage.getItem(this.USER_KEY);
-    if (token && userJson) {
-      try {
-        const user = JSON.parse(userJson) as User;
-        this.currentUser.set(user);
-      } catch {
+
+    if (token && expiresAt && userJson) {
+      const expiresAtDate = new Date(expiresAt);
+      const now = new Date();
+
+      if (now < expiresAtDate) {
+        try {
+          const user = JSON.parse(userJson) as User;
+          this.currentUserSubject.next(user);
+          this.currentUserSignal.set(user);
+        } catch {
+          this.clearAuth();
+        }
+      } else {
+        // Token expired
         this.logout();
       }
     }
   }
 
   get user() {
-    return this.currentUser.asReadonly();
+    return this.currentUserSignal();
   }
 
   get isAuthenticated(): boolean {
-    return this.currentUser() !== null;
+    return this.currentUserSignal() !== null;
   }
 
   get isSeller(): boolean {
-    return this.currentUser()?.role === 'SELLER';
+    return this.currentUserSignal()?.role === 'SELLER';
   }
 
   get isClient(): boolean {
-    return this.currentUser()?.role === 'CLIENT';
+    return this.currentUserSignal()?.role === 'CLIENT';
   }
 
-  login(request: LoginRequest, role: Role): Promise<AuthResponse> {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        // Find user by email and role
-        const user = this.mockUsers.find(u => 
-          u.email === request.email && u.role === role
-        );
-
-        if (user && request.password === 'password123') {
-          const fakeToken = `fake_jwt_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-          
-          localStorage.setItem(this.TOKEN_KEY, fakeToken);
-          localStorage.setItem(this.USER_KEY, JSON.stringify(user));
-          this.currentUser.set(user);
-
-          console.log('Login successful:', { token: fakeToken, user });
-          
-          resolve({ token: fakeToken, user });
-        } else {
-          reject(new Error('Invalid email or password'));
-        }
-      }, 800);
-    });
+  login(credentials: LoginRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`/users/auth/login`, credentials).pipe(
+      tap(response => {
+        this.handleAuthSuccess(response);
+      }),
+      catchError(error => {
+        console.error('Login error:', error);
+        throw error;
+      })
+    );
   }
 
-  register(request: RegisterRequest): Promise<AuthResponse> {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        // Check if email already exists
-        const exists = this.mockUsers.some(u => u.email === request.email);
-        
-        if (exists) {
-          reject(new Error('Email already registered'));
-          return;
-        }
+  register(request: RegisterRequest): Observable<AuthResponse> {
+    // Use placeholder UUID for avatar
+    const payload = {
+      ...request,
+      avatar: request.avatar || '00000000-0000-0000-0000-000000000000'
+    };
 
-        // Create new user
-        const newUser: User = {
-          id: String(this.mockUsers.length + 1),
-          username: request.username,
-          email: request.email,
-          role: request.role,
-          avatarUrl: request.avatar 
-            ? URL.createObjectURL(request.avatar)
-            : 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop'
-        };
+    return this.http.post<AuthResponse>(`/users/auth/register`, payload).pipe(
+      tap(response => {
+        this.handleAuthSuccess(response);
+      }),
+      catchError(error => {
+        console.error('Registration error:', error);
+        throw error;
+      })
+    );
+  }
 
-        this.mockUsers.push(newUser);
+  private handleAuthSuccess(response: AuthResponse): void {
+    localStorage.setItem(this.TOKEN_KEY, response.token);
+    localStorage.setItem(this.EXPIRES_AT_KEY, response.expiresAt);
 
-        const fakeToken = `fake_jwt_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-        
-        localStorage.setItem(this.TOKEN_KEY, fakeToken);
-        localStorage.setItem(this.USER_KEY, JSON.stringify(newUser));
-        this.currentUser.set(newUser);
+    // Extract user info from token (decode JWT)
+    const user = this.extractUserFromToken(response.token);
+    if (user) {
+      localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+      this.currentUserSubject.next(user);
+      this.currentUserSignal.set(user);
+    }
+  }
 
-        console.log('Registration successful:', { token: fakeToken, user: newUser });
-
-        resolve({ token: fakeToken, user: newUser });
-      }, 1000);
-    });
+  private extractUserFromToken(token: string): User | null {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return {
+        id: payload.sub || payload.userId || 'unknown',
+        name: payload.name || payload.name || 'User',
+        email: payload.email || 'user@example.com',
+        role: payload.role || 'CLIENT',
+        avatarUrl: payload.avatar || ''
+      };
+    } catch {
+      // Return minimal user info since we don't get user details from login response
+      return {
+        id: 'unknown',
+        name: 'User',
+        email: 'user@example.com',
+        role: 'CLIENT',
+        avatarUrl: ''
+      };
+    }
   }
 
   logout(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.USER_KEY);
-    this.currentUser.set(null);
+    this.clearAuth();
     this.router.navigate(['/login']);
   }
 
+  private clearAuth(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.EXPIRES_AT_KEY);
+    localStorage.removeItem(this.USER_KEY);
+    this.currentUserSubject.next(null);
+    this.currentUserSignal.set(null);
+  }
+
   getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    const token = localStorage.getItem(this.TOKEN_KEY);
+    const expiresAt = this.getExpiresAt();
+
+    if (token && expiresAt) {
+      const expiresAtDate = new Date(expiresAt);
+      const now = new Date();
+
+      if (now >= expiresAtDate) {
+        // Token expired, logout
+        this.logout();
+        return null;
+      }
+    }
+
+    return token;
+  }
+
+  getExpiresAt(): string | null {
+    return localStorage.getItem(this.EXPIRES_AT_KEY);
   }
 }

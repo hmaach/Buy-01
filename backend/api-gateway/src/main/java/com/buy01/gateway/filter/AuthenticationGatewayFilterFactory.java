@@ -6,12 +6,14 @@ import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -85,7 +87,15 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
         response.setStatusCode(httpStatus);
         response.getHeaders().add(HttpHeaders.CONTENT_TYPE, "application/json");
 
-        String errorJson = String.format("{\"error\": \"%s\", \"status\": %d}", error, httpStatus.value());
+        String path = exchange.getRequest().getURI().getPath();
+        String title = httpStatus == HttpStatus.UNAUTHORIZED ? "Unauthorized" : "Forbidden";
+
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(httpStatus, error);
+        problemDetail.setTitle(title);
+        problemDetail.setInstance(URI.create(path));
+
+        String errorJson = String.format("{\"detail\": \"%s\", \"instance\": \"%s\", \"status\": %d, \"title\": \"%s\"}",
+                error, path, httpStatus.value(), title);
         byte[] bytes = errorJson.getBytes(StandardCharsets.UTF_8);
 
         return response.writeWith(Mono.just(response.bufferFactory().wrap(bytes)));

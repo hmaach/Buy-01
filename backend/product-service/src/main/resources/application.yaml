@@ -40,11 +40,3 @@ management:
   endpoint:
     health:
       show-details: always
-
-logging:
-  level:
-    org.springframework.cloud.loadbalancer: TRACE          # shows service name resolution + instances
-    org.springframework.cloud.client.loadbalancer: TRACE
-    org.springframework.web.reactive.function.client: TRACE  # shows outgoing request URI + headers
-    reactor.netty.http.client: DEBUG                       # low-level HTTP (shows real target IP/port)
-    com.netflix.discovery: DEBUG                           # Eureka client interactions 

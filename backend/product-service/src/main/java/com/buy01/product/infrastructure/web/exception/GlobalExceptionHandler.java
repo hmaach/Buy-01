@@ -15,8 +15,8 @@ import org.springframework.web.reactive.resource.NoResourceFoundException;
 import org.springframework.web.server.MethodNotAllowedException;
 
 import com.buy01.product.infrastructure.web.exception.Errors.MediaServiceException;
-import com.nimbusds.jwt.proc.ExpiredJWTException;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
@@ -87,7 +87,7 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
     private static final Map<Class<? extends Throwable>, ProblemTemplate> TEMPLATES = new ProblemTemplate.Registry()
             .add(SignatureException.class, UNAUTHORIZED, "Invalid JWT Signature")
-            .add(ExpiredJWTException.class, UNAUTHORIZED, "JWT Token Expired")
+            .add(ExpiredJwtException.class, UNAUTHORIZED, "JWT Token Expired")
             .add(AuthorizationDeniedException.class, FORBIDDEN, "Access Denied")
             .add(NoResourceFoundException.class, BAD_REQUEST, "Missing Argument")
             .add(HttpMessageNotReadableException.class, BAD_REQUEST, "JSON Not Valid")

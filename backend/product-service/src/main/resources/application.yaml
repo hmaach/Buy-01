@@ -4,19 +4,22 @@ server:
 spring:
   application:
     name: product-service
-  mongodb:
-    uri: "mongodb://${PRODUCT_MONGO_DB_USER:rserraf}:${PRODUCT_MONGO_DB_PWD:123456}@localhost:${PRODUCT_MONGO_LOCAL_PORT:27019}/${PRODUCT_MONGO_DB_NAME:mongo-product}?authSource=admin"
-  # cloud:
-  #   loadbalancer:
-  #     cache:
-  #       enabled: false
+  data:
+    mongodb:
+      host: ${PRODUCT_MONGO_HOST:localhost}
+      port: ${PRODUCT_MONGO_LOCAL_PORT:27019}
+      database: ${PRODUCT_MONGO_DB_NAME:mongo-product}
+      username: ${PRODUCT_MONGO_DB_USER:rserraf}
+      password: ${PRODUCT_MONGO_DB_PWD:123456}
+      authentication-database: admin
+
   kafka:
     bootstrap-servers: ${KAFKA_BROKER:localhost:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
-        spring.json.add.type.headers: false
+        spring.json.add.type.headers: false 
 
 eureka:
   client:
@@ -24,9 +27,6 @@ eureka:
       defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
       register-with-eureka: true
       fetch-registry: true
-
-services:
-  media: "http://localhost:8083"
 
 security:
   jwt:
@@ -40,3 +40,11 @@ management:
   endpoint:
     health:
       show-details: always
+
+logging:
+  level:
+    org.springframework.cloud.loadbalancer: TRACE          # shows service name resolution + instances
+    org.springframework.cloud.client.loadbalancer: TRACE
+    org.springframework.web.reactive.function.client: TRACE  # shows outgoing request URI + headers
+    reactor.netty.http.client: DEBUG                       # low-level HTTP (shows real target IP/port)
+    com.netflix.discovery: DEBUG                           # Eureka client interactions 

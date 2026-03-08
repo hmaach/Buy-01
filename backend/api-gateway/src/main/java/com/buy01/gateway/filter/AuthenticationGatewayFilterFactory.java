@@ -17,16 +17,21 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+record RequestAllowed(String path) {
+
+}
+
 @Component
-public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFactory<AuthenticationGatewayFilterFactory.Config> {
+public class AuthenticationGatewayFilterFactory
+        extends AbstractGatewayFilterFactory<AuthenticationGatewayFilterFactory.Config> {
 
     @Autowired
     private JwtUtil jwtUtil;
 
     private static final List<String> PUBLIC_ENDPOINTS = List.of(
             "/users/auth/login",
-            "/users/auth/register"
-    );
+            "/users/auth/register",
+            "/media/**");
 
     public AuthenticationGatewayFilterFactory() {
         super(Config.class);
@@ -38,9 +43,11 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
             ServerHttpRequest request = exchange.getRequest();
             String path = request.getURI().getPath();
 
-            // Allowed endpoint 
-            if (PUBLIC_ENDPOINTS.contains(path)) {
-                return chain.filter(exchange);
+            for (var p : PUBLIC_ENDPOINTS) {
+                System.out.println(p + " " + path);
+                if (match(p, path)) {
+                    return chain.filter(exchange);
+                }
             }
 
             // 1. Check for Authorization header
@@ -81,6 +88,7 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
             }
         };
     }
+    
 
     private Mono<Void> onError(ServerWebExchange exchange, String error, HttpStatus httpStatus) {
         ServerHttpResponse response = exchange.getResponse();
@@ -94,7 +102,9 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
         problemDetail.setTitle(title);
         problemDetail.setInstance(URI.create(path));
 
-        String errorJson = String.format("{\"detail\": \"%s\", \"instance\": \"%s\", \"status\": %d, \"title\": \"%s\"}",
+        //TODO: return just problem detail
+        String errorJson = String.format(
+                "{\"detail\": \"%s\", \"instance\": \"%s\", \"status\": %d, \"title\": \"%s\"}",
                 error, path, httpStatus.value(), title);
         byte[] bytes = errorJson.getBytes(StandardCharsets.UTF_8);
 
@@ -115,5 +125,14 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
         public void setRequiredRole(String requiredRole) {
             this.requiredRole = requiredRole;
         }
+    }
+
+    private boolean match(String path, String reqPath) {
+        if (path.endsWith("/**")) {
+            if (reqPath.startsWith(path.replace("/**", ""))) {
+                return true;
+            }
+        }
+        return path.equals(reqPath);
     }
 }

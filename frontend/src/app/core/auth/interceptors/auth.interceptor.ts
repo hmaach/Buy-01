@@ -9,6 +9,7 @@ export const authInterceptor: HttpInterceptorFn = (
 ) => {
   const authService = inject(AuthService);
   const token = authService.getToken();
+  
 
   // Only prepend backend URL for relative paths (not already absolute URLs)
   let modifiedReq = req;

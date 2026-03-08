@@ -1,17 +1,15 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap, catchError, of, BehaviorSubject } from 'rxjs';
-import { LoginRequest, RegisterRequest, AuthResponse, Role, User } from '../../models/user.model';
-import { env } from '../../../../environments/environment';
+import { Observable, tap, catchError, BehaviorSubject, switchMap } from 'rxjs';
+import { LoginRequest, RegisterRequest, AuthResponse, User } from '../../models/user.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private readonly TOKEN_KEY = 'auth_token';
   private readonly EXPIRES_AT_KEY = 'auth_expires_at';
-  private readonly USER_KEY = 'auth_user';
 
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
@@ -20,7 +18,7 @@ export class AuthService {
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
   ) {
     this.initializeAuth();
   }
@@ -28,17 +26,23 @@ export class AuthService {
   private initializeAuth(): void {
     const token = this.getToken();
     const expiresAt = this.getExpiresAt();
-    const userJson = localStorage.getItem(this.USER_KEY);
 
-    if (token && expiresAt && userJson) {
+    if (token && expiresAt) {
       const expiresAtDate = new Date(expiresAt);
       const now = new Date();
 
       if (now < expiresAtDate) {
         try {
-          const user = JSON.parse(userJson) as User;
-          this.currentUserSubject.next(user);
-          this.currentUserSignal.set(user);
+          this.getCurrentUser()
+            .pipe(
+              tap((user) => {
+                if (user) {
+                  this.currentUserSubject.next(user);
+                  this.currentUserSignal.set(user);
+                }
+              }),
+            )
+            .subscribe();
         } catch {
           this.clearAuth();
         }
@@ -65,69 +69,60 @@ export class AuthService {
     return this.currentUserSignal()?.role === 'CLIENT';
   }
 
-  login(credentials: LoginRequest): Observable<AuthResponse> {
+  login(credentials: LoginRequest): Observable<User | null> {
     return this.http.post<AuthResponse>(`/users/auth/login`, credentials).pipe(
-      tap(response => {
+      tap((response) => {
         this.handleAuthSuccess(response);
       }),
-      catchError(error => {
+      switchMap(() => this.getCurrentUser()),
+      tap((user) => {
+        if (user) {
+          this.currentUserSubject.next(user);
+          this.currentUserSignal.set(user);
+        }
+      }),
+      catchError((error) => {
         console.error('Login error:', error);
         throw error;
-      })
+      }),
     );
+  }
+
+  getCurrentUser(): Observable<User | null> {
+    return this.http.get<User | null>(`/users/me`).pipe(
+      catchError((error) => {
+        console.error('Error fetching current user:', error);
+        throw error;
+      }),
+    );
+  }
+
+  public updateCurrentUser(user: User): void {
+    this.currentUserSubject.next(user);
+    this.currentUserSignal.set(user);
   }
 
   register(request: RegisterRequest): Observable<AuthResponse> {
     // Use placeholder UUID for avatar
     const payload = {
       ...request,
-      avatar: request.avatar || '00000000-0000-0000-0000-000000000000'
+      avatar: request.avatar || '00000000-0000-0000-0000-000000000000',
     };
 
     return this.http.post<AuthResponse>(`/users/auth/register`, payload).pipe(
-      tap(response => {
+      tap((response) => {
         this.handleAuthSuccess(response);
       }),
-      catchError(error => {
+      catchError((error) => {
         console.error('Registration error:', error);
         throw error;
-      })
+      }),
     );
   }
 
   private handleAuthSuccess(response: AuthResponse): void {
     localStorage.setItem(this.TOKEN_KEY, response.token);
     localStorage.setItem(this.EXPIRES_AT_KEY, response.expiresAt);
-
-    // Extract user info from token (decode JWT)
-    const user = this.extractUserFromToken(response.token);
-    if (user) {
-      localStorage.setItem(this.USER_KEY, JSON.stringify(user));
-      this.currentUserSubject.next(user);
-      this.currentUserSignal.set(user);
-    }
-  }
-
-  private extractUserFromToken(token: string): User | null {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return {
-        id: payload.sub || payload.userId || 'unknown',
-        name: payload.name || payload.name || 'User',
-        email: payload.email || 'user@example.com',
-        role: payload.role || 'CLIENT',
-        avatarUrl: payload.avatar || ''
-      };
-    } catch {
-      // Return minimal user info since we don't get user details from login response
-      return {
-        id: 'unknown',
-        name: 'User',
-        email: 'user@example.com',
-        role: 'CLIENT',
-        avatarUrl: ''
-      };
-    }
   }
 
   logout(): void {
@@ -138,7 +133,6 @@ export class AuthService {
   private clearAuth(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.EXPIRES_AT_KEY);
-    localStorage.removeItem(this.USER_KEY);
     this.currentUserSubject.next(null);
     this.currentUserSignal.set(null);
   }

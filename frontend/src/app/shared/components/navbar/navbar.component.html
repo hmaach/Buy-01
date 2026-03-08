@@ -1,15 +1,20 @@
 <mat-toolbar color="primary" class="navbar">
   <div class="navbar-container">
     <div class="navbar-brand">
-      <a routerLink="/products" class="brand-link">
+      <a routerLink="/" class="brand-link">
         <img src="/assets/logo.png" alt="Logo" />
         <span>Buy-01</span>
       </a>
     </div>
 
     <nav class="navbar-links">
-      <a mat-button routerLink="/products" routerLinkActive="active">
-        <lucide-angular [img]="ShoppingCart" [size]="17"></lucide-angular> Products
+      <a
+        mat-button
+        routerLink="/"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <lucide-angular [img]="Home" [size]="17"></lucide-angular> Home
       </a>
 
       @if (isSeller()) {
@@ -21,6 +26,16 @@
         >
           <lucide-angular [img]="LayoutDashboard" [size]="17"></lucide-angular>
           Dashboard
+        </a>
+
+        <a
+          mat-button
+          routerLink="/products/new"
+          routerLinkActive="active"
+          (click)="closeMobileMenu()"
+        >
+          <lucide-angular [img]="PackagePlus" [size]="17"></lucide-angular>
+          New Product
         </a>
       }
     </nav>
@@ -36,7 +51,7 @@
           <!-- @if (isSeller()) {
             <img
               [src]="
-                currentUser()?.avatarUrl ? currentUser()?.avatarUrl : '/assets/placeholder.png'
+                currentUser()?.avatarId ? currentUser()?.avatarId : '/assets/placeholder.png'
               "
               [alt]="currentUser()?.name"
               class="seller-avatar"
@@ -48,9 +63,9 @@
 
         <mat-menu #userMenu="matMenu" xPosition="before" style="min-width: 500px">
           <div class="menu-header" (click)="$event.stopPropagation()">
-            @if (isSeller() && currentUser()?.avatarUrl) {
+            @if (isSeller() && currentUser()?.avatarId) {
               <img
-                [src]="currentUser()?.avatarUrl"
+                [src]="currentUser()?.avatarId"
                 [alt]="currentUser()?.name"
                 class="menu-avatar"
               />
@@ -84,15 +99,7 @@
             <span>My Profile</span>
           </button>
 
-          @if (isSeller()) {
-            <button mat-menu-item routerLink="/seller/dashboard">
-              <lucide-angular [img]="LayoutDashboard" [size]="17"></lucide-angular>
-              <span>Seller Dashboard</span>
-            </button>
-          }
-
-          <mat-divider></mat-divider>
-          <button mat-menu-item (click)="logout()">
+          <button mat-menu-item (click)="logout()" style="color: red">
             <lucide-angular [img]="LogOut" [size]="17"></lucide-angular>
             <span>Logout</span>
           </button>
@@ -132,9 +139,15 @@
 
   <div class="mobile-menu-drawer" [class.open]="mobileMenuOpen">
     <nav class="mobile-links">
-      <a mat-button routerLink="/products" routerLinkActive="active" (click)="closeMobileMenu()">
-        <lucide-angular [img]="ShoppingCart" [size]="17"></lucide-angular>
-        Products
+      <a
+        mat-button
+        routerLink="/"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="closeMobileMenu()"
+      >
+        <lucide-angular [img]="Home" [size]="17"></lucide-angular>
+        Home
       </a>
 
       @if (isSeller()) {
@@ -145,7 +158,17 @@
           (click)="closeMobileMenu()"
         >
           <lucide-angular [img]="LayoutDashboard" [size]="17"></lucide-angular>
-          Seller Dashboard
+          Dashboard
+        </a>
+
+        <a
+          mat-button
+          routerLink="/products/new"
+          routerLinkActive="active"
+          (click)="closeMobileMenu()"
+        >
+          <lucide-angular [img]="PackagePlus" [size]="17"></lucide-angular>
+          New Product
         </a>
       }
 

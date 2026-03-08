@@ -8,17 +8,24 @@ export const roleGuard = (allowedRoles: Role[]): CanActivateFn => {
     const authService = inject(AuthService);
     const router = inject(Router);
 
-    if (!authService.isAuthenticated) {
+    const hasValidToken = authService.getToken() !== null;
+
+    if (!authService.isAuthenticated && !hasValidToken) {
       router.navigate(['/login']);
       return false;
     }
 
     const user = authService.user;
+
+    if (!user && hasValidToken) {
+      router.navigate(['/login']);
+      return false;
+    }
+
     if (user && allowedRoles.includes(user.role)) {
       return true;
     }
 
-    // Redirect to products if not authorized
     router.navigate(['/products']);
     return false;
   };

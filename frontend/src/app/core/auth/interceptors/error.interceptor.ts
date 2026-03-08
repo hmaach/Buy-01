@@ -1,11 +1,16 @@
-import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpErrorResponse } from '@angular/common/http';
+import {
+  HttpInterceptorFn,
+  HttpRequest,
+  HttpHandlerFn,
+  HttpErrorResponse,
+} from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 
 export const errorInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
-  next: HttpHandlerFn
+  next: HttpHandlerFn,
 ) => {
   const router = inject(Router);
 
@@ -20,11 +25,13 @@ export const errorInterceptor: HttpInterceptorFn = (
 
         // Handle 401 Unauthorized with "Invalid or expired token"
         if (error.status === 401) {
-          if (detail && detail.toLowerCase().includes('invalid') || detail.toLowerCase().includes('expired')) {
+          if (
+            (detail && detail.toLowerCase().includes('invalid')) ||
+            detail.toLowerCase().includes('expired')
+          ) {
             console.log('[HTTP] Unauthorized - Invalid or expired token - logging out');
             localStorage.removeItem('auth_token');
             localStorage.removeItem('auth_expires_at');
-            localStorage.removeItem('auth_user');
             router.navigate(['/login']);
           }
         }
@@ -34,7 +41,6 @@ export const errorInterceptor: HttpInterceptorFn = (
           console.log('[HTTP] Too Many Requests - logging out');
           localStorage.removeItem('auth_token');
           localStorage.removeItem('auth_expires_at');
-          localStorage.removeItem('auth_user');
           router.navigate(['/login']);
         }
       }
@@ -44,11 +50,10 @@ export const errorInterceptor: HttpInterceptorFn = (
         console.log('[HTTP] Unauthorized - redirecting to login');
         localStorage.removeItem('auth_token');
         localStorage.removeItem('auth_expires_at');
-        localStorage.removeItem('auth_user');
         router.navigate(['/login']);
       }
 
       return throwError(() => error);
-    })
+    }),
   );
 };

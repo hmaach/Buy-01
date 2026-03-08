@@ -1,0 +1,144 @@
+<!-- user-profile.html -->
+<div class="profile-page">
+  <!-- ── Hero Header ──────────────────────────────────── -->
+  <div class="profile-hero">
+    <div class="hero-glow"></div>
+
+    <!-- Avatar Zone -->
+    <div class="avatar-zone">
+      @if (isSeller()) {
+        <!-- Seller: avatar + upload overlay -->
+        <div class="avatar-wrapper seller">
+          @if (displayAvatar) {
+            <img [src]="displayAvatar" alt="Avatar" class="avatar-img" />
+          } @else {
+            <div class="avatar-initials">{{ initials }}</div>
+          }
+
+          <label class="avatar-upload-overlay" for="avatar-input" aria-label="Change avatar">
+            <lucide-angular [img]="Camera" [size]="20"></lucide-angular>
+            <span>Change</span>
+          </label>
+          <input
+            id="avatar-input"
+            type="file"
+            accept="image/*"
+            class="sr-only"
+            (change)="onAvatarSelected($event)"
+          />
+
+          @if (displayAvatar) {
+            <button class="avatar-remove-btn" (click)="removeAvatar()" title="Remove avatar">
+              <lucide-angular [img]="Trash2" [size]="13"></lucide-angular>
+            </button>
+          }
+        </div>
+      } @else {
+        <!-- Client: initials only, no upload -->
+        <div class="avatar-wrapper client">
+          <div class="avatar-initials">{{ initials }}</div>
+        </div>
+      }
+    </div>
+
+    <!-- User headline -->
+    <div class="hero-text">
+      <h1 class="hero-name">{{ currentUser()?.name }}</h1>
+      <p class="hero-email">{{ currentUser()?.email }}</p>
+
+      <span class="role-pill" [ngClass]="roleLabel.toLowerCase()">
+        <lucide-angular [img]="ShieldCheck" [size]="12"></lucide-angular>
+        {{ roleLabel }}
+      </span>
+    </div>
+  </div>
+
+  <!-- ── Card ─────────────────────────────────────────── -->
+  <div class="profile-card">
+    <div class="card-section-label">Account Information</div>
+
+    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-form">
+      <!-- Name field -->
+      <div class="field-group">
+        <label class="field-label">
+          <lucide-angular [img]="User" [size]="14"></lucide-angular>
+          Full Name
+        </label>
+        <mat-form-field appearance="outline" class="full-width">
+          <input matInput formControlName="name" placeholder="Your full name" />
+          @if (profileForm.get('name')?.hasError('required')) {
+            <mat-error>Name is required</mat-error>
+          }
+          @if (profileForm.get('name')?.hasError('minlength')) {
+            <mat-error>At least 2 characters</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- Email field (read-only) -->
+      <div class="field-group">
+        <label class="field-label">
+          <lucide-angular [img]="Mail" [size]="14"></lucide-angular>
+          Email Address
+          <span class="field-hint">Cannot be changed</span>
+        </label>
+        <mat-form-field appearance="outline" class="full-width">
+          <input matInput formControlName="email" />
+        </mat-form-field>
+      </div>
+
+      <!-- Role (display only) -->
+      <div class="field-group">
+        <label class="field-label">
+          <lucide-angular [img]="ShieldCheck" [size]="14"></lucide-angular>
+          Role
+        </label>
+        <div class="role-display">
+          <span class="role-pill lg" [ngClass]="roleLabel.toLowerCase()">
+            {{ roleLabel }}
+          </span>
+          <p class="role-description">
+            @switch (roleLabel) {
+              @case ('SELLER') {
+                You can manage products and media on the platform.
+              }
+              @case ('ADMIN') {
+                You have full administrative access to the platform.
+              }
+              @default {
+                You can browse and purchase products on the platform.
+              }
+            }
+          </p>
+        </div>
+      </div>
+
+      <mat-divider class="form-divider"></mat-divider>
+
+      <!-- Seller avatar hint -->
+      @if (isSeller()) {
+        <p class="avatar-hint">
+          Profile photo is visible to buyers on your product listings. Max 2 MB, image files only.
+        </p>
+      }
+
+      <!-- Save button -->
+      <div class="form-actions">
+        <button
+          mat-flat-button
+          type="submit"
+          class="save-btn"
+          [disabled]="!hasChanges || isSaving()"
+        >
+          @if (isSaving()) {
+            <span class="spinner"></span>
+            Saving…
+          } @else {
+            <lucide-angular [img]="Save" [size]="16"></lucide-angular>
+            Save Changes
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

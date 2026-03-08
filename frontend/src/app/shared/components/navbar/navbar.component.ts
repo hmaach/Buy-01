@@ -17,6 +17,10 @@ import {
   LogOut,
   LayoutDashboard,
   UserPlus,
+  Home,
+  HomeIcon,
+  House,
+  PackagePlus,
 } from 'lucide-angular';
 
 @Component({
@@ -47,10 +51,16 @@ export class NavbarComponent {
   readonly LogOut = LogOut;
   readonly LayoutDashboard = LayoutDashboard;
   readonly UserPlus = UserPlus;
+  readonly Home = House;
+  readonly PackagePlus = PackagePlus;
 
   currentUser = computed(() => this.authService.user);
   isLoggedIn = computed(() => this.authService.isAuthenticated);
   isSeller = computed(() => this.authService.isSeller);
+
+  ngOnInit(): void {
+    console.log('this.currentUser: ', this.currentUser());
+  }
 
   // Mobile menu state
   mobileMenuOpen = false;

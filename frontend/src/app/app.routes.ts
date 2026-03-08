@@ -22,6 +22,12 @@ export const routes: Routes = [
       import('./features/auth/register/register.component').then((m) => m.RegisterComponent),
   },
   {
+    path: 'profile',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/user-profile/user-profile').then((m) => m.ProfileComponent),
+  },
+  {
     path: 'products/new',
     canActivate: [roleGuard(['SELLER'])],
     loadComponent: () =>
@@ -45,6 +51,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'products',
+    redirectTo: '',
   },
 ];

@@ -20,6 +20,7 @@ import {
   Home,
   HomeIcon,
   House,
+  PackagePlus,
 } from 'lucide-angular';
 
 @Component({
@@ -51,6 +52,7 @@ export class NavbarComponent {
   readonly LayoutDashboard = LayoutDashboard;
   readonly UserPlus = UserPlus;
   readonly Home = House;
+  readonly PackagePlus = PackagePlus;
 
   currentUser = computed(() => this.authService.user);
   isLoggedIn = computed(() => this.authService.isAuthenticated);

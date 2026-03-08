@@ -72,7 +72,7 @@ export class LoginComponent {
       this.authService.login({ email, password }).subscribe({
         next: () => {
           this.snackBar.open('Login successful!', 'Close', { duration: 3000 });
-          this.router.navigate(['/products']);
+          this.router.navigate(['/']);
         },
         error: (error) => {
           const errorMessage = error.error?.detail || 'Login failed';

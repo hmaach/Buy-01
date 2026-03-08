@@ -1,9 +1,8 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap, catchError, of, BehaviorSubject, switchMap } from 'rxjs';
-import { LoginRequest, RegisterRequest, AuthResponse, Role, User } from '../../models/user.model';
-import { env } from '../../../../environments/environment';
+import { Observable, tap, catchError, BehaviorSubject, switchMap } from 'rxjs';
+import { LoginRequest, RegisterRequest, AuthResponse, User } from '../../models/user.model';
 
 @Injectable({
   providedIn: 'root',
@@ -96,6 +95,11 @@ export class AuthService {
         throw error;
       }),
     );
+  }
+
+  public updateCurrentUser(user: User): void {
+    this.currentUserSubject.next(user);
+    this.currentUserSignal.set(user);
   }
 
   register(request: RegisterRequest): Observable<AuthResponse> {

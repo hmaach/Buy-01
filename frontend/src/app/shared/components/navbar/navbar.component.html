@@ -34,7 +34,7 @@
           routerLinkActive="active"
           (click)="closeMobileMenu()"
         >
-          <lucide-angular [img]="ShoppingCart" [size]="17"></lucide-angular>
+          <lucide-angular [img]="PackagePlus" [size]="17"></lucide-angular>
           New Product
         </a>
       }
@@ -51,7 +51,7 @@
           <!-- @if (isSeller()) {
             <img
               [src]="
-                currentUser()?.avatarUrl ? currentUser()?.avatarUrl : '/assets/placeholder.png'
+                currentUser()?.avatarId ? currentUser()?.avatarId : '/assets/placeholder.png'
               "
               [alt]="currentUser()?.name"
               class="seller-avatar"
@@ -63,9 +63,9 @@
 
         <mat-menu #userMenu="matMenu" xPosition="before" style="min-width: 500px">
           <div class="menu-header" (click)="$event.stopPropagation()">
-            @if (isSeller() && currentUser()?.avatarUrl) {
+            @if (isSeller() && currentUser()?.avatarId) {
               <img
-                [src]="currentUser()?.avatarUrl"
+                [src]="currentUser()?.avatarId"
                 [alt]="currentUser()?.name"
                 class="menu-avatar"
               />
@@ -99,15 +99,7 @@
             <span>My Profile</span>
           </button>
 
-          @if (isSeller()) {
-            <button mat-menu-item routerLink="/dashboard">
-              <lucide-angular [img]="LayoutDashboard" [size]="17"></lucide-angular>
-              <span>Seller Dashboard</span>
-            </button>
-          }
-
-          <mat-divider></mat-divider>
-          <button mat-menu-item (click)="logout()">
+          <button mat-menu-item (click)="logout()" style="color: red">
             <lucide-angular [img]="LogOut" [size]="17"></lucide-angular>
             <span>Logout</span>
           </button>
@@ -166,7 +158,7 @@
           (click)="closeMobileMenu()"
         >
           <lucide-angular [img]="LayoutDashboard" [size]="17"></lucide-angular>
-          Seller Dashboard
+          Dashboard
         </a>
 
         <a
@@ -175,7 +167,7 @@
           routerLinkActive="active"
           (click)="closeMobileMenu()"
         >
-          <lucide-angular [img]="ShoppingCart" [size]="17"></lucide-angular>
+          <lucide-angular [img]="PackagePlus" [size]="17"></lucide-angular>
           New Product
         </a>
       }

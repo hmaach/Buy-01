@@ -27,10 +27,10 @@ import { Role } from '../../../core/models/user.model';
     MatSelectModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
-    MatIconModule
+    MatIconModule,
   ],
   templateUrl: './register.component.html',
-  styleUrl: './register.component.css'
+  styleUrl: './register.component.css',
 })
 export class RegisterComponent {
   registerForm: FormGroup;
@@ -44,26 +44,22 @@ export class RegisterComponent {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
   ) {
     this.registerForm = this.fb.group({
-      name: ['', [
-        Validators.required, 
-        Validators.minLength(2),
-        Validators.maxLength(100)
-      ]],
-      email: ['', [
-        Validators.required, 
-        Validators.email,
-        Validators.maxLength(255)
-      ]],
-      password: ['', [
-        Validators.required, 
-        Validators.minLength(6),
-        Validators.maxLength(100)
-      ]],
+      name: [
+        '',
+        [
+          Validators.required,
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(50),
+        ],
+      ],
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
+      password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(30)]],
       role: ['CLIENT', Validators.required],
-      avatar: [null]
+      avatar: [null],
     });
   }
 
@@ -71,7 +67,7 @@ export class RegisterComponent {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
-      
+
       // Validate file size (max 2MB)
       if (file.size > 2 * 1024 * 1024) {
         this.snackBar.open('File size must be less than 2MB', 'Close', { duration: 3000 });
@@ -93,10 +89,10 @@ export class RegisterComponent {
     if (this.registerForm.invalid) return;
 
     this.loading.set(true);
-    
+
     try {
       const { name, email, password, role } = this.registerForm.value;
-      
+
       this.authService.register({ name, email, password, role }).subscribe({
         next: () => {
           this.snackBar.open('Registration successful!', 'Close', { duration: 3000 });
@@ -106,7 +102,7 @@ export class RegisterComponent {
         error: (error) => {
           const errorMessage = error.error?.detail || 'Registration failed';
           this.snackBar.open(errorMessage, 'Close', { duration: 3000 });
-        }
+        },
       });
     } catch (error: any) {
       this.snackBar.open(error.message || 'Registration failed', 'Close', { duration: 3000 });

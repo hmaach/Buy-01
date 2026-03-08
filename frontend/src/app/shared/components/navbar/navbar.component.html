@@ -1,15 +1,20 @@
 <mat-toolbar color="primary" class="navbar">
   <div class="navbar-container">
     <div class="navbar-brand">
-      <a routerLink="/products/list" class="brand-link">
+      <a routerLink="/" class="brand-link">
         <img src="/assets/logo.png" alt="Logo" />
         <span>Buy-01</span>
       </a>
     </div>
 
     <nav class="navbar-links">
-      <a mat-button routerLink="/products/list" routerLinkActive="active">
-        <lucide-angular [img]="ShoppingCart" [size]="17"></lucide-angular> Products
+      <a
+        mat-button
+        routerLink="/"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <lucide-angular [img]="Home" [size]="17"></lucide-angular> Home
       </a>
 
       @if (isSeller()) {
@@ -21,6 +26,16 @@
         >
           <lucide-angular [img]="LayoutDashboard" [size]="17"></lucide-angular>
           Dashboard
+        </a>
+
+        <a
+          mat-button
+          routerLink="/products/new"
+          routerLinkActive="active"
+          (click)="closeMobileMenu()"
+        >
+          <lucide-angular [img]="ShoppingCart" [size]="17"></lucide-angular>
+          New Product
         </a>
       }
     </nav>
@@ -134,12 +149,13 @@
     <nav class="mobile-links">
       <a
         mat-button
-        routerLink="/products/list"
+        routerLink="/"
         routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
         (click)="closeMobileMenu()"
       >
-        <lucide-angular [img]="ShoppingCart" [size]="17"></lucide-angular>
-        Products
+        <lucide-angular [img]="Home" [size]="17"></lucide-angular>
+        Home
       </a>
 
       @if (isSeller()) {
@@ -151,6 +167,16 @@
         >
           <lucide-angular [img]="LayoutDashboard" [size]="17"></lucide-angular>
           Seller Dashboard
+        </a>
+
+        <a
+          mat-button
+          routerLink="/products/new"
+          routerLinkActive="active"
+          (click)="closeMobileMenu()"
+        >
+          <lucide-angular [img]="ShoppingCart" [size]="17"></lucide-angular>
+          New Product
         </a>
       }
 

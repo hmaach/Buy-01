@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -17,8 +18,19 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-record RequestAllowed(String path) {
+record PublicEndpoint(HttpMethod method, String pattern) {
+    public boolean matches(HttpMethod reqMethod, String reqPath) {
+        if (method != null && method != reqMethod) {
+            return false;
+        }
 
+        if (pattern.endsWith("/**")) {
+            String prefix = pattern.substring(0, pattern.length() - 3);
+            return reqPath.startsWith(prefix);
+        }
+
+        return pattern.equals(reqPath);
+    }
 }
 
 @Component
@@ -28,10 +40,13 @@ public class AuthenticationGatewayFilterFactory
     @Autowired
     private JwtUtil jwtUtil;
 
-    private static final List<String> PUBLIC_ENDPOINTS = List.of(
-            "/users/auth/login",
-            "/users/auth/register",
-            "/media/**");
+    private static final List<PublicEndpoint> PUBLIC_ENDPOINTS = List.of(
+            new PublicEndpoint(HttpMethod.POST, "/users/auth/login"),
+            new PublicEndpoint(HttpMethod.POST, "/users/auth/register"),
+            new PublicEndpoint(null, "/media/**"),
+            new PublicEndpoint(HttpMethod.GET, "/products"), 
+            new PublicEndpoint(HttpMethod.GET, "/products/**")
+    );
 
     public AuthenticationGatewayFilterFactory() {
         super(Config.class);
@@ -42,14 +57,14 @@ public class AuthenticationGatewayFilterFactory
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
             String path = request.getURI().getPath();
+            HttpMethod method = request.getMethod();
 
-            for (var p : PUBLIC_ENDPOINTS) {
-                System.out.println(p + " " + path);
-                if (match(p, path)) {
-                    return chain.filter(exchange);
-                }
+            boolean isPublic = PUBLIC_ENDPOINTS.stream()
+                    .anyMatch(endpoint -> endpoint.matches(method, path));
+
+            if (isPublic) {
+                return chain.filter(exchange);
             }
-
             // 1. Check for Authorization header
             String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -88,7 +103,6 @@ public class AuthenticationGatewayFilterFactory
             }
         };
     }
-    
 
     private Mono<Void> onError(ServerWebExchange exchange, String error, HttpStatus httpStatus) {
         ServerHttpResponse response = exchange.getResponse();
@@ -102,7 +116,7 @@ public class AuthenticationGatewayFilterFactory
         problemDetail.setTitle(title);
         problemDetail.setInstance(URI.create(path));
 
-        //TODO: return just problem detail
+        // TODO: return just problem detail
         String errorJson = String.format(
                 "{\"detail\": \"%s\", \"instance\": \"%s\", \"status\": %d, \"title\": \"%s\"}",
                 error, path, httpStatus.value(), title);

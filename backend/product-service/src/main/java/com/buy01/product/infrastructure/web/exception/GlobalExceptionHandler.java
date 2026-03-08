@@ -2,6 +2,7 @@ package com.buy01.product.infrastructure.web.exception;
 
 import static org.springframework.http.HttpStatus.*;
 
+import org.springframework.core.codec.DecodingException;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.reactive.resource.NoResourceFoundException;
 import org.springframework.web.server.MethodNotAllowedException;
+import org.springframework.web.server.ServerWebInputException;
 
 import com.buy01.product.infrastructure.web.exception.Errors.MediaServiceException;
 
@@ -95,6 +97,7 @@ public class GlobalExceptionHandler {
             .add(NotFoundException.class, NOT_FOUND, "Validation Error")
             .add(UsernameNotFoundException.class, NOT_FOUND, "User Not Found")
             .add(MethodNotAllowedException.class, METHOD_NOT_ALLOWED, "Method Not Allowed")
+            .add(ServerWebInputException.class, BAD_REQUEST, "No request body")
             .add(WebExchangeBindException.class, BAD_REQUEST, "Validation Failed",
                     ex -> ((WebExchangeBindException) ex).getBindingResult().getFieldErrors()
                             .stream()

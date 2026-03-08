@@ -140,13 +140,4 @@ public class AuthenticationGatewayFilterFactory
             this.requiredRole = requiredRole;
         }
     }
-
-    private boolean match(String path, String reqPath) {
-        if (path.endsWith("/**")) {
-            if (reqPath.startsWith(path.replace("/**", ""))) {
-                return true;
-            }
-        }
-        return path.equals(reqPath);
-    }
 }

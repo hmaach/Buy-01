@@ -1,14 +1,14 @@
 <mat-toolbar color="primary" class="navbar">
   <div class="navbar-container">
     <div class="navbar-brand">
-      <a routerLink="/products" class="brand-link">
+      <a routerLink="/products/list" class="brand-link">
         <img src="/assets/logo.png" alt="Logo" />
         <span>Buy-01</span>
       </a>
     </div>
 
     <nav class="navbar-links">
-      <a mat-button routerLink="/products" routerLinkActive="active">
+      <a mat-button routerLink="/products/list" routerLinkActive="active">
         <lucide-angular [img]="ShoppingCart" [size]="17"></lucide-angular> Products
       </a>
 
@@ -85,7 +85,7 @@
           </button>
 
           @if (isSeller()) {
-            <button mat-menu-item routerLink="/seller/dashboard">
+            <button mat-menu-item routerLink="/dashboard">
               <lucide-angular [img]="LayoutDashboard" [size]="17"></lucide-angular>
               <span>Seller Dashboard</span>
             </button>
@@ -132,7 +132,12 @@
 
   <div class="mobile-menu-drawer" [class.open]="mobileMenuOpen">
     <nav class="mobile-links">
-      <a mat-button routerLink="/products" routerLinkActive="active" (click)="closeMobileMenu()">
+      <a
+        mat-button
+        routerLink="/products/list"
+        routerLinkActive="active"
+        (click)="closeMobileMenu()"
+      >
         <lucide-angular [img]="ShoppingCart" [size]="17"></lucide-angular>
         Products
       </a>

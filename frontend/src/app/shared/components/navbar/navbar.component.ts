@@ -52,6 +52,10 @@ export class NavbarComponent {
   isLoggedIn = computed(() => this.authService.isAuthenticated);
   isSeller = computed(() => this.authService.isSeller);
 
+  ngOnInit(): void {
+    console.log('this.currentUser: ', this.currentUser());
+  }
+
   // Mobile menu state
   mobileMenuOpen = false;
 

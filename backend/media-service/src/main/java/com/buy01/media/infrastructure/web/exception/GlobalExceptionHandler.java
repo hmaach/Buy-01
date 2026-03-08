@@ -14,6 +14,7 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.server.MissingRequestValueException;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.buy01.media.infrastructure.web.exception.Errors.Faileduploadedfile;
@@ -42,6 +43,7 @@ public class GlobalExceptionHandler {
             .add(Faileduploadedfile.class, CONFLICT, "Failed to uploaded file")
             .add(NotFound.class, NOT_FOUND, "Not Found")
             .add(NoResourceFoundException.class, NOT_FOUND, "Path Not Found")
+            .add(ServerWebInputException.class, BAD_REQUEST, "No request body")
             .add(WebExchangeBindException.class, BAD_REQUEST, "Validation Failed",
                     ex -> "Fields: " + ((WebExchangeBindException) ex).getBindingResult().getFieldErrorCount())
             .build();

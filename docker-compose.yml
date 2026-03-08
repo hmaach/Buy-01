@@ -3,6 +3,7 @@ services:
   discovery-server:
     build: ./backend/discovery-server/
     container_name: discovery-server
+    restart: always
     ports:
       - "${DISCOVERY_PORT}:8761"
     networks:
@@ -12,6 +13,7 @@ services:
   kafka:
     image: apache/kafka:latest
     container_name: kafka
+    restart: always
     ports:
       - "9092:9092"
     environment:
@@ -74,14 +76,14 @@ services:
   mongo-media:
     container_name: ${MEDIA_MONGO_DB_NAME}
     image: mongo:7
-    command: mongod --port ${MEDIA_MONGO_DOCKER_PORT}
+    restart: always
     ports:
-      - "${MEDIA_MONGO_LOCAL_PORT}:${MEDIA_MONGO_DOCKER_PORT}"
+      - "${MEDIA_MONGO_LOCAL_PORT}:27017"
     environment:
+      MONGO_INITDB_DATABASE: ${MEDIA_MONGO_DB_NAME}
       MONGO_INITDB_ROOT_USERNAME: ${MEDIA_MONGO_DB_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MEDIA_MONGO_DB_PWD}
-      MONGO_INITDB_DATABASE: ${MEDIA_MONGO_DB_NAME}
-    volumes:
+    volumes:  
       - media-mongo-data:/data/db
     networks:
       - ecommerce-network
@@ -90,9 +92,9 @@ services:
   mongo-product:
     container_name: ${PRODUCT_MONGO_DB_NAME}
     image: mongo:7
-    command: mongod --port ${PRODUCT_MONGO_DOCKER_PORT}
+    restart: always
     ports:
-      - "${PRODUCT_MONGO_LOCAL_PORT}:${PRODUCT_MONGO_DOCKER_PORT}"
+      - "${PRODUCT_MONGO_LOCAL_PORT}:27017" 
     environment:
       MONGO_INITDB_DATABASE: ${PRODUCT_MONGO_DB_NAME}
       MONGO_INITDB_ROOT_USERNAME: ${PRODUCT_MONGO_DB_USER}

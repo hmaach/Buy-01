@@ -62,6 +62,9 @@ docker-up:
 docker-up-dbs:
 	docker compose up -d kafka mongo-user mongo-product mongo-media
 
+docker-up-dev:
+	docker compose up -d kafka mongo-user mongo-product mongo-media discovery-server
+
 docker-down:
 	docker compose down
 

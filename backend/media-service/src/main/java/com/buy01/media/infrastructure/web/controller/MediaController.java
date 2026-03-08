@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,7 +36,6 @@ import com.buy01.media.infrastructure.web.mapper.MediaMapper;
 public class MediaController {
 
     private final MediaUseCase mediaService;
-    String userId = "qwertyuiopasdfdfghhjfghjfh=";
 
     public MediaController(MediaUseCase muc) {
         this.mediaService = muc;
@@ -80,17 +80,17 @@ public class MediaController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteImages(@PathVariable String id) {
-        mediaService.deleteById(id, userId);
+    public ResponseEntity<Void> deleteImages(@PathVariable String id, @AuthenticationPrincipal UserPrincipal principal) {
+        mediaService.deleteById(id, principal.id());
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public List<MediaResponse> uploadImages(@RequestParam("files") MultipartFile[] files) {
+    public List<MediaResponse> uploadImages(@RequestParam("files") MultipartFile[] files, @AuthenticationPrincipal UserPrincipal principal) {
         return List.of(files).stream()
                 .map(file -> {
-                    var media = mediaService.uploadImage(file, userId);
+                    var media = mediaService.uploadImage(file, principal.id());
                     return MediaMapper.toResponse(media);
                 })
                 .toList();

@@ -18,4 +18,6 @@ public interface ProductUseCase {
     Mono<ProductResponse> getProductWithImages(String productId);
 
     Flux<ProductList> getProductsList(Instant beforeTime);
+
+    void deleteProduct(String id, String userId);
 }

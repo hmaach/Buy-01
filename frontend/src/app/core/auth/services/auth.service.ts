@@ -58,7 +58,7 @@ export class AuthService {
   }
 
   get isAuthenticated(): boolean {
-    return this.currentUserSignal() !== null;
+    return this.getToken() !== null;
   }
 
   get isSeller(): boolean {
@@ -146,7 +146,6 @@ export class AuthService {
       const now = new Date();
 
       if (now >= expiresAtDate) {
-        // Token expired, logout
         this.logout();
         return null;
       }
@@ -157,5 +156,9 @@ export class AuthService {
 
   getExpiresAt(): string | null {
     return localStorage.getItem(this.EXPIRES_AT_KEY);
+  }
+
+  getUserRole(): string | null {
+    return this.currentUserSignal()?.role || null;
   }
 }

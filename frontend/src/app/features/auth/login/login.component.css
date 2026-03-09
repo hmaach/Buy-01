@@ -1,93 +1,224 @@
+/* ── Page ──────────────────────────────────────────────── */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 64px);
-  padding: 24px;
-  background-color: var(--mat-sys-surface);
+  /* padding: 24px 16px; */
+  background: var(--mat-sys-background);
+  position: relative;
+  overflow: hidden;
 }
 
+/* Subtle background mesh */
+.login-container::before {
+  content: '';
+  position: absolute;
+  top: -120px;
+  right: -120px;
+  width: 480px;
+  height: 480px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.login-container::after {
+  content: '';
+  position: absolute;
+  bottom: -80px;
+  left: -80px;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ── Card ──────────────────────────────────────────────── */
 .login-card {
+  position: relative;
+  z-index: 1;
   width: 100%;
-  max-width: 400px;
-  padding: 24px;
-  border-radius: 16px;
-  box-shadow: var(--mat-sys-level2);
+  max-width: 420px;
+  border-radius: 24px !important;
+  padding: 0 !important;
+  overflow: hidden;
+  border: 1px solid var(--mat-sys-outline-variant) !important;
+  box-shadow:
+    0 4px 6px -2px rgba(0, 0, 0, 0.06),
+    0 20px 48px -8px rgba(0, 0, 0, 0.12) !important;
+  animation: cardIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-mat-card-header {
-  margin-bottom: 24px;
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Card Header (blue banner) ─────────────────────────── */
+mat-card-header.login-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 32px 32px 28px !important;
+  background: linear-gradient(135deg, #1a56db 0%, #1e40af 100%);
+  margin: 0 !important;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative circle in header */
+mat-card-header.login-header::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  pointer-events: none;
+}
+
+.logo-max {
+  width: 169px;
+  height: auto;
+  margin-top: 20px;
+  display: block;
+  /* margin-bottom: 20px; */
+  filter: brightness(0) invert(1);
+  opacity: 0.92;
 }
 
 mat-card-title {
-  font-size: 28px;
-  font-weight: 600;
-  color: var(--mat-sys-on-surface);
-  margin-bottom: 8px;
+  font-size: 1.6rem !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin: 0 0 6px !important;
 }
 
 mat-card-subtitle {
-  font-size: 14px;
-  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.875rem !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  margin: 0 !important;
+}
+
+/* ── Card Content ──────────────────────────────────────── */
+mat-card-content {
+  padding: 28px 32px 32px !important;
 }
 
 form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 4px;
 }
 
 .full-width {
   width: 100%;
 }
 
-.login-hint {
-  padding: 12px;
-  background-color: var(--mat-sys-surface-container-low);
-  border-radius: 8px;
-  margin-bottom: 8px;
+mat-form-field {
+  margin-bottom: 4px;
 }
 
-.login-hint p {
-  margin: 0;
-  font-size: 13px;
-  color: var(--mat-sys-on-surface-variant);
-}
-
-.login-hint strong {
-  color: var(--mat-sys-primary);
-}
-
+/* ── Submit Button ─────────────────────────────────────── */
 .login-btn {
-  height: 48px;
-  font-size: 16px;
-  font-weight: 500;
-  border-radius: 12px;
-  margin-top: 8px;
+  height: 48px !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  border-radius: 12px !important;
+  margin-top: 10px;
+  background: #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.35) !important;
+  transition:
+    background-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.1s ease !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.login-btn:hover:not(:disabled) {
+  background: #1d4ed8 !important;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.45) !important;
+  transform: translateY(-1px);
+}
+
+.login-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.login-btn:disabled {
+  background: var(--mat-sys-surface-container-highest) !important;
+  color: var(--mat-sys-on-surface-variant) !important;
+  box-shadow: none !important;
 }
 
 .login-btn mat-spinner {
   display: inline-block;
 }
 
+/* ── Bottom Link ───────────────────────────────────────── */
 .register-link {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin-top: 24px;
-  font-size: 14px;
+  align-items: center;
+  gap: 6px;
+  margin-top: 22px;
+  font-size: 0.85rem;
+  color: var(--mat-sys-on-surface-variant);
 }
 
 .register-link a {
-  color: var(--mat-sys-primary);
+  color: #2563eb;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
+  transition: color 0.15s ease;
 }
 
 .register-link a:hover {
+  color: #1d4ed8;
   text-decoration: underline;
 }
 
-mat-form-field {
-  margin-bottom: 8px;
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .login-container {
+    align-items: flex-start;
+    padding: 16px 12px 32px;
+  }
+
+  .login-card {
+    border-radius: 20px !important;
+    max-width: 100%;
+  }
+
+  mat-card-header.login-header {
+    padding: 24px 20px 22px !important;
+  }
+
+  mat-card-content {
+    padding: 22px 20px 24px !important;
+  }
+
+  mat-card-title {
+    font-size: 1.4rem !important;
+  }
+
+  .logo-max {
+    width: 96px;
+  }
 }

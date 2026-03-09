@@ -1,6 +1,6 @@
 import { Component, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,11 +17,10 @@ import {
   LogOut,
   LayoutDashboard,
   UserPlus,
-  Home,
-  HomeIcon,
   House,
   PackagePlus,
 } from 'lucide-angular';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
@@ -42,6 +41,7 @@ import {
 })
 export class NavbarComponent {
   private authService = inject(AuthService);
+  private router = inject(Router);
 
   readonly CircleUserRound = CircleUserRound;
   readonly CircleX = CircleX;
@@ -58,12 +58,18 @@ export class NavbarComponent {
   isLoggedIn = computed(() => this.authService.isAuthenticated);
   isSeller = computed(() => this.authService.isSeller);
 
+  currentUrl: string = '';
+  mobileMenuOpen = false;
+
   ngOnInit(): void {
-    console.log('this.currentUser: ', this.currentUser());
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        this.currentUrl = event.urlAfterRedirects;
+      });
   }
 
   // Mobile menu state
-  mobileMenuOpen = false;
 
   toggleMobileMenu(): void {
     this.mobileMenuOpen = !this.mobileMenuOpen;

@@ -1,15 +1,16 @@
+<!-- product-listing.component.html -->
 <main class="main-content">
+  <!-- Error -->
   @if (error()) {
-  <div class="error-message">
-    {{ error() }}
-    <button (click)="loadMore()">Try again</button>
-  </div>
+    <div class="error-message">
+      <span>{{ error() }}</span>
+      <button (click)="loadMore()">Try again</button>
+    </div>
   }
 
   <div class="content-grid">
-
-    <!-- Products Area -->
     <div class="products-area">
+      <!-- Toolbar -->
       <div class="toolbar">
         <div>
           <h1 class="page-title">New Products</h1>
@@ -17,40 +18,51 @@
         </div>
       </div>
 
-      <!-- Product Cards Grid -->
+      <!-- Grid -->
       <div class="products-grid">
         @for (product of products(); track product.id) {
-        <div class="product-card">
-          <div class="image-wrapper">
-            <img [src]="this.imageUrl(product.image)" [alt]="product.name" class="product-image" />
+          <div class="product-card" (click)="moreDetail(product)">
+            <div class="image-wrapper">
+              <img [src]="imageUrl(product.image)" [alt]="product.name" class="product-image" />
+              @if (product.badge) {
+                <span class="badge" [class.new]="product.badge === 'New'">
+                  {{ product.badge }}
+                </span>
+              }
+            </div>
 
-            @if (product.badge) {
-            <span class="badge" [class.new]="product.badge === 'New'">
-              {{ product.badge }}
-            </span>
-            }
+            <div class="card-body">
+              <!-- Rating -->
+              <div class="rating">
+                @for (n of [1, 2, 3, 4, 5]; track n) {
+                  <span
+                    class="star material-symbols-outlined"
+                    [class.filled]="n <= 3"
+                    [class.half]="n === 4 && 4 % 1 !== 0"
+                    >star</span
+                  >
+                }
+                <span class="review-count">(34)</span>
+              </div>
+
+              <!-- Name -->
+              <h3 class="product-name">{{ product.name }}</h3>
+
+              <!-- Price -->
+              <div class="price">
+                <span class="current-price">${{ product.price.toFixed(2) }}</span>
+              </div>
+
+              <!-- CTA -->
+              <button
+                class="add-to-cart-btn"
+                (click)="moreDetail(product); $event.stopPropagation()"
+              >
+                <span class="material-symbols-outlined">shopping_bag</span>
+                See more Detail
+              </button>
+            </div>
           </div>
-
-          <div class="rating">
-            @for (n of [1,2,3,4,5]; track n) {
-            <span class="star material-symbols-outlined" [class.filled]="n <= 3" [class.half]="n === 4 && 4 % 1 !== 0">
-              star
-            </span>
-            }
-            <span class="review-count">(34)</span>
-          </div>
-
-          <h3 class="product-name">{{ product.name }}</h3>
-
-          <div class="price">
-            <span class="current-price">${{ product.price.toFixed(2) }}</span>
-          </div>
-
-          <button class="add-to-cart-btn" (click)="moreDetail(product)">
-            <span class="material-symbols-outlined">shopping_bag</span>
-            See more Detail
-          </button>
-        </div>
         }
       </div>
     </div>
@@ -58,13 +70,23 @@
 
   <!-- Sentinel / Loader -->
   @if (hasMore() || isLoading()) {
-  <div #sentinel class="loading-area">
-    @if (isLoading()) {
-    <div class="spinner">Loading more products...</div>
-    }
-    @if (!hasMore() && products().length > 0) {
-    <div class="end-message">No more products</div>
-    }
-  </div>
+    <div #sentinel class="loading-area">
+      @if (isLoading()) {
+        <div class="spinner">Loading more products…</div>
+      }
+    </div>
+  }
+
+  @if (!hasMore() && !isLoading() && products().length > 0) {
+    <div class="loading-area">
+      <div class="end-message">You've seen all products</div>
+    </div>
+  }
+
+  @if (!isLoading() && products().length === 0 && !error()) {
+    <div class="empty-state">
+      <span class="material-symbols-outlined">inventory_2</span>
+      <p>No products available yet.</p>
+    </div>
   }
 </main>

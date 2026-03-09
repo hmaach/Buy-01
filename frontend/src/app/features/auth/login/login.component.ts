@@ -49,7 +49,15 @@ export class LoginComponent {
     private snackBar: MatSnackBar,
   ) {
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
+      email: [
+        '',
+        [
+          Validators.required,
+          Validators.email,
+          Validators.maxLength(255),
+          Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/),
+        ],
+      ],
       password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(100)]],
     });
 
@@ -59,6 +67,16 @@ export class LoginComponent {
         this.loginForm.patchValue({ email: params['email'] });
       }
     });
+  }
+
+  ngOnInit() {
+    const stateData = history.state;
+
+    console.log(stateData);
+
+    if (stateData && stateData.email) {
+      this.loginForm.patchValue({ email: stateData.email });
+    }
   }
 
   async onSubmit() {

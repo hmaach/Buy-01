@@ -12,7 +12,7 @@ import { Product } from '../../../core/models/product.model';
 @Component({
   selector: 'app-seller-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, MatCardModule, MatButtonModule, MatIconModule, MatSnackBarModule],
+  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, MatSnackBarModule],
   templateUrl: './seller-dashboard.component.html',
   styleUrl: './seller-dashboard.component.css'
 })

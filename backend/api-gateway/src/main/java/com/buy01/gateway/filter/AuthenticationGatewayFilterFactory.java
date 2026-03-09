@@ -44,9 +44,8 @@ public class AuthenticationGatewayFilterFactory
             new PublicEndpoint(HttpMethod.POST, "/users/auth/login"),
             new PublicEndpoint(HttpMethod.POST, "/users/auth/register"),
             new PublicEndpoint(null, "/media/**"),
-            new PublicEndpoint(HttpMethod.GET, "/products"), 
-            new PublicEndpoint(HttpMethod.GET, "/products/**")
-    );
+            new PublicEndpoint(HttpMethod.GET, "/products"),
+            new PublicEndpoint(HttpMethod.GET, "/products/**"));
 
     public AuthenticationGatewayFilterFactory() {
         super(Config.class);
@@ -56,15 +55,20 @@ public class AuthenticationGatewayFilterFactory
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
-            String path = request.getURI().getPath();
             HttpMethod method = request.getMethod();
 
+            if (HttpMethod.OPTIONS.equals(method)) {
+                return chain.filter(exchange);
+            }
+
+            String path = request.getURI().getPath();
             boolean isPublic = PUBLIC_ENDPOINTS.stream()
                     .anyMatch(endpoint -> endpoint.matches(method, path));
 
             if (isPublic) {
                 return chain.filter(exchange);
             }
+            
             // 1. Check for Authorization header
             String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {

@@ -12,6 +12,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { Role } from '../../../core/models/user.model';
+import { Eye, EyeOff, LucideAngularModule, ShoppingBag, UserRound } from 'lucide-angular';
+import { validateImage } from '../../../shared/utils/media-validation.utils';
 
 @Component({
   selector: 'app-register',
@@ -28,6 +30,7 @@ import { Role } from '../../../core/models/user.model';
     MatProgressSpinnerModule,
     MatSnackBarModule,
     MatIconModule,
+    LucideAngularModule,
   ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css',
@@ -39,6 +42,11 @@ export class RegisterComponent {
   avatarPreview = signal<string | null>(null);
 
   roles: Role[] = ['CLIENT', 'SELLER'];
+
+  readonly Eye = Eye;
+  readonly EyeOff = EyeOff;
+  readonly ShoppingBag = ShoppingBag;
+  readonly UserRound = UserRound;
 
   constructor(
     private fb: FormBuilder,
@@ -56,7 +64,15 @@ export class RegisterComponent {
           Validators.maxLength(50),
         ],
       ],
-      email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
+      email: [
+        '',
+        [
+          Validators.required,
+          Validators.email,
+          Validators.maxLength(100),
+          Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/),
+        ],
+      ],
       password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(30)]],
       role: ['CLIENT', Validators.required],
       avatar: [null],
@@ -68,9 +84,9 @@ export class RegisterComponent {
     if (input.files && input.files[0]) {
       const file = input.files[0];
 
-      // Validate file size (max 2MB)
-      if (file.size > 2 * 1024 * 1024) {
-        this.snackBar.open('File size must be less than 2MB', 'Close', { duration: 3000 });
+      const errorMessage = validateImage(file);
+      if (errorMessage) {
+        this.snackBar.open(errorMessage, 'Dismiss', { duration: 3000 });
         return;
       }
 
@@ -96,8 +112,7 @@ export class RegisterComponent {
       this.authService.register({ name, email, password, role }).subscribe({
         next: () => {
           this.snackBar.open('Registration successful!', 'Close', { duration: 3000 });
-          // Redirect to login with pre-filled email
-          this.router.navigate(['/login'], { queryParams: { email } });
+          this.router.navigateByUrl('/login', { state: { email } });
         },
         error: (error) => {
           const errorMessage = error.error?.detail || 'Registration failed';

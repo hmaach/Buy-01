@@ -12,21 +12,6 @@ import { NavbarComponent } from './shared/components/navbar/navbar.component';
       <router-outlet></router-outlet>
     </main>
   `,
-  styles: [`
-    :host {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    
-    .content {
-      flex: 1;
-      padding: 24px;
-      max-width: 1200px;
-      margin: 0 auto;
-      width: 100%;
-      box-sizing: border-box;
-    }
-  `]
+  styleUrl: './app.css',
 })
 export class AppComponent {}

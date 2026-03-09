@@ -8,25 +8,23 @@ export const roleGuard = (allowedRoles: Role[]): CanActivateFn => {
     const authService = inject(AuthService);
     const router = inject(Router);
 
-    const hasValidToken = authService.getToken() !== null;
-
-    if (!authService.isAuthenticated && !hasValidToken) {
+    if (!authService.isAuthenticated) {
       router.navigate(['/login']);
       return false;
     }
 
-    const user = authService.user;
+    const userRole = authService.getUserRole() as Role | null;
 
-    if (!user && hasValidToken) {
+    if (!userRole) {
       router.navigate(['/login']);
       return false;
     }
 
-    if (user && allowedRoles.includes(user.role)) {
+    if (allowedRoles.includes(userRole)) {
       return true;
     }
 
-    router.navigate(['/products']);
+    router.navigate(['/']);
     return false;
   };
 };

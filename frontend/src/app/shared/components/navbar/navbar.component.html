@@ -3,7 +3,6 @@
     <div class="navbar-brand">
       <a routerLink="/" class="brand-link">
         <img src="/assets/logo.png" alt="Logo" />
-        <span>Buy-01</span>
       </a>
     </div>
 
@@ -105,15 +104,19 @@
           </button>
         </mat-menu>
       } @else {
-        <a mat-button routerLink="/login">
-          <lucide-angular [img]="LogIn" [size]="17"></lucide-angular>
-          Login
-        </a>
+        @if (currentUrl !== '/login') {
+          <a mat-button routerLink="/login">
+            <lucide-angular [img]="LogIn" [size]="17"></lucide-angular>
+            Login
+          </a>
+        }
 
-        <a mat-button routerLink="/register">
-          <lucide-angular [img]="UserPlus" [size]="17"></lucide-angular>
-          Register
-        </a>
+        @if (currentUrl !== '/register') {
+          <a mat-button routerLink="/register">
+            <lucide-angular [img]="UserPlus" [size]="17"></lucide-angular>
+            Register
+          </a>
+        }
       }
 
       <button
@@ -174,14 +177,17 @@
 
       @if (!isLoggedIn()) {
         <div class="mobile-divider"></div>
+        @if (currentUrl !== '/login') {}
         <a mat-button routerLink="/login" (click)="closeMobileMenu()">
           <lucide-angular [img]="LogIn" [size]="17"></lucide-angular>
           Login
         </a>
-        <a mat-button routerLink="/register" (click)="closeMobileMenu()">
-          <lucide-angular [img]="UserPlus" [size]="17"></lucide-angular>
-          Register
-        </a>
+        @if (currentUrl !== '/register') {
+          <a mat-button routerLink="/register" (click)="closeMobileMenu()">
+            <lucide-angular [img]="UserPlus" [size]="17"></lucide-angular>
+            Register
+          </a>
+        }
       }
     </nav>
   </div>

@@ -1,24 +1,26 @@
+<!-- login.component.html -->
 <div class="login-container">
   <mat-card class="login-card">
-    <mat-card-header>
+    <mat-card-header class="login-header">
+      <img src="/assets/logo-max.png" alt="Logo" class="logo-max" />
       <mat-card-title>Welcome Back</mat-card-title>
-      <mat-card-subtitle>Sign in to continue</mat-card-subtitle>
+      <mat-card-subtitle>Sign in to your account</mat-card-subtitle>
     </mat-card-header>
 
     <mat-card-content>
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Email</mat-label>
-          <input matInput formControlName="email" type="email" placeholder="Enter your email" />
-          <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
-            Email is required
-          </mat-error>
-          <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
-            Please enter a valid email
-          </mat-error>
-          <mat-error *ngIf="loginForm.get('email')?.hasError('maxlength')">
-            Email must be at most 255 characters
-          </mat-error>
+          <input matInput formControlName="email" type="email" placeholder="you@example.com" />
+          <mat-error *ngIf="loginForm.get('email')?.hasError('required')"
+            >Email is required</mat-error
+          >
+          <mat-error *ngIf="loginForm.get('email')?.hasError('email')"
+            >Enter a valid email</mat-error
+          >
+          <mat-error *ngIf="loginForm.get('email')?.hasError('maxlength')"
+            >Max 255 characters</mat-error
+          >
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
@@ -27,38 +29,33 @@
             matInput
             formControlName="password"
             [type]="hidePassword() ? 'password' : 'text'"
-            placeholder="Enter your password"
+            placeholder="Your password"
           />
           <button
             mat-icon-button
             matSuffix
             type="button"
             (click)="hidePassword.set(!hidePassword())"
+            aria-label="Toggle password"
           >
             @if (hidePassword()) {
-              <lucide-angular [img]="EyeOff" [size]="17"></lucide-angular>
-            } @else {
               <lucide-angular [img]="Eye" [size]="17"></lucide-angular>
+            } @else {
+              <lucide-angular [img]="EyeOff" [size]="17"></lucide-angular>
             }
           </button>
-          <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
-            Password is required
-          </mat-error>
-          <mat-error *ngIf="loginForm.get('password')?.hasError('minlength')">
-            Password must be at least 6 characters
-          </mat-error>
-          <mat-error *ngIf="loginForm.get('password')?.hasError('maxlength')">
-            Password must be at most 100 characters
-          </mat-error>
+          <mat-error *ngIf="loginForm.get('password')?.hasError('required')"
+            >Password is required</mat-error
+          >
+          <mat-error *ngIf="loginForm.get('password')?.hasError('minlength')"
+            >At least 6 characters</mat-error
+          >
+          <mat-error *ngIf="loginForm.get('password')?.hasError('maxlength')"
+            >Max 100 characters</mat-error
+          >
         </mat-form-field>
 
-        <button
-          mat-flat-button
-          color="primary"
-          type="submit"
-          class="full-width login-btn"
-          [disabled]="loading()"
-        >
+        <button mat-flat-button type="submit" class="full-width login-btn" [disabled]="loading()">
           @if (loading()) {
             <mat-spinner diameter="20"></mat-spinner>
           } @else {

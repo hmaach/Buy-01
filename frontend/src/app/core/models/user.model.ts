@@ -5,7 +5,7 @@ export interface User {
   name: string;
   email: string;
   role: Role;
-  avatarUrl: string;
+  avatarId: string;
 }
 
 export interface LoginRequest {

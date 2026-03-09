@@ -72,7 +72,7 @@ Register a new user in the system.
   "name": "John Doe",
   "email": "john@example.com",
   "role": "SELLER",
-  "avatarUrl": null,
+  "avatarId": null,
   "createdAt": "2024-01-01T00:00:00Z"
 }
 ```
@@ -126,7 +126,7 @@ Authorization: Bearer <jwt_token>
   "name": "John Doe",
   "email": "john@example.com",
   "role": "SELLER",
-  "avatarUrl": "https://...",
+  "avatarId": "https://...",
   "createdAt": "2024-01-01T00:00:00Z"
 }
 ```
@@ -152,7 +152,7 @@ Get a user by their UUID.
   "name": "John Doe",
   "email": "john@example.com",
   "role": "SELLER",
-  "avatarUrl": "https://...",
+  "avatarId": "https://...",
   "createdAt": "2024-01-01T00:00:00Z"
 }
 ```
@@ -186,7 +186,7 @@ Authorization: Bearer <jwt_token>
   "name": "John Updated",
   "email": "john@example.com",
   "role": "SELLER",
-  "avatarUrl": "https://...",
+  "avatarId": "https://...",
   "createdAt": "2024-01-01T00:00:00Z"
 }
 ```

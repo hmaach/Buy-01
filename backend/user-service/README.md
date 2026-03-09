@@ -36,7 +36,7 @@ User
 ├── email: String (unique)
 ├── password: String (encrypted)
 ├── role: Role (CLIENT, SELLER)
-├── avatarUrl: String (optional)
+├── avatarId: String (optional)
 ├── createdAt: Instant
 └── updatedAt: Instant
 ```
@@ -105,7 +105,7 @@ User
   "name": "John Doe",
   "email": "john@example.com",
   "role": "SELLER",
-  "avatarUrl": "https://...",
+  "avatarId": "https://...",
   "createdAt": "2024-01-01T00:00:00Z"
 }
 ```

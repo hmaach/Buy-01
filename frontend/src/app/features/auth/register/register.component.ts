@@ -13,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { Role } from '../../../core/models/user.model';
 import { Eye, EyeOff, LucideAngularModule, ShoppingBag, UserRound } from 'lucide-angular';
+import { validateImage } from '../../../shared/utils/media-validation.utils';
 
 @Component({
   selector: 'app-register',
@@ -83,9 +84,9 @@ export class RegisterComponent {
     if (input.files && input.files[0]) {
       const file = input.files[0];
 
-      // Validate file size (max 2MB)
-      if (file.size > 2 * 1024 * 1024) {
-        this.snackBar.open('File size must be less than 2MB', 'Close', { duration: 3000 });
+      const errorMessage = validateImage(file);
+      if (errorMessage) {
+        this.snackBar.open(errorMessage, 'Dismiss', { duration: 3000 });
         return;
       }
 

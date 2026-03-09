@@ -19,6 +19,7 @@ public class CorsConfig {
         // Allowed origins (frontend URLs)
         corsConfig.setAllowedOrigins(List.of(
                 "http://localhost:4200", // Angular dev server
+                "https://localhost:4200",
                 "http://localhost:3000", // React dev server (if needed)
                 "https://your-production-domain.com"
         ));

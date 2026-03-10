@@ -17,16 +17,6 @@ spring:
       password: ${MEDIA_MONGO_DB_PWD:123456}
       authentication-database: admin
       
-  kafka:
-    consumer:
-      group-id: media-service-group
-      auto-offset-reset: earliest
-      enable-auto-commit: true
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: "*"
-
 security:
   jwt:
     public-key: ${JWT_PUBLIC_KEY}

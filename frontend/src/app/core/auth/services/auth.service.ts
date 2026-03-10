@@ -26,6 +26,7 @@ export class AuthService {
   private initializeAuth(): void {
     const token = this.getToken();
     const expiresAt = this.getExpiresAt();
+    console.log('initializeAuth - token:', token, 'expiresAt:', expiresAt);
 
     if (token && expiresAt) {
       const expiresAtDate = new Date(expiresAt);
@@ -36,6 +37,7 @@ export class AuthService {
           this.getCurrentUser()
             .pipe(
               tap((user) => {
+                console.log('initializeAuth - user:', user);
                 if (user) {
                   this.currentUserSubject.next(user);
                   this.currentUserSignal.set(user);
@@ -103,15 +105,16 @@ export class AuthService {
   }
 
   register(request: RegisterRequest): Observable<AuthResponse> {
-    // Use placeholder UUID for avatar
     const payload = {
-      ...request,
-      avatar: request.avatar || '00000000-0000-0000-0000-000000000000',
+      name: request.name,
+      email: request.email,
+      password: request.password,
+      role: request.role,
     };
 
     return this.http.post<AuthResponse>(`/users/auth/register`, payload).pipe(
-      tap((response) => {
-        this.handleAuthSuccess(response);
+      tap(() => {
+        this.router.navigateByUrl('/login', { state: { email: request.email } });
       }),
       catchError((error) => {
         console.error('Registration error:', error);

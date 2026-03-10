@@ -28,6 +28,7 @@ help:
 	@echo "  make rebuild        -> clean install all services"
 	@echo "  make docker-build   -> build docker images"
 	@echo "  make docker-up      -> start docker-compose"
+	@echo "  make docker-up-dev  -> start docker-compose with dbs and discovery-server for development"
 	@echo "  make docker-up-dbs  -> start docker-compose databases only"
 	@echo "  make docker-down    -> stop docker-compose"
 

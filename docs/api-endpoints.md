@@ -19,6 +19,7 @@ Authorization: Bearer <jwt_token>
 ## Response Format
 
 ### Success Response
+
 ```json
 {
   "data": { ... }
@@ -26,6 +27,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 ### Error Response
+
 ```json
 {
   "status": 404,
@@ -41,6 +43,7 @@ Authorization: Bearer <jwt_token>
 ### Authentication
 
 #### Register User
+
 ```
 POST /auth/register
 ```
@@ -48,6 +51,7 @@ POST /auth/register
 Register a new user in the system.
 
 **Request Body:**
+
 ```json
 {
   "name": "John Doe",
@@ -66,13 +70,13 @@ Register a new user in the system.
 | role | String | Yes | CLIENT or SELLER |
 
 **Response (201 Created):**
+
 ```json
 {
   "id": "uuid",
   "name": "John Doe",
   "email": "john@example.com",
   "role": "SELLER",
-  "avatarId": null,
   "createdAt": "2024-01-01T00:00:00Z"
 }
 ```
@@ -80,6 +84,7 @@ Register a new user in the system.
 ---
 
 #### Login User
+
 ```
 POST /auth/login
 ```
@@ -87,6 +92,7 @@ POST /auth/login
 Authenticate a user and receive JWT tokens.
 
 **Request Body:**
+
 ```json
 {
   "email": "john@example.com",
@@ -95,6 +101,7 @@ Authenticate a user and receive JWT tokens.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIs...",
@@ -108,6 +115,7 @@ Authenticate a user and receive JWT tokens.
 ### User Management
 
 #### Get Current User Profile
+
 ```
 GET /me
 ```
@@ -115,18 +123,19 @@ GET /me
 Get the profile of the currently authenticated user.
 
 **Headers:**
+
 ```
 Authorization: Bearer <jwt_token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "uuid",
   "name": "John Doe",
   "email": "john@example.com",
   "role": "SELLER",
-  "avatarId": "https://...",
   "createdAt": "2024-01-01T00:00:00Z"
 }
 ```
@@ -134,6 +143,7 @@ Authorization: Bearer <jwt_token>
 ---
 
 #### Get User by ID
+
 ```
 GET /users/id/{id}
 ```
@@ -146,13 +156,13 @@ Get a user by their UUID.
 | id | UUID | User's unique identifier |
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "uuid",
   "name": "John Doe",
   "email": "john@example.com",
   "role": "SELLER",
-  "avatarId": "https://...",
   "createdAt": "2024-01-01T00:00:00Z"
 }
 ```
@@ -160,6 +170,7 @@ Get a user by their UUID.
 ---
 
 #### Update Current User
+
 ```
 PUT /users/me
 ```
@@ -167,6 +178,7 @@ PUT /users/me
 Update the currently authenticated user's profile.
 
 **Headers:**
+
 ```
 Authorization: Bearer <jwt_token>
 ```
@@ -177,16 +189,16 @@ Authorization: Bearer <jwt_token>
 | Field | Type | Description |
 |-------|------|-------------|
 | name | String | User's full name |
-| file | File | Profile avatar image (optional) |
+| zmail | String | User's email |
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "uuid",
   "name": "John Updated",
   "email": "john@example.com",
   "role": "SELLER",
-  "avatarId": "https://...",
   "createdAt": "2024-01-01T00:00:00Z"
 }
 ```
@@ -194,6 +206,7 @@ Authorization: Bearer <jwt_token>
 ---
 
 #### Delete Current User
+
 ```
 DELETE /users/me
 ```
@@ -201,6 +214,7 @@ DELETE /users/me
 Delete the currently authenticated user's account.
 
 **Headers:**
+
 ```
 Authorization: Bearer <jwt_token>
 ```
@@ -214,6 +228,7 @@ Authorization: Bearer <jwt_token>
 ### Product Management
 
 #### List Products
+
 ```
 GET /products
 ```
@@ -226,6 +241,7 @@ Get a list of all products.
 | beforeTime | Instant | No | Filter products created before this time |
 
 **Response (200 OK):**
+
 ```json
 {
   "products": [
@@ -249,6 +265,7 @@ Get a list of all products.
 ---
 
 #### Get Product by ID
+
 ```
 GET /products/{id}
 ```
@@ -261,6 +278,7 @@ Get a specific product by ID.
 | id | String | Product's unique identifier |
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "product-uuid",
@@ -280,6 +298,7 @@ Get a specific product by ID.
 ---
 
 #### Create Product
+
 ```
 POST /products
 ```
@@ -287,12 +306,14 @@ POST /products
 Create a new product. **Requires SELLER role.**
 
 **Headers:**
+
 ```
 Authorization: Bearer <jwt_token>
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "name": "iPhone 15 Pro",
@@ -313,6 +334,7 @@ Content-Type: application/json
 | category | String | Yes | Product category |
 
 **Response (201 Created):**
+
 ```json
 {
   "id": "product-uuid",
@@ -332,6 +354,7 @@ Content-Type: application/json
 ---
 
 #### Update Product
+
 ```
 PUT /products/{id}
 ```
@@ -339,12 +362,14 @@ PUT /products/{id}
 Update an existing product. **Requires SELLER role (owner only).**
 
 **Headers:**
+
 ```
 Authorization: Bearer <jwt_token>
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "name": "iPhone 15 Pro Updated",
@@ -356,6 +381,7 @@ Content-Type: application/json
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": "product-uuid",
@@ -375,6 +401,7 @@ Content-Type: application/json
 ---
 
 #### Delete Product
+
 ```
 DELETE /products/{id}
 ```
@@ -382,6 +409,7 @@ DELETE /products/{id}
 Delete a product. **Requires SELLER role (owner only).**
 
 **Headers:**
+
 ```
 Authorization: Bearer <jwt_token>
 ```
@@ -395,6 +423,7 @@ Authorization: Bearer <jwt_token>
 ### Media Management
 
 #### Upload Image
+
 ```
 POST /media
 ```
@@ -402,6 +431,7 @@ POST /media
 Upload a new image. **Requires SELLER role.**
 
 **Headers:**
+
 ```
 Authorization: Bearer <jwt_token>
 Content-Type: multipart/form-data
@@ -413,6 +443,7 @@ Content-Type: multipart/form-data
 | file | File | Image file (JPEG, PNG, etc.) |
 
 **Response (201 Created):**
+
 ```json
 {
   "id": "media-uuid",
@@ -427,6 +458,7 @@ Content-Type: multipart/form-data
 ---
 
 #### Get Image
+
 ```
 GET /media/{id}
 ```
@@ -443,6 +475,7 @@ Get an image by ID. Returns the raw image data.
 ---
 
 #### Get Product Images
+
 ```
 GET /media/product/{productId}
 ```
@@ -455,6 +488,7 @@ Get all images associated with a product.
 | productId | String | Product's unique identifier |
 
 **Response (200 OK):**
+
 ```json
 {
   "productId": "product-uuid",
@@ -468,6 +502,7 @@ Get all images associated with a product.
 ---
 
 #### Delete Image
+
 ```
 DELETE /media/{id}
 ```
@@ -475,6 +510,7 @@ DELETE /media/{id}
 Delete an image. **Requires SELLER role.**
 
 **Headers:**
+
 ```
 Authorization: Bearer <jwt_token>
 ```
@@ -484,6 +520,7 @@ Authorization: Bearer <jwt_token>
 ---
 
 #### Batch Image Operation
+
 ```
 POST /media/batch
 ```
@@ -491,12 +528,14 @@ POST /media/batch
 Link multiple images to a product. **Requires SELLER role.**
 
 **Headers:**
+
 ```
 Authorization: Bearer <jwt_token>
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "productId": "product-uuid",
@@ -505,6 +544,7 @@ Content-Type: application/json
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "productId": "product-uuid",
@@ -517,21 +557,25 @@ Content-Type: application/json
 ## Health Check Endpoints
 
 ### API Gateway
+
 ```
 GET /actuator/health
 ```
 
 ### User Service
+
 ```
 GET http://localhost:8081/actuator/health
 ```
 
 ### Product Service
+
 ```
 GET http://localhost:8082/actuator/health
 ```
 
 ### Media Service
+
 ```
 GET http://localhost:8083/actuator/health
 ```
@@ -540,17 +584,17 @@ GET http://localhost:8083/actuator/health
 
 ## HTTP Status Codes
 
-| Code | Description |
-|------|-------------|
-| 200 | OK - Request successful |
-| 201 | Created - Resource created successfully |
-| 204 | No Content - Request successful, no response body |
-| 400 | Bad Request - Invalid request data |
-| 401 | Unauthorized - Invalid or missing JWT token |
-| 403 | Forbidden - Insufficient permissions |
-| 404 | Not Found - Resource not found |
-| 429 | Too Many Requests - Rate limit exceeded |
-| 500 | Internal Server Error - Server error |
+| Code | Description                                       |
+| ---- | ------------------------------------------------- |
+| 200  | OK - Request successful                           |
+| 201  | Created - Resource created successfully           |
+| 204  | No Content - Request successful, no response body |
+| 400  | Bad Request - Invalid request data                |
+| 401  | Unauthorized - Invalid or missing JWT token       |
+| 403  | Forbidden - Insufficient permissions              |
+| 404  | Not Found - Resource not found                    |
+| 429  | Too Many Requests - Rate limit exceeded           |
+| 500  | Internal Server Error - Server error              |
 
 ---
 

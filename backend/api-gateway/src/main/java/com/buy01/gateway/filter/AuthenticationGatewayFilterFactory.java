@@ -1,6 +1,9 @@
 package com.buy01.gateway.filter;
 
-import com.buy01.gateway.security.JwtUtil;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -12,11 +15,10 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
 
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
+import com.buy01.gateway.security.JwtUtil;
+
+import reactor.core.publisher.Mono;
 
 record PublicEndpoint(HttpMethod method, String pattern) {
     public boolean matches(HttpMethod reqMethod, String reqPath) {
@@ -76,7 +78,6 @@ public class AuthenticationGatewayFilterFactory
             }
 
             String token = authHeader.substring(7);
-            System.out.println(token);
 
             try {
                 // 2. Validate token

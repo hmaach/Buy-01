@@ -10,20 +10,18 @@ public class User {
     private String email;
     private String password;
     private Role role;
-    private UUID avatarId;
     private Instant createdAt;
     private Instant updatedAt;
 
     public User() {
     }
 
-    public User(UUID id, String name, String email, String password, Role role, UUID avatarId, Instant createdAt, Instant updatedAt) {
+    public User(UUID id, String name, String email, String password, Role role, Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
-        this.avatarId = avatarId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -68,14 +66,6 @@ public class User {
         this.role = role;
     }
 
-    public UUID getAvatarId() {
-        return avatarId;
-    }
-
-    public void setAvatarId(UUID avatarId) {
-        this.avatarId = avatarId;
-    }
-
     public Instant getCreatedAt() {
         return createdAt;
     }
@@ -100,17 +90,21 @@ public class User {
                 email,
                 password,
                 role,
-                null,
                 now,
                 now
         );
     }
 
-    public void update(String name, UUID avatarId) {
-        this.name = name;
-        if (avatarId != null) {
-            this.avatarId = avatarId;
+    public void update(String name, String email) {
+        boolean updated = false;
+        if (name != null) {
+            this.name = name;
         }
-        this.updatedAt = Instant.now();
+        if (email != null) {
+            this.email = email;
+        }
+        if (updated) {
+            this.updatedAt = Instant.now();
+        }
     }
 }

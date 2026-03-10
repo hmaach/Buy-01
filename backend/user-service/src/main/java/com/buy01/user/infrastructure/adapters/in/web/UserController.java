@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.buy01.user.domain.model.User;
+import com.buy01.user.domain.port.in.AvatarService;
 import com.buy01.user.domain.port.in.UserService;
 import com.buy01.user.infrastructure.adapters.in.web.dto.request.UpdateUserRequest;
 import com.buy01.user.infrastructure.adapters.in.web.dto.response.UserResponse;
@@ -26,9 +27,11 @@ import jakarta.validation.Valid;
 public class UserController {
 
     private final UserService userService;
+    private final AvatarService avatarService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, AvatarService avatarService) {
         this.userService = userService;
+        this.avatarService = avatarService;
     }
 
     @GetMapping
@@ -55,8 +58,12 @@ public class UserController {
     ) {
         UserPrincipal currUser = (UserPrincipal) authentication.getPrincipal();
 
+        String avatarUrl = null;
+        if (request.avatar() != null && !request.avatar().isEmpty()) {
+            avatarUrl = avatarService.saveAvatar(request.avatar());
+        }
 
-        User updatedUser = userService.updateUser(currUser.id(), request.toCommand());
+        User updatedUser = userService.updateUser(currUser.id(), request.toCommand(avatarUrl));
         return ResponseEntity.ok(UserResponse.from(updatedUser));
     }
 

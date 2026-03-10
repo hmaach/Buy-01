@@ -8,6 +8,7 @@ import com.buy01.user.domain.exception.InvalidCredentialsException;
 import com.buy01.user.domain.exception.UserAlreadyExistsException;
 import com.buy01.user.domain.model.User;
 import com.buy01.user.domain.port.in.AuthService;
+import com.buy01.user.domain.port.in.AvatarService;
 import com.buy01.user.domain.port.out.PasswordEncoderPort;
 import com.buy01.user.domain.port.out.TokenGeneratorPort;
 import com.buy01.user.domain.port.out.TokenResult;
@@ -19,15 +20,18 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepositoryPort userRepository;
     private final PasswordEncoderPort passwordEncoder;
     private final TokenGeneratorPort tokenGenerator;
+    private final AvatarService avatarService;
 
     public AuthServiceImpl(
             UserRepositoryPort userRepository,
             PasswordEncoderPort passwordEncoder,
-            TokenGeneratorPort tokenGenerator
+            TokenGeneratorPort tokenGenerator,
+            AvatarService avatarService
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenGenerator = tokenGenerator;
+        this.avatarService = avatarService;
     }
 
     @Override
@@ -44,6 +48,11 @@ public class AuthServiceImpl implements AuthService {
                 encodedPassword,
                 command.role()
         );
+
+        // Set avatar URL if provided
+        if (command.avatarUrl() != null && !command.avatarUrl().isEmpty()) {
+            user.setAvatarUrl(command.avatarUrl());
+        }
 
         return userRepository.save(user);
     }

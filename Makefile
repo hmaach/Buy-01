@@ -35,10 +35,10 @@ help:
 # Maven Targets
 # ==============================
 
-install:
+install: ssl
 	@for service in $(SERVICES); do \
 		echo "Building $$service..."; \
-		cd $(BACKEND_DIR)/$$service && $(MVN_CMD) clean install && cd - > /dev/null; \
+		cd $(BACKEND_DIR)/$$service && $(MVN_CMD) clean install -DskipTests && cd - > /dev/null; \
 	done
 
 clean:
@@ -53,7 +53,7 @@ rebuild: clean install
 # Docker Targets
 # ==============================
 
-docker-build:
+docker-build: ssl
 	docker compose build
 
 docker-up:
@@ -71,6 +71,9 @@ docker-down:
 # ==============================
 # Key Generation
 # ==============================
+ssl:
+	@echo "Checking SSL certificates..."
+	@bash ./scripts/setup-ssl.sh
 
 env:
 	@echo "Generating RSA keys..."

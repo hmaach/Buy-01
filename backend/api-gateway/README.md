@@ -12,6 +12,32 @@ API Gateway for the e-commerce microservices platform.
 - ✅ Request/response logging
 - ✅ Centralized error handling
 
+## Security Setup (HTTPS)
+
+### using keytool
+To run the Gateway, you must generate a local SSL certificate:
+
+```bash
+keytool -genkeypair -alias springgateway -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore src/main/resources/edge-service.p12 -validity 3650 -storepass yourpassword
+```
+- Note: The .p12 file is ignored by git for security.
+
+### using openSSL
+#### Step A: Generate the Private Key and Certificate
+
+Run this in your api-gateway terminal:
+```bash
+openssl req -x509 -newkey rsa:4096 -keyout src/main/resources/key.pem -out src/main/resources/cert.pem -sha256 -days 365 -nodes
+```
+This gives you key.pem (your secret) and cert.pem (your public certificate).
+
+#### Step B: Bundle them into a .p12 file (What Spring Needs)
+
+Spring Boot cannot read raw .pem files easily without extra code. You need to "wrap" them:
+```Bash
+openssl pkcs12 -export -in src/main/resources/cert.pem -inkey src/main/resources/key.pem -out src/main/resources/edge-service.p12 -name springgateway -passout pass:123456
+```
+Important: The -name springgateway here is the Alias. It must match the key-alias in your application.yml.
 ## Routes
 
 ### User Service

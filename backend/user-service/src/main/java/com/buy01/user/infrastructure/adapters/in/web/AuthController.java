@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.buy01.user.application.command.CreateUserCommand;
 import com.buy01.user.application.command.LoginCommand;
-import com.buy01.user.domain.model.Role;
 import com.buy01.user.domain.model.User;
 import com.buy01.user.domain.port.in.AuthService;
 import com.buy01.user.domain.port.out.TokenResult;
@@ -34,16 +33,16 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@RequestBody @Valid RegisterRequest request) {
+
         CreateUserCommand command = new CreateUserCommand(
                 request.name(),
                 request.email(),
                 request.password(),
-                request.role() != null ? request.role() : Role.CLIENT,
-                null
+                request.role()
         );
 
         User user = authService.register(command);
-        return ResponseEntity.status(HttpStatus.CREATED).body(UserResponse.from(user, null));
+        return ResponseEntity.status(HttpStatus.CREATED).body(UserResponse.from(user));
     }
 
     @PostMapping("/login")

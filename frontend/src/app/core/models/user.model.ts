@@ -5,7 +5,6 @@ export interface User {
   name: string;
   email: string;
   role: Role;
-  avatarId: string;
 }
 
 export interface LoginRequest {
@@ -18,7 +17,6 @@ export interface RegisterRequest {
   email: string;
   password: string;
   role: Role;
-  avatar?: string;
 }
 
 export interface AuthResponse {

@@ -1,8 +1,5 @@
 package com.buy01.user.infrastructure.adapters.in.web.dto.request;
 
-import java.util.UUID;
-
-import org.springframework.web.multipart.MultipartFile;
 
 import com.buy01.user.application.command.UpdateUserCommand;
 
@@ -14,11 +11,10 @@ public record UpdateUserRequest(
         String name,
         @Email(message = "Email must be valid")
         @Size(max = 255, message = "Email must not exceed 255 characters")
-        String email,
-        MultipartFile avatar
+        String email
         ) {
 
-    public UpdateUserCommand toCommand(UUID avatarId) {
-        return new UpdateUserCommand(name, email, avatarId);
+    public UpdateUserCommand toCommand() {
+        return new UpdateUserCommand(name, email);
     }
 }

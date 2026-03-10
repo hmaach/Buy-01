@@ -9,7 +9,6 @@ import { MatDividerModule } from '@angular/material/divider';
 import { LucideAngularModule, Camera, Mail, User, ShieldCheck, Save, Trash2 } from 'lucide-angular';
 import { AuthService } from '../../core/auth/services/auth.service';
 import { UserService } from '../../core/services/user.service';
-import { validateImage } from '../../shared/utils/media-validation.utils';
 import { MediaService } from '../../core/services/media.service';
 
 @Component({
@@ -46,14 +45,19 @@ export class ProfileComponent {
   currentUser = computed(() => this.authService.user);
   isSeller = computed(() => this.authService.isSeller);
 
-  avatarPreview = signal<string | null>(null);
-  avatarFile = signal<File | null>(null);
-  avatarRemoved = signal(false);
   isSaving = signal(false);
 
   profileForm = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
-    email: [{ value: '', disabled: true }],
+    email: [
+      '',
+      [
+        Validators.required,
+        Validators.email,
+        Validators.maxLength(100),
+        Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/),
+      ],
+    ],
   });
 
   constructor() {
@@ -68,14 +72,12 @@ export class ProfileComponent {
         name: user.name,
         email: user.email,
       });
-      this.avatarPreview.set(user.avatarId ?? null);
     }
   }
 
   get hasChanges(): boolean {
     const nameChanged = this.profileForm.get('name')?.value !== this.currentUser()?.name;
-    const avatarChanged = this.avatarFile() !== null || this.avatarRemoved();
-    return (nameChanged || avatarChanged) && this.profileForm.valid;
+    return nameChanged && this.profileForm.valid;
   }
 
   get roleLabel(): string {
@@ -90,36 +92,6 @@ export class ProfileComponent {
       .join('')
       .toUpperCase()
       .slice(0, 2);
-  }
-
-  get displayAvatar(): string | null {
-    if (this.avatarRemoved()) return null;
-    return this.avatarPreview() ?? this.currentUser()?.avatarId ?? null;
-  }
-
-  onAvatarSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-
-    const errorMessage = validateImage(file);
-    if (errorMessage) {
-      this.snackBar.open(errorMessage, 'Dismiss', { duration: 3000 });
-      return;
-    }
-
-    this.avatarFile.set(file);
-    this.avatarRemoved.set(false);
-
-    const reader = new FileReader();
-    reader.onload = () => this.avatarPreview.set(reader.result as string);
-    reader.readAsDataURL(file);
-  }
-
-  removeAvatar(): void {
-    this.avatarPreview.set(null);
-    this.avatarFile.set(null);
-    this.avatarRemoved.set(!!this.currentUser()?.avatarId);
   }
 
   private uploadImage(file: File, callback: (id: string) => void): void {
@@ -139,22 +111,20 @@ export class ProfileComponent {
     if (!this.hasChanges) return;
     this.isSaving.set(true);
 
-    const updateUser = (avatarId?: string) => {
+    const updateUser = () => {
       const formData = new FormData();
 
       const name = this.profileForm.get('name')?.value ?? '';
+      const email = this.profileForm.get('email')?.value ?? '';
 
       formData.append('name', name);
-      if (avatarId) formData.append('avatarId', avatarId);
-      else if (!this.avatarRemoved())
-        formData.append('avatarId', this.currentUser()?.avatarId ?? '');
+      formData.append('email', email);
 
       this.userService.updateUser(formData).subscribe({
         next: (updatedUser) => {
           if (updatedUser) {
             this.authService.updateCurrentUser(updatedUser);
             this.profileForm.markAsPristine();
-            this.avatarRemoved.set(false);
             this.snackBar.open('Profile updated successfully!', '✓', { duration: 3000 });
           }
           this.isSaving.set(false);
@@ -169,10 +139,6 @@ export class ProfileComponent {
       });
     };
 
-    if (this.avatarFile()) {
-      this.uploadImage(this.avatarFile()!, (id) => updateUser(id));
-    } else {
-      updateUser();
-    }
+    updateUser();
   }
 }

@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateUser(UUID userId, UpdateUserCommand command) {
         User user = findById(userId);
-        user.update(command.name(), command.avatarId());
+        user.update(command.name(), command.email());
         return userRepository.save(user);
     }
 

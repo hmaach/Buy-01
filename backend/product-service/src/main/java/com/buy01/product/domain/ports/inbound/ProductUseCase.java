@@ -19,5 +19,7 @@ public interface ProductUseCase {
 
     Flux<ProductList> getProductsList(Instant beforeTime);
 
-    void deleteProduct(String id, String userId);
+    Flux<ProductList> getUserProductsList(String userId, Instant beforeTime);
+
+    Mono<Void> deleteProduct(String id, String userId);
 }

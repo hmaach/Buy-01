@@ -1,8 +1,8 @@
-import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, signal, viewChild, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProductService } from '../../../core/services/product.service';
 import { env } from '../../../../environments/environment';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ProductListDto } from '../../../core/models/product.model';
 
 @Component({
@@ -15,11 +15,13 @@ import { ProductListDto } from '../../../core/models/product.model';
 export class ProductList implements OnInit, OnDestroy, AfterViewInit {
   private productService = inject(ProductService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   products = signal<ProductListDto[]>([]);
   isLoading = signal(false);
   hasMore = signal(true);
   error = signal<string | null>(null);
+  isMyProducts = signal(false);
 
   private beforeTime = signal<string>('');
   private observer!: IntersectionObserver;
@@ -34,6 +36,8 @@ export class ProductList implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit() {
+    this.isMyProducts.set(this.route.snapshot.data['myProducts'] === true || this.router.url.startsWith('/dashboard'));
+
     this.loadMore();
 
     this.observer = new IntersectionObserver(
@@ -56,7 +60,11 @@ export class ProductList implements OnInit, OnDestroy, AfterViewInit {
     this.isLoading.set(true);
     this.error.set(null);
 
-    this.productService.getListOfProducts(this.beforeTime()).subscribe({
+    const request$ = this.isMyProducts() ?
+      this.productService.getMyProductsList(this.beforeTime()) :
+      this.productService.getListOfProducts(this.beforeTime());
+
+    request$.subscribe({
       next: (newProducts) => {
         if (newProducts.length === 0) {
           this.hasMore.set(false);

@@ -10,6 +10,7 @@ export interface ProductCreateRequest {
 export interface Product {
   name: string,
   price: number,
+  userId: string
   oldPrice: number,
   rating: 4.8,
   reviewsCount: 124,

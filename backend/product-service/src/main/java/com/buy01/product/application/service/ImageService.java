@@ -67,18 +67,14 @@ public class ImageService {
                 }
         }
 
-        public void sendKafkaProductDeleted(Product savedProduct, List<String> imagesIds) {
-                if (!imagesIds.isEmpty()) {
-                        ProductDeletedEvent event = new ProductDeletedEvent(savedProduct.getId());
+        public void sendKafkaProductDeleted(String productId) {
+                ProductDeletedEvent event = new ProductDeletedEvent(productId);
 
-                        sendKafkaEvent(productDeleteTemplate,
-                                        TOPIC_PRODUCT_DELETED,
-                                        savedProduct.getId(),
-                                        event,
-                                        imagesIds.size());
-                } else {
-                        log.debug("No images to link for product {}", savedProduct.getId());
-                }
+                sendKafkaEvent(productDeleteTemplate,
+                                TOPIC_PRODUCT_DELETED,
+                                productId,
+                                event,
+                                0);
         }
 
         public Mono<List<String>> getProductImages(String productId) {

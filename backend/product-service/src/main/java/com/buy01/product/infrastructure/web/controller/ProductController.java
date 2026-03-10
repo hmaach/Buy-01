@@ -5,14 +5,13 @@ import java.time.Instant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,16 +36,7 @@ public class ProductController {
     private final ProductWebMapper mapper;
     private final ProductUseCase productUseCase;
 
-    @GetMapping("/user")
-    // @PreAuthorize("hasRole('SELLER')")
-    // @PreAuthorize("hasRole('CLIENT')")
-    public Mono<UserPrincipal> testUser(Authentication authentication) {
-        UserPrincipal currUser = (UserPrincipal) authentication.getPrincipal();
-        return Mono.just(currUser);
-    }
-
     @PostMapping
-    // @PreAuthorize("hasRole('SELLER')")
     public Mono<ResponseEntity<ProductResponse>> createProduct(
             @Valid @RequestBody ProductCreateRequest request,
             @AuthenticationPrincipal UserPrincipal principal) {
@@ -56,8 +46,7 @@ public class ProductController {
                 .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response));
     }
 
-    @PatchMapping("/{id}")
-    // @PreAuthorize("hasRole('SELLER')")
+    @PutMapping("/{id}")
     public Mono<ProductResponse> updateProduct(
             @PathVariable String id,
             @Valid @RequestBody ProductCreateRequest request,
@@ -90,14 +79,21 @@ public class ProductController {
         return ResponseEntity.ok(prodctList);
     }
 
+    @GetMapping("/user")
+    public ResponseEntity<?> getUserProductsList(@AuthenticationPrincipal UserPrincipal principal,
+            @RequestParam(required = false) Instant beforeTime) {
+        if (beforeTime == null) {
+            beforeTime = Instant.now();
+        }
+        var prodctList = productUseCase.getUserProductsList(principal.id(), beforeTime);
+        return ResponseEntity.ok(prodctList);
+    }
+
     @DeleteMapping("/{id}")
-    // @PreAuthorize("hasRole('SELLER')")
-    public Mono<?> deleteProduct(
+    public Mono<ResponseEntity<Void>> deleteProduct(
             @PathVariable String id,
             @AuthenticationPrincipal UserPrincipal principal) {
-
-        productUseCase.deleteProduct(id, principal.id());
-
-        return Mono.just(ResponseEntity.noContent().build());
+        return productUseCase.deleteProduct(id, principal.id())
+                .then(Mono.just(ResponseEntity.noContent().build()));
     }
 }

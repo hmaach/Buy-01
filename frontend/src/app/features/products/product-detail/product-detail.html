@@ -15,6 +15,18 @@
       <ol>
         <li class="current">{{ product()?.name }}</li>
       </ol>
+      @if(authService.user?.id === product()?.userId){
+      <div class="admin-actions">
+        <span class="material-symbols-outlined" matButton [matMenuTriggerFor]="menu">more_vert </span>
+        <mat-menu class="mat-menu" #menu="matMenu">
+          <button mat-menu-item (click)="goToEdit()"><span class="material-symbols-outlined">
+              edit_document</span>edit</button>
+          <button mat-menu-item (click)="onDeleteClick()"><span class="material-symbols-outlined">
+              delete_forever</span>delete
+          </button>
+        </mat-menu>
+      </div>
+      }
     </nav>
 
     <!-- use a static class name instead of evaluating product() inside it -->

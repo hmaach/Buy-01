@@ -1,5 +1,7 @@
 package com.buy01.user.infrastructure.adapters.in.web.dto.request;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.buy01.user.domain.model.Role;
 
 import jakarta.validation.constraints.Email;
@@ -19,7 +21,8 @@ public record RegisterRequest(
         @Size(min = 6, max = 30, message = "Password must be between 6 and 30 characters")
         String password,
         @NotNull(message = "Role is required")
-        Role role
+        Role role,
+        MultipartFile avatar
         ) {
 
 }

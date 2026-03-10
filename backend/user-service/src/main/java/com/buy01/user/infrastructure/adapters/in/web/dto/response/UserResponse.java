@@ -9,6 +9,7 @@ public record UserResponse(
         UUID id,
         String name,
         String email,
+        String avatarUrl,
         Role role
         ) {
 
@@ -17,6 +18,7 @@ public record UserResponse(
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
+                user.getAvatarUrl(),
                 user.getRole()
         );
     }

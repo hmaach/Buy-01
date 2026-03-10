@@ -45,6 +45,18 @@
         </label>
         <mat-form-field appearance="outline" class="full-width">
           <input matInput formControlName="email" />
+          @if (profileForm.get('email')?.hasError('required')) {
+            <mat-error>Email is required</mat-error>
+          }
+          @if (profileForm.get('email')?.hasError('minlength')) {
+            <mat-error>At least 2 characters</mat-error>
+          }
+          @if (profileForm.get('email')?.hasError('required')) {
+            <mat-error>Email is required</mat-error>
+          }
+          @if (profileForm.get('email')?.hasError('email')) {
+            <mat-error>Invalid email format</mat-error>
+          }
         </mat-form-field>
       </div>
 
@@ -75,7 +87,6 @@
       </div>
 
       <mat-divider class="form-divider"></mat-divider>
-
 
       <!-- Save button -->
       <div class="form-actions">

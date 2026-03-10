@@ -77,7 +77,8 @@ export class ProfileComponent {
 
   get hasChanges(): boolean {
     const nameChanged = this.profileForm.get('name')?.value !== this.currentUser()?.name;
-    return nameChanged && this.profileForm.valid;
+    const emailChanged = this.profileForm.get('email')?.value !== this.currentUser()?.email;
+    return (nameChanged || emailChanged) && this.profileForm.valid;
   }
 
   get roleLabel(): string {

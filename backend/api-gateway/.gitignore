@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### ssl ###
+*.p12
+*.pem
+*.key

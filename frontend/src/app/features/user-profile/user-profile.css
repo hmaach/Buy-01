@@ -295,3 +295,42 @@
     justify-content: center;
   }
 }
+
+/* ── Delete Account Section ───────────────────────────────── */
+.delete-section {
+  margin-top: 8px;
+  padding: 20px;
+  background: var(--mat-sys-surface-container-lowest);
+  border: 1px solid var(--mat-sys-error-container);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.delete-section h3 {
+  margin: 0 0 8px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--mat-sys-error);
+}
+
+.delete-section p {
+  margin: 0 0 16px 0;
+  font-size: 0.85rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.delete-btn {
+  color: var(--mat-sys-error) !important;
+  border-color: var(--mat-sys-error) !important;
+  border-radius: 12px !important;
+  padding: 0 20px !important;
+  height: 40px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.delete-btn:hover:not(:disabled) {
+  background: rgba(244, 67, 54, 0.08) !important;
+}

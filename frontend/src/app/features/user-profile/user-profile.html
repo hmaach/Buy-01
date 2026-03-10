@@ -106,5 +106,28 @@
         </button>
       </div>
     </form>
+
+    <!-- Delete Account Section -->
+    <mat-divider class="form-divider"></mat-divider>
+    
+    <div class="delete-section">
+      <h3>Danger Zone</h3>
+      <p>Once you delete your account, there is no going back. Please be certain.</p>
+      <button
+        mat-stroked-button
+        color="warn"
+        (click)="confirmDelete()"
+        [disabled]="isDeleting()"
+        class="delete-btn"
+      >
+        @if (isDeleting()) {
+          <span class="spinner"></span>
+          Deleting…
+        } @else {
+          <lucide-angular [img]="Trash2" [size]="16"></lucide-angular>
+          Delete Account
+        }
+      </button>
+    </div>
   </div>
 </div>

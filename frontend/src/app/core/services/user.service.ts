@@ -14,4 +14,8 @@ export class UserService {
   updateUser(formData: FormData): Observable<User> {
     return this.http.put<User>(`${this.parentPath}/me`, formData);
   }
+
+  deleteUser(): Observable<void> {
+    return this.http.delete<void>(`${this.parentPath}/me`);
+  }
 }

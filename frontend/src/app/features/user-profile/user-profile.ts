@@ -1,15 +1,18 @@
 import { Component, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { LucideAngularModule, Camera, Mail, User, ShieldCheck, Save, Trash2 } from 'lucide-angular';
 import { AuthService } from '../../core/auth/services/auth.service';
 import { UserService } from '../../core/services/user.service';
 import { MediaService } from '../../core/services/media.service';
+import { DeleteAccountDialogComponent } from './delete-account-dialog.component';
 
 @Component({
   selector: 'app-user-profile',
@@ -22,6 +25,7 @@ import { MediaService } from '../../core/services/media.service';
     MatInputModule,
     MatSnackBarModule,
     MatDividerModule,
+    MatDialogModule,
     LucideAngularModule,
   ],
   templateUrl: './user-profile.html',
@@ -33,6 +37,8 @@ export class ProfileComponent {
   private userService = inject(UserService);
   private mediaService = inject(MediaService);
   private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
+  private router = inject(Router);
 
   // Icons
   readonly Camera = Camera;
@@ -46,6 +52,7 @@ export class ProfileComponent {
   isSeller = computed(() => this.authService.isSeller);
 
   isSaving = signal(false);
+  isDeleting = signal(false);
 
   profileForm = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
@@ -141,5 +148,36 @@ export class ProfileComponent {
     };
 
     updateUser();
+  }
+
+  confirmDelete(): void {
+    const dialogRef = this.dialog.open(DeleteAccountDialogComponent, {
+      width: '400px',
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === 'delete') {
+        this.deleteAccount();
+      }
+    });
+  }
+
+  deleteAccount(): void {
+    this.isDeleting.set(true);
+
+    this.userService.deleteUser().subscribe({
+      next: () => {
+        this.snackBar.open('Account deleted successfully', '✓', { duration: 3000 });
+        this.authService.logout();
+      },
+      error: (e) => {
+        console.error('Account deletion failed', e);
+        this.snackBar.open('Failed to delete account. Please try again.', 'Dismiss', {
+          duration: 3000,
+        });
+        this.isDeleting.set(false);
+      },
+    });
   }
 }

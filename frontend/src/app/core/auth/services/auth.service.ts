@@ -26,6 +26,7 @@ export class AuthService {
   private initializeAuth(): void {
     const token = this.getToken();
     const expiresAt = this.getExpiresAt();
+    console.log('initializeAuth - token:', token, 'expiresAt:', expiresAt);
 
     if (token && expiresAt) {
       const expiresAtDate = new Date(expiresAt);
@@ -36,6 +37,7 @@ export class AuthService {
           this.getCurrentUser()
             .pipe(
               tap((user) => {
+                console.log('initializeAuth - user:', user);
                 if (user) {
                   this.currentUserSubject.next(user);
                   this.currentUserSignal.set(user);

@@ -86,9 +86,11 @@ export class LoginComponent {
       const { email, password } = this.loginForm.value;
 
       this.authService.login({ email, password }).subscribe({
-        next: () => {
+        next: (user) => {
           this.snackBar.open('Login successful!', 'Close', { duration: 3000 });
-          this.router.navigate(['/']);
+          setTimeout(() => {
+            this.router.navigate(['/']);
+          }, 100);
         },
         error: (error) => {
           const errorMessage = error.error?.detail || 'Login failed';

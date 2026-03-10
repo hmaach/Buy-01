@@ -39,7 +39,6 @@ export class RegisterComponent {
   registerForm: FormGroup;
   loading = signal(false);
   hidePassword = signal(true);
-  avatarPreview = signal<string | null>(null);
 
   roles: Role[] = ['CLIENT', 'SELLER'];
 
@@ -75,30 +74,7 @@ export class RegisterComponent {
       ],
       password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(30)]],
       role: ['CLIENT', Validators.required],
-      avatar: [null],
     });
-  }
-
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-
-      const errorMessage = validateImage(file);
-      if (errorMessage) {
-        this.snackBar.open(errorMessage, 'Dismiss', { duration: 3000 });
-        return;
-      }
-
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.avatarPreview.set(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-
-      this.registerForm.patchValue({ avatar: file });
-    }
   }
 
   async onSubmit() {

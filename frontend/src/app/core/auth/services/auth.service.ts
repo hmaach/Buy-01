@@ -103,14 +103,16 @@ export class AuthService {
   }
 
   register(request: RegisterRequest): Observable<AuthResponse> {
-    // Use placeholder UUID for avatar
     const payload = {
-      ...request,
-      avatar: request.avatar || '00000000-0000-0000-0000-000000000000',
+      name: request.name,
+      email: request.email,
+      password: request.password,
+      role: request.role,
     };
 
     return this.http.post<AuthResponse>(`/users/auth/register`, payload).pipe(
       tap((response) => {
+        this.router.navigateByUrl('/login', { state: { email: request.email } });
         this.handleAuthSuccess(response);
       }),
       catchError((error) => {

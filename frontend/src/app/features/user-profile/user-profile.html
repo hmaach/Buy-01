@@ -3,44 +3,6 @@
   <!-- ── Hero Header ──────────────────────────────────── -->
   <div class="profile-hero">
     <div class="hero-glow"></div>
-
-    <!-- Avatar Zone -->
-    <div class="avatar-zone">
-      @if (isSeller()) {
-        <!-- Seller: avatar + upload overlay -->
-        <div class="avatar-wrapper seller">
-          @if (displayAvatar) {
-            <img [src]="displayAvatar" alt="Avatar" class="avatar-img" />
-          } @else {
-            <div class="avatar-initials">{{ initials }}</div>
-          }
-
-          <label class="avatar-upload-overlay" for="avatar-input" aria-label="Change avatar">
-            <lucide-angular [img]="Camera" [size]="20"></lucide-angular>
-            <span>Change</span>
-          </label>
-          <input
-            id="avatar-input"
-            type="file"
-            accept="image/*"
-            class="sr-only"
-            (change)="onAvatarSelected($event)"
-          />
-
-          @if (displayAvatar) {
-            <button class="avatar-remove-btn" (click)="removeAvatar()" title="Remove avatar">
-              <lucide-angular [img]="Trash2" [size]="13"></lucide-angular>
-            </button>
-          }
-        </div>
-      } @else {
-        <!-- Client: initials only, no upload -->
-        <div class="avatar-wrapper client">
-          <div class="avatar-initials">{{ initials }}</div>
-        </div>
-      }
-    </div>
-
     <!-- User headline -->
     <div class="hero-text">
       <h1 class="hero-name">{{ currentUser()?.name }}</h1>
@@ -80,7 +42,6 @@
         <label class="field-label">
           <lucide-angular [img]="Mail" [size]="14"></lucide-angular>
           Email Address
-          <span class="field-hint">Cannot be changed</span>
         </label>
         <mat-form-field appearance="outline" class="full-width">
           <input matInput formControlName="email" />
@@ -115,12 +76,6 @@
 
       <mat-divider class="form-divider"></mat-divider>
 
-      <!-- Seller avatar hint -->
-      @if (isSeller()) {
-        <p class="avatar-hint">
-          Profile photo is visible to buyers on your product listings. Max 2 MB, image files only.
-        </p>
-      }
 
       <!-- Save button -->
       <div class="form-actions">

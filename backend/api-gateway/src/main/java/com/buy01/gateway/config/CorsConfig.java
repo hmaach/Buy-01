@@ -16,20 +16,16 @@ public class CorsConfig {
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
 
-        // Allowed origins (frontend URLs)
         corsConfig.setAllowedOrigins(List.of(
-                "http://localhost:4200", // Angular dev server
+                "http://localhost:4200",
                 "https://localhost:4200",
-                "http://localhost:3000", // React dev server (if needed)
-                "https://your-production-domain.com"
+                "http://127.0.0.1:5500"
         ));
 
-        // Allowed HTTP methods
         corsConfig.setAllowedMethods(Arrays.asList(
                 "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
         ));
 
-        // Allowed headers
         corsConfig.setAllowedHeaders(List.of(
                 "Authorization",
                 "Content-Type",
@@ -38,13 +34,10 @@ public class CorsConfig {
                 "X-Requested-With"
         ));
 
-        // Allow credentials (cookies, authorization headers)
         corsConfig.setAllowCredentials(true);
 
-        // Max age for preflight requests (in seconds)
         corsConfig.setMaxAge(3600L);
 
-        // Expose headers to the client
         corsConfig.setExposedHeaders(List.of("Authorization"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

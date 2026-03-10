@@ -88,6 +88,34 @@
           </div>
         }
 
+        <!-- Avatar Upload -->
+        <div class="avatar-upload-section">
+          <label class="avatar-label">Profile Photo (Optional)</label>
+          <div class="avatar-upload-container">
+            @if (avatarPreview()) {
+              <div class="avatar-preview">
+                <img [src]="avatarPreview()" alt="Avatar preview" />
+                <button type="button" class="remove-avatar-btn" (click)="removeAvatar()">
+                  <lucide-angular [img]="UserRound" [size]="16"></lucide-angular>
+                </button>
+              </div>
+            } @else {
+              <label class="avatar-input-label">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  (change)="onAvatarSelected($event)"
+                  class="avatar-input"
+                />
+                <span class="upload-text">Choose an image</span>
+              </label>
+            }
+          </div>
+          @if (avatarError()) {
+            <mat-error class="avatar-error">{{ avatarError() }}</mat-error>
+          }
+        </div>
+
         <button
           mat-flat-button
           type="submit"

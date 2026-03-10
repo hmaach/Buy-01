@@ -244,3 +244,93 @@ mat-form-field {
   }
 
 }
+
+/* ── Avatar Upload ─────────────────────────────────────── */
+.avatar-upload-section {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.avatar-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--mat-sys-on-surface);
+  margin-bottom: 8px;
+}
+
+.avatar-upload-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.avatar-input-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 120px;
+  border: 2px dashed var(--mat-sys-outline);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--mat-sys-surface-container-low);
+}
+
+.avatar-input-label:hover {
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.05);
+}
+
+.avatar-input {
+  display: none;
+}
+
+.upload-text {
+  font-size: 0.75rem;
+  color: var(--mat-sys-on-surface-variant);
+  text-align: center;
+  margin-top: 4px;
+}
+
+.avatar-preview {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.avatar-preview img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--mat-sys-primary);
+}
+
+.remove-avatar-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #dc2626;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.remove-avatar-btn:hover {
+  background: #b91c1c;
+}
+
+.avatar-error {
+  font-size: 0.75rem;
+  margin-top: 4px;
+}

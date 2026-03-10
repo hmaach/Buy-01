@@ -20,6 +20,37 @@
     <div class="card-section-label">Account Information</div>
 
     <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-form">
+      <!-- Avatar Upload -->
+      <div class="avatar-section">
+        <div class="avatar-container">
+          @if (avatarPreview()) {
+            <div class="avatar-preview">
+              <img [src]="avatarPreview()" alt="Profile avatar" />
+              <button type="button" class="avatar-overlay" (click)="$any($event.target).click()">
+                <lucide-angular [img]="Camera" [size]="20"></lucide-angular>
+              </button>
+            </div>
+          } @else {
+            <div class="avatar-placeholder" (click)="$any($event.target).click()">
+              <span class="avatar-initials">{{ initials }}</span>
+              <div class="avatar-overlay">
+                <lucide-angular [img]="Camera" [size]="20"></lucide-angular>
+              </div>
+            </div>
+          }
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/gif,image/webp"
+            (change)="onAvatarSelected($event)"
+            class="avatar-input"
+          />
+        </div>
+        @if (avatarError()) {
+          <mat-error class="avatar-error">{{ avatarError() }}</mat-error>
+        }
+        <p class="avatar-hint">Click to upload a new profile photo (max 2MB)</p>
+      </div>
+
       <!-- Name field -->
       <div class="field-group">
         <label class="field-label">

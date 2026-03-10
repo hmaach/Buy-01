@@ -4,6 +4,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  avatarUrl?: string;
   role: Role;
 }
 
@@ -17,6 +18,7 @@ export interface RegisterRequest {
   email: string;
   password: string;
   role: Role;
+  avatar?: File;
 }
 
 export interface AuthResponse {

@@ -334,3 +334,90 @@
 .delete-btn:hover:not(:disabled) {
   background: rgba(244, 67, 54, 0.08) !important;
 }
+
+/* ── Avatar Section ─────────────────────────────────────── */
+.avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.avatar-container {
+  position: relative;
+  width: 100px;
+  height: 100px;
+}
+
+.avatar-input {
+  display: none;
+}
+
+.avatar-placeholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.avatar-initials {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+}
+
+.avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  cursor: pointer;
+  border: none;
+}
+
+.avatar-placeholder:hover .avatar-overlay,
+.avatar-preview:hover .avatar-overlay {
+  opacity: 1;
+}
+
+.avatar-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+}
+
+.avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-hint {
+  font-size: 0.75rem;
+  color: var(--mat-sys-on-surface-variant);
+  margin-top: 8px;
+  text-align: center;
+}
+
+.avatar-error {
+  font-size: 0.75rem;
+  margin-top: 4px;
+}

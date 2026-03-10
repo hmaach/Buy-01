@@ -51,6 +51,12 @@ public class UserController {
         return UserResponse.from(userService.findById(id));
     }
 
+    @GetMapping("/exists/{id}")
+    public ResponseEntity<Boolean> checkUserExists(@PathVariable UUID id) {
+        boolean exists = userService.existsById(id);
+        return ResponseEntity.ok(exists);
+    }
+
     @PutMapping(value = "/me", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserResponse> updateCurrentUser(
             Authentication authentication,

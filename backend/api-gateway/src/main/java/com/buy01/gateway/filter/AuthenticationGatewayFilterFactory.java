@@ -14,6 +14,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 
 import com.buy01.gateway.security.JwtUtil;
@@ -42,6 +43,8 @@ public class AuthenticationGatewayFilterFactory
     @Autowired
     private JwtUtil jwtUtil;
 
+    private final WebClient webClient;
+
     private static final List<PublicEndpoint> PUBLIC_ENDPOINTS = List.of(
             new PublicEndpoint(HttpMethod.POST, "/users/auth/login"),
             new PublicEndpoint(HttpMethod.POST, "/users/auth/register"),
@@ -51,6 +54,7 @@ public class AuthenticationGatewayFilterFactory
 
     public AuthenticationGatewayFilterFactory() {
         super(Config.class);
+        this.webClient = WebClient.builder().build();
     }
 
     @Override
@@ -95,13 +99,33 @@ public class AuthenticationGatewayFilterFactory
                     }
                 }
 
-                // 4. Mutate request to pass info downstream
-                ServerHttpRequest modifiedRequest = request.mutate()
-                        .header("X-User-Id", userId)
-                        .header("X-User-Role", role)
-                        .build();
+                // 4. Check if user exists in user-service
+                return webClient.get()
+                        .uri("http://USER-SERVICE/users/exists/" + userId)
+                        .retrieve()
+                        .bodyToMono(Boolean.class)
+                        .flatMap(exists -> {
+                            if (!exists) {
+                                return onError(exchange, "User not found or has been deleted", HttpStatus.UNAUTHORIZED);
+                            }
+                            
+                            // 5. Mutate request to pass info downstream
+                            ServerHttpRequest modifiedRequest = request.mutate()
+                                    .header("X-User-Id", userId)
+                                    .header("X-User-Role", role)
+                                    .build();
 
-                return chain.filter(exchange.mutate().request(modifiedRequest).build());
+                            return chain.filter(exchange.mutate().request(modifiedRequest).build());
+                        })
+                        .onErrorResume(e -> {
+                            // If user-service is unavailable, allow request to proceed but log warning
+                            System.err.println("Warning: Could not verify user existence: " + e.getMessage());
+                            ServerHttpRequest modifiedRequest = request.mutate()
+                                    .header("X-User-Id", userId)
+                                    .header("X-User-Role", role)
+                                    .build();
+                            return chain.filter(exchange.mutate().request(modifiedRequest).build());
+                        });
 
             } catch (Exception e) {
                 return onError(exchange, "Authentication failed: " + e.getMessage(), HttpStatus.UNAUTHORIZED);

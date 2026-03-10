@@ -50,6 +50,14 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
     }
 
     @Override
+    public boolean existsById(UUID id) {
+        if (id == null) {
+            return false;
+        }
+        return mongoRepository.existsById(id);
+    }
+
+    @Override
     public void deleteById(UUID id) {
         if (id == null) {
             return;

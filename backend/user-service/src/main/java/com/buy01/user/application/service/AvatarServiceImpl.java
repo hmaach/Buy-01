@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Set;
 import java.util.UUID;
 
+import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +18,15 @@ import jakarta.annotation.PostConstruct;
 
 @Service
 public class AvatarServiceImpl implements AvatarService {
+
+    private static final long MAX_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
+    private static final Set<String> ALLOWED_MIME_TYPES = Set.of(
+            "image/jpeg",
+            "image/png",
+            "image/gif",
+            "image/webp");
+
+    private final Tika tika = new Tika();
 
     @Value("${app.avatar.upload-dir:./uploads/avatars}")
     private String uploadDir;
@@ -37,6 +48,26 @@ public class AvatarServiceImpl implements AvatarService {
     public String saveAvatar(MultipartFile avatar) {
         if (avatar == null || avatar.isEmpty()) {
             return null;
+        }
+
+        // Validate file size
+        if (avatar.getSize() > MAX_SIZE_BYTES) {
+            throw new IllegalArgumentException(
+                    "File size exceeds 2MB limit. Received: " + avatar.getSize() + " bytes");
+        }
+
+        // Validate MIME type using Tika
+        String detectedMimeType;
+        try {
+            detectedMimeType = tika.detect(avatar.getBytes());
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Could not read file for type detection: " + e.getMessage());
+        }
+
+        if (!ALLOWED_MIME_TYPES.contains(detectedMimeType)) {
+            throw new IllegalArgumentException(
+                    "Invalid file type. Detected: " + detectedMimeType
+                            + ". Only JPEG, PNG, GIF, and WebP are allowed.");
         }
 
         String originalFilename = avatar.getOriginalFilename();

@@ -72,8 +72,6 @@ export class LoginComponent {
   ngOnInit() {
     const stateData = history.state;
 
-    console.log(stateData);
-
     if (stateData && stateData.email) {
       this.loginForm.patchValue({ email: stateData.email });
     }

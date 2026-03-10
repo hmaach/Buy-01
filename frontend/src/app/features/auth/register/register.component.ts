@@ -13,7 +13,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { Role } from '../../../core/models/user.model';
 import { Eye, EyeOff, LucideAngularModule, ShoppingBag, UserRound } from 'lucide-angular';
-import { validateImage } from '../../../shared/utils/media-validation.utils';
 
 @Component({
   selector: 'app-register',
@@ -87,8 +86,7 @@ export class RegisterComponent {
 
       this.authService.register({ name, email, password, role }).subscribe({
         next: () => {
-          this.snackBar.open('Registration successful!', 'Close', { duration: 3000 });
-          this.router.navigateByUrl('/login', { state: { email } });
+          this.snackBar.open('Registration successful! Please login with your credentials.', 'Close', { duration: 3000 });
         },
         error: (error) => {
           const errorMessage = error.error?.detail || 'Registration failed';

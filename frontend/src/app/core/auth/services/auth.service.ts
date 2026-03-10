@@ -111,9 +111,8 @@ export class AuthService {
     };
 
     return this.http.post<AuthResponse>(`/users/auth/register`, payload).pipe(
-      tap((response) => {
+      tap(() => {
         this.router.navigateByUrl('/login', { state: { email: request.email } });
-        this.handleAuthSuccess(response);
       }),
       catchError((error) => {
         console.error('Registration error:', error);

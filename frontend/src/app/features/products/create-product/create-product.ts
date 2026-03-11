@@ -217,7 +217,7 @@ export class ProductForm {
         this.router.navigate(['/products', resp.id || this.productId()]);
       },
       error: (err) => {
-        this.errorMessage.set(err.error?.message || 'Operation failed');
+        this.errorMessage.set(err.error?.detail || 'Operation failed');
         this.isLoading.set(false);
       }
     });

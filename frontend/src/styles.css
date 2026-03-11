@@ -1,4 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
+:root {
+    --mat-sys-surface-container: rgb(255, 255, 255);
+}
 
 html,
 body {

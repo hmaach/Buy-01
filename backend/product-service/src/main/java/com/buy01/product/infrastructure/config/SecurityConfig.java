@@ -26,9 +26,10 @@ public class SecurityConfig {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> exchange
-                .pathMatchers(HttpMethod.GET, "/products/**").permitAll()
-                .anyExchange().authenticated()
-                )
+                        .pathMatchers("/products/user").authenticated()
+                        .pathMatchers(HttpMethod.GET, "/products/**").permitAll()
+                        .pathMatchers("/products/**").hasRole("SELLER")
+                        .anyExchange().authenticated())
                 .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .build();
     }

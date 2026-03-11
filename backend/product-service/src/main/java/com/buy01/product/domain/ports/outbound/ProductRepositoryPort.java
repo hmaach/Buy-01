@@ -12,7 +12,9 @@ public interface ProductRepositoryPort {
 
     Mono<Product> findById(String id);
 
-    void deleteById(String id);
+    Mono<Void> deleteById(String id);
 
     Flux<Product> findTop10ByCreatedAtBeforeOrderByCreatedAtDesc(Instant lastProduct);
+
+    Flux<Product> findTop10ByUserIdAndCreatedAtBeforeOrderByCreatedAtDesc(String userId, Instant beforeTime);
 }

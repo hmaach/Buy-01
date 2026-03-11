@@ -9,4 +9,6 @@ public interface SpringDataProductRepository extends ReactiveMongoRepository<Pro
     Flux<ProductDocument> findByUserId(String userId);
 
     Flux<ProductDocument> findTop10ByCreatedAtBeforeOrderByCreatedAtDesc(Instant lastProduct);
+
+    Flux<ProductDocument> findTop10ByUserIdAndCreatedAtBeforeOrderByCreatedAtDesc(String userId, Instant beforeTime);
 }

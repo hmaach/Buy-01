@@ -32,13 +32,19 @@ public class MongoProductAdapter implements ProductRepositoryPort {
     }
 
     @Override
-    public void deleteById(String id) {
-        springRepo.deleteById(id);
+    public Mono<Void> deleteById(String id) {
+        return springRepo.deleteById(id);
     }
 
     @Override
     public Flux<Product> findTop10ByCreatedAtBeforeOrderByCreatedAtDesc(Instant lastProduct) {
         var productList = springRepo.findTop10ByCreatedAtBeforeOrderByCreatedAtDesc(lastProduct);
+        return productList.map(mapper::toDomain);
+    }
+
+    @Override
+    public Flux<Product> findTop10ByUserIdAndCreatedAtBeforeOrderByCreatedAtDesc(String userId, Instant beforeTime) {
+        var productList = springRepo.findTop10ByUserIdAndCreatedAtBeforeOrderByCreatedAtDesc(userId, beforeTime);
         return productList.map(mapper::toDomain);
     }
 }

@@ -56,7 +56,7 @@ public class ProductServiceImpl implements ProductUseCase {
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("Product not found")))
                 .flatMap(existing -> {
                     if (!existing.getUserId().equals(userId)) {
-                        return Mono.error(new SecurityException("Not your product"));
+                        return Mono.error(new IllegalArgumentException("Not your product"));
                     }
 
                     Product updatedProduct = existing.toBuilder()
@@ -107,17 +107,39 @@ public class ProductServiceImpl implements ProductUseCase {
     }
 
     @Override
-    public void deleteProduct(String id, String userId) {
-        productRepository.findById(id)
+    public Flux<ProductList> getUserProductsList(String userId, Instant beforeTime) {
+        return productRepository.findTop10ByUserIdAndCreatedAtBeforeOrderByCreatedAtDesc(userId, beforeTime)
+                .collectList()
+                .flatMapMany(products -> {
+                    if (products.isEmpty()) {
+                        return Flux.empty();
+                    }
+
+                    List<String> ids = products.stream().map(Product::getId).toList();
+                    var images = imageService.getImagesBatch(ids);
+
+                    return images.map(urlMap -> products.stream()
+                            .map(p -> new ProductList(
+                                    p.getId(),
+                                    p.getName(),
+                                    p.getPrice(),
+                                    p.getCreatedAt(),
+                                    urlMap.getOrDefault(p.getId(), "")))
+                            .collect(Collectors.toList()))
+                            .flatMapMany(Flux::fromIterable);
+                });
+    }
+
+    @Override
+    public Mono<Void> deleteProduct(String id, String userId) {
+        return productRepository.findById(id)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("Product not found")))
                 .flatMap(existing -> {
                     if (!existing.getUserId().equals(userId)) {
-                        return Mono.error(new SecurityException("Not your product"));
+                        return Mono.error(new IllegalArgumentException("Not your product"));
                     }
-                    productRepository.deleteById(id);
-                    return Mono.empty();
-                })
-                .doOnNext(savedProduct -> {
+                    return productRepository.deleteById(id)
+                            .doOnSuccess(voidResult -> imageService.sendKafkaProductDeleted(id));
                 })
                 .doOnError(e -> log.error("Failed to delete product", e));
     }

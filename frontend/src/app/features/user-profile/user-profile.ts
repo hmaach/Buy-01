@@ -1,29 +1,16 @@
 import { Component, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import {
-  LucideAngularModule,
-  Camera,
-  Mail,
-  User,
-  ShieldCheck,
-  Save,
-  Trash2,
-  X,
-} from 'lucide-angular';
+import { LucideAngularModule, Camera, Mail, User, ShieldCheck, Save, Trash2 } from 'lucide-angular';
 import { AuthService } from '../../core/auth/services/auth.service';
 import { UserService } from '../../core/services/user.service';
-import { MediaService } from '../../core/services/media.service';
-import { DeleteAccountDialogComponent } from './delete-account-dialog.component';
 import { validateImage } from '../../shared/utils/media-validation.utils';
-import { env } from '../../../environments/environment';
+import { MediaService } from '../../core/services/media.service';
 
 @Component({
   selector: 'app-user-profile',
@@ -36,7 +23,6 @@ import { env } from '../../../environments/environment';
     MatInputModule,
     MatSnackBarModule,
     MatDividerModule,
-    MatDialogModule,
     LucideAngularModule,
   ],
   templateUrl: './user-profile.html',
@@ -48,8 +34,6 @@ export class ProfileComponent {
   private userService = inject(UserService);
   private mediaService = inject(MediaService);
   private snackBar = inject(MatSnackBar);
-  private dialog = inject(MatDialog);
-  private router = inject(Router);
 
   // Icons
   readonly Camera = Camera;
@@ -58,31 +42,18 @@ export class ProfileComponent {
   readonly ShieldCheck = ShieldCheck;
   readonly Save = Save;
   readonly Trash2 = Trash2;
-  readonly X = X;
 
   currentUser = computed(() => this.authService.user);
   isSeller = computed(() => this.authService.isSeller);
 
-  isSaving = signal(false);
-  isDeleting = signal(false);
-
-  // Avatar state
   avatarPreview = signal<string | null>(null);
-  avatarError = signal<string | null>(null);
-  selectedAvatar = signal<File | null>(null);
-  newAvatarUploaded = signal(false);
+  avatarFile = signal<File | null>(null);
+  avatarRemoved = signal(false);
+  isSaving = signal(false);
 
   profileForm = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
-    email: [
-      '',
-      [
-        Validators.required,
-        Validators.email,
-        Validators.maxLength(100),
-        Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/),
-      ],
-    ],
+    email: [{ value: '', disabled: true }],
   });
 
   constructor() {
@@ -97,17 +68,14 @@ export class ProfileComponent {
         name: user.name,
         email: user.email,
       });
-      // Set avatar preview from existing avatarUrl
-      if (user.avatarUrl) {
-        this.avatarPreview.set(env.avatarUrl + user.avatarUrl);
-      }
+      this.avatarPreview.set(user.avatarId ?? null);
     }
   }
 
   get hasChanges(): boolean {
     const nameChanged = this.profileForm.get('name')?.value !== this.currentUser()?.name;
-    const emailChanged = this.profileForm.get('email')?.value !== this.currentUser()?.email;
-    return (nameChanged || emailChanged || this.newAvatarUploaded()) && this.profileForm.valid;
+    const avatarChanged = this.avatarFile() !== null || this.avatarRemoved();
+    return (nameChanged || avatarChanged) && this.profileForm.valid;
   }
 
   get roleLabel(): string {
@@ -122,6 +90,36 @@ export class ProfileComponent {
       .join('')
       .toUpperCase()
       .slice(0, 2);
+  }
+
+  get displayAvatar(): string | null {
+    if (this.avatarRemoved()) return null;
+    return this.avatarPreview() ?? this.currentUser()?.avatarId ?? null;
+  }
+
+  onAvatarSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    const errorMessage = validateImage(file);
+    if (errorMessage) {
+      this.snackBar.open(errorMessage, 'Dismiss', { duration: 3000 });
+      return;
+    }
+
+    this.avatarFile.set(file);
+    this.avatarRemoved.set(false);
+
+    const reader = new FileReader();
+    reader.onload = () => this.avatarPreview.set(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  removeAvatar(): void {
+    this.avatarPreview.set(null);
+    this.avatarFile.set(null);
+    this.avatarRemoved.set(!!this.currentUser()?.avatarId);
   }
 
   private uploadImage(file: File, callback: (id: string) => void): void {
@@ -141,30 +139,22 @@ export class ProfileComponent {
     if (!this.hasChanges) return;
     this.isSaving.set(true);
 
-    const updateUser = () => {
+    const updateUser = (avatarId?: string) => {
       const formData = new FormData();
 
       const name = this.profileForm.get('name')?.value ?? '';
-      const email = this.profileForm.get('email')?.value ?? '';
 
       formData.append('name', name);
-      formData.append('email', email);
-
-      // Append avatar if a new one was selected
-      const avatar = this.selectedAvatar();
-      if (avatar) {
-        formData.append('avatar', avatar);
-      }
+      if (avatarId) formData.append('avatarId', avatarId);
+      else if (!this.avatarRemoved())
+        formData.append('avatarId', this.currentUser()?.avatarId ?? '');
 
       this.userService.updateUser(formData).subscribe({
         next: (updatedUser) => {
           if (updatedUser) {
             this.authService.updateCurrentUser(updatedUser);
             this.profileForm.markAsPristine();
-            // Reset avatar state after successful update
-            this.selectedAvatar.set(null);
-            this.newAvatarUploaded.set(false);
-            this.avatarPreview.set(env.avatarUrl + updatedUser.avatarUrl || null);
+            this.avatarRemoved.set(false);
             this.snackBar.open('Profile updated successfully!', '✓', { duration: 3000 });
           }
           this.isSaving.set(false);
@@ -179,70 +169,10 @@ export class ProfileComponent {
       });
     };
 
-    updateUser();
-  }
-
-  onAvatarSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-
-      // Validate using validateImage
-      const validationError = validateImage(file);
-      if (validationError) {
-        this.avatarError.set(validationError);
-        this.selectedAvatar.set(null);
-        return;
-      }
-
-      this.avatarError.set(null);
-      this.selectedAvatar.set(file);
-      this.newAvatarUploaded.set(true);
-
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.avatarPreview.set(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+    if (this.avatarFile()) {
+      this.uploadImage(this.avatarFile()!, (id) => updateUser(id));
+    } else {
+      updateUser();
     }
-  }
-
-  removeAvatar(): void {
-    this.selectedAvatar.set(null);
-    this.newAvatarUploaded.set(true);
-    // Reset to original avatar or null
-    this.avatarPreview.set(this.currentUser()?.avatarUrl || null);
-  }
-
-  confirmDelete(): void {
-    const dialogRef = this.dialog.open(DeleteAccountDialogComponent, {
-      width: '400px',
-      disableClose: true,
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result === 'delete') {
-        this.deleteAccount();
-      }
-    });
-  }
-
-  deleteAccount(): void {
-    this.isDeleting.set(true);
-
-    this.userService.deleteUser().subscribe({
-      next: () => {
-        this.snackBar.open('Account deleted successfully', '✓', { duration: 3000 });
-        this.authService.logout();
-      },
-      error: (e) => {
-        console.error('Account deletion failed', e);
-        this.snackBar.open('Failed to delete account. Please try again.', 'Dismiss', {
-          duration: 3000,
-        });
-        this.isDeleting.set(false);
-      },
-    });
   }
 }

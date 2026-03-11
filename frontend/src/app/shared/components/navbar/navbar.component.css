@@ -243,13 +243,6 @@ lucide-angular {
   text-transform: uppercase;
 }
 
-.menu-avatar-placeholder img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-}
-
 .menu-user-details {
   display: flex;
   flex-direction: column;

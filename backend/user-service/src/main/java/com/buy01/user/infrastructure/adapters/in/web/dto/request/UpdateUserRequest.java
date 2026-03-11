@@ -1,6 +1,5 @@
 package com.buy01.user.infrastructure.adapters.in.web.dto.request;
 
-import java.util.UUID;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,7 +17,7 @@ public record UpdateUserRequest(
         MultipartFile avatar
         ) {
 
-    public UpdateUserCommand toCommand(UUID avatarId) {
-        return new UpdateUserCommand(name, email, avatarId);
+    public UpdateUserCommand toCommand(String avatarUrl) {
+        return new UpdateUserCommand(name, email, avatarUrl);
     }
 }

@@ -1,8 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { MediaResponse } from '../models/api-response.model';
-import { env } from '../../../environments/environment';
 import { Product, ProductCreateRequest, ProductListDto } from '../models/product.model';
 
 @Injectable({
@@ -26,6 +24,7 @@ export class ProductService {
         name: r.name,
         description: r.description,
         price: r.price,
+        userId: r.userId,
         quantity: r.quantity,
         rating: 4.8,
         reviewsCount: 124,
@@ -53,8 +52,29 @@ export class ProductService {
       )
     );
   }
+
+  getMyProductsList(beforeTime?: string): Observable<ProductListDto[]> {
+    let url = `${this.parentPath}/user`;
+    if (beforeTime) {
+      url += `?beforeTime=${beforeTime}`;
+    }
+
+    return this.http.get<ProductListDto[]>(url).pipe(
+      map(products =>
+        products.map(p => ({
+          ...p,
+          badge: this.isNew(p.createdAt) ? 'New' : undefined
+        }))
+      )
+    );
+  }
+
   updateProduct(id: string, changes: ProductCreateRequest): Observable<ProductCreateRequest> {
-    return this.http.patch<ProductCreateRequest>(`${this.parentPath}/${id}`, changes);
+    return this.http.put<ProductCreateRequest>(`${this.parentPath}/${id}`, changes);
+  }
+
+  deleteProduct(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.parentPath}/${id}`);
   }
 
   private isNew(createdAt?: string): boolean {

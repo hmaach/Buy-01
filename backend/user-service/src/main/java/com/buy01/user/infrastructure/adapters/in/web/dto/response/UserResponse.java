@@ -9,17 +9,17 @@ public record UserResponse(
         UUID id,
         String name,
         String email,
-        Role role,
-        String avatar
+        String avatarUrl,
+        Role role
         ) {
 
-    public static UserResponse from(User user, String avatar) {
+    public static UserResponse from(User user) {
         return new UserResponse(
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
-                user.getRole(),
-                avatar
+                user.getAvatarUrl(),
+                user.getRole()
         );
     }
 }

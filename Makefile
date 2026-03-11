@@ -23,11 +23,13 @@ MVN_CMD := ./mvnw
 help:
 	@echo "Available targets:"
 	@echo "  make env            -> generate RSA keys for JWT signing in .env"
+	@echo "  make ssl           -> generate SSL certificates for secure communication"
 	@echo "  make install        -> clean install all backend services"
 	@echo "  make clean          -> clean all backend services"
 	@echo "  make rebuild        -> clean install all services"
 	@echo "  make docker-build   -> build docker images"
 	@echo "  make docker-up      -> start docker-compose"
+	@echo "  make docker-up-dev  -> start docker-compose with dbs and discovery-server for development"
 	@echo "  make docker-up-dbs  -> start docker-compose databases only"
 	@echo "  make docker-down    -> stop docker-compose"
 

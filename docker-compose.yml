@@ -20,10 +20,11 @@ services:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://${KAFKA_BROKER}
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -32,23 +33,6 @@ services:
       KAFKA_LOG_DIRS: /var/lib/kafka/data
     volumes:
       - kafka-data:/var/lib/kafka/data
-    networks:
-      - ecommerce-network
-
-  # API GATEWAY
-  api-gateway:
-    build: ./backend/api-gateway
-    container_name: api-gateway
-    restart: unless-stopped
-    depends_on:
-      - discovery-server
-      - user-service
-    ports:
-      - "${GATEWAY_PORT}:8080"
-    environment:
-      EUREKA_URL: http://discovery-server:${DISCOVERY_PORT}/eureka
-      SPRING_PROFILES_ACTIVE: docker
-      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
     networks:
       - ecommerce-network
 
@@ -87,6 +71,11 @@ services:
       - media-mongo-data:/data/db
     networks:
       - ecommerce-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # PRODUCT DATABASE
   mongo-product:
@@ -103,29 +92,153 @@ services:
       - product-mongo-data:/data/db
     networks:
       - ecommerce-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # API GATEWAY
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+      args:
+        SSL_PASSWORD: ${SSL_PASSWORD}
+    container_name: api-gateway
+    restart: unless-stopped
+    ports:
+      - "${GATEWAY_PORT}:8080"
+    depends_on:
+      - discovery-server
+      - user-service
+      - product-service
+      - media-service
+    environment:
+      - TZ=${TZ}
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - EUREKA_URL=http://discovery-server:8761/eureka
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
+      - SSL_PASSWORD=${SSL_PASSWORD}
+      - RATE_LIMIT_ENABLED=${RATE_LIMIT_ENABLED}
+      - RATE_LIMIT_CAPACITY=${RATE_LIMIT_CAPACITY}
+      - RATE_LIMIT_REFILL_MINUTES=${RATE_LIMIT_REFILL_MINUTES}
+    networks:
+      - ecommerce-network
 
   # USER SERVICE
-  user-service:
-    build: ./backend/user-service
+  user-service: 
+    build: 
+      context: ./backend/user-service 
+      dockerfile: Dockerfile
     container_name: user-service
     restart: unless-stopped
-    # depends_on:
-    #   mongo-user:
-    #     condition: service_healthy
     ports:
-      - "${USER_SERVICE_PORT}:8080"
+      - "${USER_SERVICE_PORT}:${USER_SERVICE_PORT}"
+    depends_on:
+      mongo-user:
+        condition: service_healthy
+      discovery-server:
+        condition: service_started
+      kafka:
+        condition: service_started
     environment:
-      EUREKA_URL: http://discovery-server:${DISCOVERY_PORT}/eureka
-      SPRING_PROFILES_ACTIVE: docker
-      MONGO_HOST: mongo-user
-      MONGO_PORT: 27017
-      MONGO_DB: ${USER_MONGO_DB}
-      MONGO_USERNAME: ${USER_MONGO_USERNAME}
-      MONGO_PASSWORD: ${USER_MONGO_PASSWORD}
-      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
-      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
-      JWT_EXPIRATION: ${JWT_EXPIRATION}
-      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
+      - TZ=${TZ}
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - EUREKA_URL=http://discovery-server:8761/eureka
+      - USER_MONGO_HOST=mongo-user
+      - USER_MONGO_PORT=27017
+      - USER_MONGO_DB=${USER_MONGO_DB}
+      - USER_MONGO_USERNAME=${USER_MONGO_USERNAME}
+      - USER_MONGO_PASSWORD=${USER_MONGO_PASSWORD}
+      - KAFKA_BROKER=kafka:9092
+      - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY}
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
+      - JWT_EXPIRATION=${JWT_EXPIRATION}
+      - MEDIA_SERVICE_URL=http://media-service:8083
+    volumes:
+      - ./uploads/avatars:/app/uploads/avatars
+    networks:
+      - ecommerce-network
+  
+  # PRODUCT SERVICE
+  product-service:
+    build:
+      context: ./backend/product-service
+      dockerfile: Dockerfile
+    container_name: product-service
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    depends_on:
+      mongo-product:
+        condition: service_healthy
+      discovery-server:
+        condition: service_started
+      kafka:
+        condition: service_started
+    environment:
+      - TZ=${TZ}
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - EUREKA_URL=http://discovery-server:8761/eureka
+      - PRODUCT_MONGO_HOST=mongo-product
+      - PRODUCT_MONGO_LOCAL_PORT=27017
+      - PRODUCT_MONGO_DB_NAME=${PRODUCT_MONGO_DB_NAME}
+      - PRODUCT_MONGO_DB_USER=${PRODUCT_MONGO_DB_USER}
+      - PRODUCT_MONGO_DB_PWD=${PRODUCT_MONGO_DB_PWD}
+      - KAFKA_BROKER=kafka:9092
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
+    networks:
+      - ecommerce-network
+
+  # MEDIA SERVICE
+  media-service:
+    build:
+      context: ./backend/media-service
+      dockerfile: Dockerfile
+    container_name: media-service
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    depends_on:
+      mongo-media:
+        condition: service_healthy
+      discovery-server:
+        condition: service_started
+      kafka:
+        condition: service_started
+    environment:
+      - TZ=${TZ}
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - EUREKA_URL=http://discovery-server:8761/eureka
+      - MEDIA_MONGO_HOST=mongo-media
+      - MEDIA_MONGO_LOCAL_PORT=27017
+      - MEDIA_MONGO_DB_NAME=${MEDIA_MONGO_DB_NAME}
+      - MEDIA_MONGO_DB_USER=${MEDIA_MONGO_DB_USER}
+      - MEDIA_MONGO_DB_PWD=${MEDIA_MONGO_DB_PWD}
+      - KAFKA_BROKER=kafka:9092
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
+    volumes:
+      - ./uploads/media:/app/uploads/media
+    networks:
+      - ecommerce-network
+
+    # FRONTEND
+ 
+  # FRONTEND
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        SSL_PASSWORD: ${SSL_PASSWORD}
+    container_name: frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - api-gateway
     networks:
       - ecommerce-network
 

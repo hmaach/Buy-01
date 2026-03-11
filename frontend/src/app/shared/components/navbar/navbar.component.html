@@ -53,7 +53,7 @@
         <mat-menu #userMenu="matMenu" xPosition="before" style="min-width: 500px">
           <div class="menu-header" (click)="$event.stopPropagation()">
             <div class="menu-avatar-placeholder">
-              {{ currentUser()?.name?.charAt(0) }}
+              <img src="{{ env.avatarUrl + currentUser()?.avatarUrl }}" alt="" srcset="" />
             </div>
 
             <div class="menu-user-details">

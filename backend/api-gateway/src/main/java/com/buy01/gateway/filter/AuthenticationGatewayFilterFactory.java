@@ -22,6 +22,7 @@ import com.buy01.gateway.security.JwtUtil;
 import reactor.core.publisher.Mono;
 
 record PublicEndpoint(HttpMethod method, String pattern) {
+
     public boolean matches(HttpMethod reqMethod, String reqPath) {
         if (method != null && method != reqMethod) {
             return false;
@@ -48,6 +49,7 @@ public class AuthenticationGatewayFilterFactory
     private static final List<PublicEndpoint> PUBLIC_ENDPOINTS = List.of(
             new PublicEndpoint(HttpMethod.POST, "/users/auth/login"),
             new PublicEndpoint(HttpMethod.POST, "/users/auth/register"),
+            new PublicEndpoint(HttpMethod.GET, "/users/avatars/**"),
             new PublicEndpoint(null, "/media/**"),
             new PublicEndpoint(HttpMethod.GET, "/products"),
             new PublicEndpoint(HttpMethod.GET, "/products/**"));
@@ -74,7 +76,7 @@ public class AuthenticationGatewayFilterFactory
             if (isPublic) {
                 return chain.filter(exchange);
             }
-            
+
             // 1. Check for Authorization header
             String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -108,7 +110,7 @@ public class AuthenticationGatewayFilterFactory
                             if (!exists) {
                                 return onError(exchange, "User not found or has been deleted", HttpStatus.UNAUTHORIZED);
                             }
-                            
+
                             // 5. Mutate request to pass info downstream
                             ServerHttpRequest modifiedRequest = request.mutate()
                                     .header("X-User-Id", userId)

@@ -26,7 +26,6 @@ export class AuthService {
   private initializeAuth(): void {
     const token = this.getToken();
     const expiresAt = this.getExpiresAt();
-    console.log('initializeAuth - token:', token, 'expiresAt:', expiresAt);
 
     if (token && expiresAt) {
       const expiresAtDate = new Date(expiresAt);
@@ -37,7 +36,6 @@ export class AuthService {
           this.getCurrentUser()
             .pipe(
               tap((user) => {
-                console.log('initializeAuth - user:', user);
                 if (user) {
                   this.currentUserSubject.next(user);
                   this.currentUserSignal.set(user);
@@ -105,17 +103,14 @@ export class AuthService {
   }
 
   register(request: RegisterRequest): Observable<AuthResponse> {
-    const formData = new FormData();
-    formData.append('name', request.name);
-    formData.append('email', request.email);
-    formData.append('password', request.password);
-    formData.append('role', request.role);
-    
-    if (request.avatar) {
-      formData.append('avatar', request.avatar);
-    }
+    const payload = {
+      name: request.name,
+      email: request.email,
+      password: request.password,
+      role: request.role,
+    };
 
-    return this.http.post<AuthResponse>(`/users/auth/register`, formData).pipe(
+    return this.http.post<AuthResponse>(`/users/auth/register`, payload).pipe(
       tap(() => {
         this.router.navigateByUrl('/login', { state: { email: request.email } });
       }),

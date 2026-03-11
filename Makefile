@@ -23,6 +23,7 @@ MVN_CMD := ./mvnw
 help:
 	@echo "Available targets:"
 	@echo "  make env            -> generate RSA keys for JWT signing in .env"
+	@echo "  make ssl           -> generate SSL certificates for secure communication"
 	@echo "  make install        -> clean install all backend services"
 	@echo "  make clean          -> clean all backend services"
 	@echo "  make rebuild        -> clean install all services"

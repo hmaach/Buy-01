@@ -21,6 +21,7 @@ import {
   PackagePlus,
 } from 'lucide-angular';
 import { filter } from 'rxjs';
+import { env } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-navbar',
@@ -53,6 +54,8 @@ export class NavbarComponent {
   readonly UserPlus = UserPlus;
   readonly Home = House;
   readonly PackagePlus = PackagePlus;
+
+  env = env;
 
   currentUser = computed(() => {
     const user = this.authService.user;

@@ -8,12 +8,22 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { LucideAngularModule, Camera, Mail, User, ShieldCheck, Save, Trash2, X } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  Camera,
+  Mail,
+  User,
+  ShieldCheck,
+  Save,
+  Trash2,
+  X,
+} from 'lucide-angular';
 import { AuthService } from '../../core/auth/services/auth.service';
 import { UserService } from '../../core/services/user.service';
 import { MediaService } from '../../core/services/media.service';
 import { DeleteAccountDialogComponent } from './delete-account-dialog.component';
 import { validateImage } from '../../shared/utils/media-validation.utils';
+import { env } from '../../../environments/environment';
 
 @Component({
   selector: 'app-user-profile',
@@ -55,7 +65,7 @@ export class ProfileComponent {
 
   isSaving = signal(false);
   isDeleting = signal(false);
-  
+
   // Avatar state
   avatarPreview = signal<string | null>(null);
   avatarError = signal<string | null>(null);
@@ -89,7 +99,7 @@ export class ProfileComponent {
       });
       // Set avatar preview from existing avatarUrl
       if (user.avatarUrl) {
-        this.avatarPreview.set(user.avatarUrl);
+        this.avatarPreview.set(env.avatarUrl + user.avatarUrl);
       }
     }
   }
@@ -176,7 +186,7 @@ export class ProfileComponent {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
-      
+
       // Validate using validateImage
       const validationError = validateImage(file);
       if (validationError) {
@@ -184,11 +194,11 @@ export class ProfileComponent {
         this.selectedAvatar.set(null);
         return;
       }
-      
+
       this.avatarError.set(null);
       this.selectedAvatar.set(file);
       this.newAvatarUploaded.set(true);
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {

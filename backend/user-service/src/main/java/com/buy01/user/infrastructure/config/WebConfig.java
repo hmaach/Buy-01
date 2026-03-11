@@ -14,7 +14,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // Serve avatars from the uploads directory
-        registry.addResourceHandler("/uploads/avatars/**")
+        registry.addResourceHandler("/users/avatars/**")
                 .addResourceLocations("file:" + uploadDir + "/");
     }
 }

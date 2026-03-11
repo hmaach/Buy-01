@@ -27,10 +27,11 @@ public class UserEntity {
     private String email;
     private String password;
     private Role role;
+    private String avatar;
     private Instant createdAt;
     private Instant updatedAt;
 
-    public static UserEntity create(String name, String email, String password, Role role) {
+    public static UserEntity create(String name, String email, String password, Role role, String avatar) {
         Instant now = Instant.now();
         return new UserEntity(
                 UUID.randomUUID(),
@@ -38,14 +39,16 @@ public class UserEntity {
                 email,
                 password,
                 role,
+                avatar,
                 now,
                 now
         );
     }
 
-    public void update(String name, String email) {
+    public void update(String name, String email, String avatar) {
         this.name = name;
         this.email = email;
+        this.avatar = avatar;
 
         this.updatedAt = Instant.now();
     }

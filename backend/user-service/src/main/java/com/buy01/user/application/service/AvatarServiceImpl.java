@@ -67,7 +67,7 @@ public class AvatarServiceImpl implements AvatarService {
         if (!ALLOWED_MIME_TYPES.contains(detectedMimeType)) {
             throw new IllegalArgumentException(
                     "Invalid file type. Detected: " + detectedMimeType
-                            + ". Only JPEG, PNG, GIF, and WebP are allowed.");
+                    + ". Only JPEG, PNG, GIF, and WebP are allowed.");
         }
 
         String originalFilename = avatar.getOriginalFilename();
@@ -85,7 +85,7 @@ public class AvatarServiceImpl implements AvatarService {
             throw new RuntimeException("Failed to save avatar", e);
         }
 
-        return "/uploads/avatars/" + filename;
+        return "/avatars/" + filename;
     }
 
     @Override

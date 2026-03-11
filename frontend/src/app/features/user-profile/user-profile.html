@@ -26,12 +26,12 @@
           @if (avatarPreview()) {
             <div class="avatar-preview">
               <img [src]="avatarPreview()" alt="Profile avatar" />
-              <button type="button" class="avatar-overlay" (click)="$any($event.target).click()">
+              <button type="button" class="avatar-overlay" (click)="fileInput.click()">
                 <lucide-angular [img]="Camera" [size]="20"></lucide-angular>
               </button>
             </div>
           } @else {
-            <div class="avatar-placeholder" (click)="$any($event.target).click()">
+            <div class="avatar-placeholder" (click)="fileInput.click()">
               <span class="avatar-initials">{{ initials }}</span>
               <div class="avatar-overlay">
                 <lucide-angular [img]="Camera" [size]="20"></lucide-angular>
@@ -39,6 +39,7 @@
             </div>
           }
           <input
+            #fileInput
             type="file"
             accept="image/jpeg,image/png,image/gif,image/webp"
             (change)="onAvatarSelected($event)"

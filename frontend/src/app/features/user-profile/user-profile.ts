@@ -164,7 +164,7 @@ export class ProfileComponent {
             // Reset avatar state after successful update
             this.selectedAvatar.set(null);
             this.newAvatarUploaded.set(false);
-            this.avatarPreview.set(updatedUser.avatarUrl || null);
+            this.avatarPreview.set(env.avatarUrl + updatedUser.avatarUrl || null);
             this.snackBar.open('Profile updated successfully!', '✓', { duration: 3000 });
           }
           this.isSaving.set(false);

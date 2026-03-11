@@ -103,14 +103,18 @@ export class AuthService {
   }
 
   register(request: RegisterRequest): Observable<AuthResponse> {
-    const payload = {
-      name: request.name,
-      email: request.email,
-      password: request.password,
-      role: request.role,
-    };
+    const formData = new FormData();
 
-    return this.http.post<AuthResponse>(`/users/auth/register`, payload).pipe(
+    formData.append('name', request.name);
+    formData.append('email', request.email);
+    formData.append('password', request.password);
+    formData.append('role', request.role);
+
+    if (request.avatar) {
+      formData.append('avatar', request.avatar);
+    }
+
+    return this.http.post<AuthResponse>(`/users/auth/register`, formData).pipe(
       tap(() => {
         this.router.navigateByUrl('/login', { state: { email: request.email } });
       }),

@@ -105,27 +105,37 @@ services:
       - ecommerce-network
 
   # USER SERVICE
-  user-service:
-    build: ./backend/user-service
+  user-service: 
+    build: 
+      context: ./backend/user-service 
+      dockerfile: Dockerfile
     container_name: user-service
     restart: unless-stopped
-    # depends_on:
-    #   mongo-user:
-    #     condition: service_healthy
     ports:
-      - "${USER_SERVICE_PORT}:8080"
+      - "${USER_SERVICE_PORT}:${USER_SERVICE_PORT}"
+    depends_on:
+      mongo-user:
+        condition: service_healthy
+      discovery-server:
+        condition: service_started
+      kafka:
+        condition: service_started
     environment:
-      EUREKA_URL: http://discovery-server:${DISCOVERY_PORT}/eureka
-      SPRING_PROFILES_ACTIVE: docker
-      MONGO_HOST: mongo-user
-      MONGO_PORT: 27017
-      MONGO_DB: ${USER_MONGO_DB}
-      MONGO_USERNAME: ${USER_MONGO_USERNAME}
-      MONGO_PASSWORD: ${USER_MONGO_PASSWORD}
-      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
-      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
-      JWT_EXPIRATION: ${JWT_EXPIRATION}
-      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
+      - TZ=${TZ}
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - EUREKA_URL=http://discovery-server:8761/eureka
+      - USER_MONGO_HOST=mongo-user
+      - USER_MONGO_PORT=27017
+      - USER_MONGO_DB=${USER_MONGO_DB}
+      - USER_MONGO_USERNAME=${USER_MONGO_USERNAME}
+      - USER_MONGO_PASSWORD=${USER_MONGO_PASSWORD}
+      - KAFKA_BROKER=kafka:9092
+      - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY}
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
+      - JWT_EXPIRATION=${JWT_EXPIRATION}
+      - MEDIA_SERVICE_URL=http://media-service:8083
+    volumes:
+      - ./uploads/avatars:/app/uploads/avatars
     networks:
       - ecommerce-network
 

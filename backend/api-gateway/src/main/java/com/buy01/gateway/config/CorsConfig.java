@@ -12,37 +12,37 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 @Configuration
 public class CorsConfig {
 
-    @Bean
-    public CorsWebFilter corsWebFilter() {
-        CorsConfiguration corsConfig = new CorsConfiguration();
+        @Bean
+        public CorsWebFilter corsWebFilter() {
+                CorsConfiguration corsConfig = new CorsConfiguration();
 
-        corsConfig.setAllowedOrigins(List.of(
-                "http://localhost:4200",
-                "https://localhost:4200",
-                "http://127.0.0.1:5500"
-        ));
+                corsConfig.setAllowedOrigins(List.of(
+                                "http://localhost:4200",
+                                "https://localhost:4200",
+                                "https://localhost",
+                                "http://localhost",
+                                "https://frontend:443",
+                                "http://127.0.0.1:5500"));
 
-        corsConfig.setAllowedMethods(Arrays.asList(
-                "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
-        ));
+                corsConfig.setAllowedMethods(Arrays.asList(
+                                "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 
-        corsConfig.setAllowedHeaders(List.of(
-                "Authorization",
-                "Content-Type",
-                "Accept",
-                "Origin",
-                "X-Requested-With"
-        ));
+                corsConfig.setAllowedHeaders(List.of(
+                                "Authorization",
+                                "Content-Type",
+                                "Accept",
+                                "Origin",
+                                "X-Requested-With"));
 
-        corsConfig.setAllowCredentials(true);
+                corsConfig.setAllowCredentials(true);
 
-        corsConfig.setMaxAge(3600L);
+                corsConfig.setMaxAge(3600L);
 
-        corsConfig.setExposedHeaders(List.of("Authorization"));
+                corsConfig.setExposedHeaders(List.of("Authorization"));
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", corsConfig);
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", corsConfig);
 
-        return new CorsWebFilter(source);
-    }
+                return new CorsWebFilter(source);
+        }
 }

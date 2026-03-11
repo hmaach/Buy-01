@@ -223,6 +223,25 @@ services:
     networks:
       - ecommerce-network
 
+    # FRONTEND
+ 
+  # FRONTEND
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        SSL_PASSWORD: ${SSL_PASSWORD}
+    container_name: frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - api-gateway
+    networks:
+      - ecommerce-network
+
 # NETWORK
 networks:
   ecommerce-network:

@@ -3,12 +3,12 @@
 
 ### Authentication (Mock JWT)
 - **Login**: `POST /login` - Email/password authentication with role selection (CLIENT | SELLER)
-- **Register**: `POST /register` - User registration with optional avatar upload for sellers
+- **Register**: `POST /register` - User registration
 - **JWT**: Mock JWT tokens stored in localStorage with auth interceptor
 
 ### Profile Management
 - **GET /me**: Profile viewing via navbar dropdown
-- **PUT /me**: Profile update (sellers can upload avatars)
+- **PUT /me**: Profile update 
 
 ### Product Features
 - **Product List**: Grid display with 8 Apple products (iPhone, MacBook, iPad, etc.)

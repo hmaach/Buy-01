@@ -40,6 +40,8 @@ export class RegisterComponent {
   loading = signal(false);
   hidePassword = signal(true);
   avatarPreview = signal<string | null>(null);
+  avatarError = signal<string | null>(null);
+  selectedAvatar = signal<File | null>(null);
 
   roles: Role[] = ['CLIENT', 'SELLER'];
 
@@ -75,30 +77,7 @@ export class RegisterComponent {
       ],
       password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(30)]],
       role: ['CLIENT', Validators.required],
-      avatar: [null],
     });
-  }
-
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-
-      const errorMessage = validateImage(file);
-      if (errorMessage) {
-        this.snackBar.open(errorMessage, 'Dismiss', { duration: 3000 });
-        return;
-      }
-
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.avatarPreview.set(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-
-      this.registerForm.patchValue({ avatar: file });
-    }
   }
 
   async onSubmit() {
@@ -109,10 +88,9 @@ export class RegisterComponent {
     try {
       const { name, email, password, role } = this.registerForm.value;
 
-      this.authService.register({ name, email, password, role }).subscribe({
+      this.authService.register({ name, email, password, role, avatar: this.selectedAvatar() ?? undefined }).subscribe({
         next: () => {
-          this.snackBar.open('Registration successful!', 'Close', { duration: 3000 });
-          this.router.navigateByUrl('/login', { state: { email } });
+          this.snackBar.open('Registration successful! Please login with your credentials.', 'Close', { duration: 3000 });
         },
         error: (error) => {
           const errorMessage = error.error?.detail || 'Registration failed';
@@ -124,5 +102,37 @@ export class RegisterComponent {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  onAvatarSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      
+      // Validate using validateImage
+      const validationError = validateImage(file);
+      if (validationError) {
+        this.avatarError.set(validationError);
+        this.selectedAvatar.set(null);
+        this.avatarPreview.set(null);
+        return;
+      }
+      
+      this.avatarError.set(null);
+      this.selectedAvatar.set(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.avatarPreview.set(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  removeAvatar(): void {
+    this.selectedAvatar.set(null);
+    this.avatarPreview.set(null);
+    this.avatarError.set(null);
   }
 }

@@ -4,8 +4,8 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  avatarUrl?: string;
   role: Role;
-  avatarId: string;
 }
 
 export interface LoginRequest {
@@ -18,7 +18,7 @@ export interface RegisterRequest {
   email: string;
   password: string;
   role: Role;
-  avatar?: string;
+  avatar?: File;
 }
 
 export interface AuthResponse {

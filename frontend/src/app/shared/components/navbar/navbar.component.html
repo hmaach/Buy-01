@@ -26,27 +26,33 @@
 
     <div class="navbar-actions">
       @if (isLoggedIn()) {
-        <button
-          mat-button
-          [matMenuTriggerFor]="userMenu"
-          class="user-menu-trigger"
-          aria-label="Open user menu"
-        >
-          <lucide-angular [img]="CircleUserRound" style="transform: translateY(0)"></lucide-angular>
-        </button>
+      <button mat-button [matMenuTriggerFor]="userMenu" class="user-menu-trigger" aria-label="Open user menu">
+        <!-- @if (isSeller()) {
+            <img
+              [src]="
+                currentUser()?.avatarId ? currentUser()?.avatarId : '/assets/placeholder.png'
+              "
+              [alt]="currentUser()?.name"
+              class="seller-avatar"
+            />
+          } @else { -->
+        <lucide-angular [img]="CircleUserRound" style="transform: translateY(0)"></lucide-angular>
+        <!-- } -->
+      </button>
 
-        <mat-menu #userMenu="matMenu" xPosition="before" style="min-width: 500px">
-          <div class="menu-header" (click)="$event.stopPropagation()">
-            <div class="menu-avatar-placeholder">
-              <img
-                src="{{
-                  currentUser()?.avatarUrl
-                    ? env.avatarUrl + currentUser()?.avatarUrl
-                    : '/assets/placeholder.png'
-                }}"
-                alt="avatar"
-              />
-            </div>
+      <mat-menu #userMenu="matMenu" xPosition="before" style="min-width: 500px">
+        <div class="menu-header" (click)="$event.stopPropagation()">
+          @if (isSeller() && currentUser()?.avatarId) {
+          <img [src]="currentUser()?.avatarId" [alt]="currentUser()?.name" class="menu-avatar" />
+          } @else {
+          <!-- Initial circle — always shown, no icon -->
+          <div class="menu-avatar-placeholder">
+            {{ currentUser()?.name?.charAt(0) }}
+          </div>
+          }
+
+          <div class="menu-user-details">
+            <span class="menu-user-name">{{ currentUser()?.name }}</span>
 
             @switch (currentUser()?.role?.toUpperCase()) {
             @case ('SELLER') {

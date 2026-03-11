@@ -103,20 +103,15 @@ export class AuthService {
   }
 
   register(request: RegisterRequest): Observable<AuthResponse> {
-    const formData = new FormData();
+    // Use placeholder UUID for avatar
+    const payload = {
+      ...request,
+      avatar: request.avatar || '00000000-0000-0000-0000-000000000000',
+    };
 
-    formData.append('name', request.name);
-    formData.append('email', request.email);
-    formData.append('password', request.password);
-    formData.append('role', request.role);
-
-    if (request.avatar) {
-      formData.append('avatar', request.avatar);
-    }
-
-    return this.http.post<AuthResponse>(`/users/auth/register`, formData).pipe(
-      tap(() => {
-        this.router.navigateByUrl('/login', { state: { email: request.email } });
+    return this.http.post<AuthResponse>(`/users/auth/register`, payload).pipe(
+      tap((response) => {
+        this.handleAuthSuccess(response);
       }),
       catchError((error) => {
         console.error('Registration error:', error);

@@ -21,7 +21,6 @@ import {
   PackagePlus,
 } from 'lucide-angular';
 import { filter } from 'rxjs';
-import { env } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-navbar',
@@ -55,18 +54,8 @@ export class NavbarComponent {
   readonly Home = House;
   readonly PackagePlus = PackagePlus;
 
-  env = env;
-
-  currentUser = computed(() => {
-    const user = this.authService.user;
-    console.log('Navbar currentUser:', user);
-    return user;
-  });
-  isLoggedIn = computed(() => {
-    const loggedIn = this.authService.isAuthenticated;
-    console.log('Navbar isLoggedIn:', loggedIn);
-    return loggedIn;
-  });
+  currentUser = computed(() => this.authService.user);
+  isLoggedIn = computed(() => this.authService.isAuthenticated);
   isSeller = computed(() => this.authService.isSeller);
 
   currentUrl: string = '';

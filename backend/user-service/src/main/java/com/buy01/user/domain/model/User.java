@@ -9,21 +9,21 @@ public class User {
     private String name;
     private String email;
     private String password;
-    private String avatarUrl;
     private Role role;
+    private UUID avatarId;
     private Instant createdAt;
     private Instant updatedAt;
 
     public User() {
     }
 
-    public User(UUID id, String name, String email, String password, String avatarUrl, Role role, Instant createdAt, Instant updatedAt) {
+    public User(UUID id, String name, String email, String password, Role role, UUID avatarId, Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
-        this.avatarUrl = avatarUrl;
         this.role = role;
+        this.avatarId = avatarId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -68,6 +68,14 @@ public class User {
         this.role = role;
     }
 
+    public UUID getAvatarId() {
+        return avatarId;
+    }
+
+    public void setAvatarId(UUID avatarId) {
+        this.avatarId = avatarId;
+    }
+
     public Instant getCreatedAt() {
         return createdAt;
     }
@@ -84,14 +92,6 @@ public class User {
         this.updatedAt = updatedAt;
     }
 
-    public String getAvatarUrl() {
-        return avatarUrl;
-    }
-
-    public void setAvatarUrl(String avatarUrl) {
-        this.avatarUrl = avatarUrl;
-    }
-
     public static User create(String name, String email, String password, Role role) {
         Instant now = Instant.now();
         return new User(
@@ -99,29 +99,18 @@ public class User {
                 name,
                 email,
                 password,
-                null,
                 role,
+                null,
                 now,
                 now
         );
     }
 
-    public void update(String name, String email, String avatarUrl) {
-        boolean updated = false;
-        if (name != null) {
-            this.name = name;
-            updated = true;
+    public void update(String name, UUID avatarId) {
+        this.name = name;
+        if (avatarId != null) {
+            this.avatarId = avatarId;
         }
-        if (email != null) {
-            this.email = email;
-            updated = true;
-        }
-        if (avatarUrl != null) {
-            this.avatarUrl = avatarUrl;
-            updated = true;
-        }
-        if (updated) {
-            this.updatedAt = Instant.now();
-        }
+        this.updatedAt = Instant.now();
     }
 }

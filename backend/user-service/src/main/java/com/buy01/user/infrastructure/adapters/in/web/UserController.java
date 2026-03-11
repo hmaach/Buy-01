@@ -13,12 +13,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.buy01.user.domain.model.Role;
 import com.buy01.user.domain.model.User;
-import com.buy01.user.domain.port.in.AvatarService;
 import com.buy01.user.domain.port.in.UserService;
 import com.buy01.user.infrastructure.adapters.in.web.dto.request.UpdateUserRequest;
 import com.buy01.user.infrastructure.adapters.in.web.dto.response.UserResponse;
 import com.buy01.user.infrastructure.security.JwtAuthenticationFilter.UserPrincipal;
+import com.buy01.user.infrastructure.web.client.MediaServiceClient;
 
 import jakarta.validation.Valid;
 
@@ -27,11 +28,11 @@ import jakarta.validation.Valid;
 public class UserController {
 
     private final UserService userService;
-    private final AvatarService avatarService;
+    private final MediaServiceClient mediaServiceClient;
 
-    public UserController(UserService userService, AvatarService avatarService) {
+    public UserController(UserService userService, MediaServiceClient mediaServiceClient) {
         this.userService = userService;
-        this.avatarService = avatarService;
+        this.mediaServiceClient = mediaServiceClient;
     }
 
     @GetMapping
@@ -43,18 +44,12 @@ public class UserController {
     public ResponseEntity<UserResponse> getCurrentUser(Authentication authentication) {
         UserPrincipal currUser = (UserPrincipal) authentication.getPrincipal();
         User user = userService.findById(currUser.id());
-        return ResponseEntity.ok(UserResponse.from(user));
+        return ResponseEntity.ok(UserResponse.from(user, null));
     }
 
     @GetMapping("/id/{id}")
     public UserResponse getUser(@PathVariable UUID id) {
-        return UserResponse.from(userService.findById(id));
-    }
-
-    @GetMapping("/exists/{id}")
-    public ResponseEntity<Boolean> checkUserExists(@PathVariable UUID id) {
-        boolean exists = userService.existsById(id);
-        return ResponseEntity.ok(exists);
+        return UserResponse.from(userService.findById(id), null);
     }
 
     @PutMapping(value = "/me", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -64,13 +59,17 @@ public class UserController {
     ) {
         UserPrincipal currUser = (UserPrincipal) authentication.getPrincipal();
 
-        String avatarUrl = null;
-        if (request.avatar() != null && !request.avatar().isEmpty()) {
-            avatarUrl = avatarService.saveAvatar(request.avatar());
+        UUID avatarid = null;
+        // Only sellers can upload avatar
+        if (currUser.role() == Role.SELLER && request.avatar() != null && !request.avatar().isEmpty()) {
+            try {
+                avatarid = mediaServiceClient.uploadAvatar(request.avatar());
+            } catch (Exception e) {
+            }
         }
 
-        User updatedUser = userService.updateUser(currUser.id(), request.toCommand(avatarUrl));
-        return ResponseEntity.ok(UserResponse.from(updatedUser));
+        User updatedUser = userService.updateUser(currUser.id(), request.toCommand(avatarid));
+        return ResponseEntity.ok(UserResponse.from(updatedUser, null));
     }
 
     @DeleteMapping("/me")

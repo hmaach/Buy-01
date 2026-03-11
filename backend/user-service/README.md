@@ -14,6 +14,7 @@ The User Service handles all user-related operations including registration, log
 - Role-based Access Control (CLIENT, SELLER)
 - Password Encryption (BCrypt)
 - JWT Token Generation & Validation
+- Avatar Upload Support
 
 ## Technology Stack
 
@@ -35,6 +36,7 @@ User
 ├── email: String (unique)
 ├── password: String (encrypted)
 ├── role: Role (CLIENT, SELLER)
+├── avatarId: String (optional)
 ├── createdAt: Instant
 └── updatedAt: Instant
 ```
@@ -103,6 +105,7 @@ User
   "name": "John Doe",
   "email": "john@example.com",
   "role": "SELLER",
+  "avatarId": "https://...",
   "createdAt": "2024-01-01T00:00:00Z"
 }
 ```
@@ -183,3 +186,11 @@ docker-compose up user-service
 | User Service | 8081 |
 | MongoDB | 27017 |
 
+## Integration with Media Service
+
+The User Service can upload avatars to the Media Service:
+
+```java
+@PostMapping(value = "/media/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+UUID uploadAvatar(@RequestPart("file") MultipartFile file);
+```

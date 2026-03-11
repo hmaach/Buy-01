@@ -72,6 +72,8 @@ export class LoginComponent {
   ngOnInit() {
     const stateData = history.state;
 
+    console.log(stateData);
+
     if (stateData && stateData.email) {
       this.loginForm.patchValue({ email: stateData.email });
     }
@@ -86,11 +88,9 @@ export class LoginComponent {
       const { email, password } = this.loginForm.value;
 
       this.authService.login({ email, password }).subscribe({
-        next: (user) => {
+        next: () => {
           this.snackBar.open('Login successful!', 'Close', { duration: 3000 });
-          setTimeout(() => {
-            this.router.navigate(['/']);
-          }, 100);
+          this.router.navigate(['/']);
         },
         error: (error) => {
           const errorMessage = error.error?.detail || 'Login failed';

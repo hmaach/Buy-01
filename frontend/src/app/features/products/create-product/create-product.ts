@@ -5,8 +5,6 @@ import { CommonModule } from '@angular/common';
 import { ProductService } from '../../../core/services/product.service';
 import { env } from '../../../../environments/environment';
 import { MediaService } from '../../../core/services/media.service';
-import { validateImage } from '../../../shared/utils/media-validation.utils';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-product-form',
@@ -21,7 +19,6 @@ export class ProductForm {
   private router = inject(Router);
   readonly productService = inject(ProductService);
   readonly mediaService = inject(MediaService);
-    private snackBar = inject(MatSnackBar);
 
   isEditMode = signal(false);
   isLoading = signal(false);
@@ -119,12 +116,7 @@ export class ProductForm {
   }
 
   private uploadImage(file: File, isMain: boolean): void {
-    const errorMessage = validateImage(file);
-    if (errorMessage) {
-      this.snackBar.open(errorMessage, 'Dismiss', { duration: 3000 });
-      return;
-    }
-   
+    if (!this.isValidImage(file)) return;
 
     const formData = new FormData();
     formData.append('files', file);
@@ -163,6 +155,19 @@ export class ProductForm {
     event.stopPropagation();
   }
 
+  private isValidImage(file: File): boolean {
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    const maxSize = 2 * 1024 * 1024;
+    if (!validTypes.includes(file.type)) {
+      this.errorMessage.set('Only JPG, PNG, WebP, GIF allowed');
+      return false;
+    }
+    if (file.size > maxSize) {
+      this.errorMessage.set('File too large (max 2MB)');
+      return false;
+    }
+    return true;
+  }
 
   // ── Form getters ─────────────────────────────────────────
   get name() { return this.form.get('name'); }

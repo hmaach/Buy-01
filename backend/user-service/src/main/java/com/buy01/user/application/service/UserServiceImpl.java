@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import com.buy01.user.application.command.UpdateUserCommand;
 import com.buy01.user.domain.exception.UserNotFoundException;
 import com.buy01.user.domain.model.User;
-import com.buy01.user.domain.port.in.AvatarService;
 import com.buy01.user.domain.port.in.UserService;
 import com.buy01.user.domain.port.out.UserRepositoryPort;
 
@@ -15,11 +14,9 @@ import com.buy01.user.domain.port.out.UserRepositoryPort;
 public class UserServiceImpl implements UserService {
 
     private final UserRepositoryPort userRepository;
-    private final AvatarService avatarService;
 
-    public UserServiceImpl(UserRepositoryPort userRepository, AvatarService avatarService) {
+    public UserServiceImpl(UserRepositoryPort userRepository) {
         this.userRepository = userRepository;
-        this.avatarService = avatarService;
     }
 
     @Override
@@ -31,31 +28,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateUser(UUID userId, UpdateUserCommand command) {
         User user = findById(userId);
-        
-        // Handle avatar update - delete old avatar if new one is provided
-        String newAvatarUrl = command.avatarUrl();
-        if (newAvatarUrl != null && !newAvatarUrl.isEmpty()) {
-            // Delete old avatar if exists
-            if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
-                avatarService.deleteAvatar(user.getAvatarUrl());
-            }
-            user.setAvatarUrl(newAvatarUrl);
-        }
-        
-        user.update(command.name(), command.email(), newAvatarUrl);
+        user.update(command.name(), command.avatarId());
         return userRepository.save(user);
     }
 
     @Override
     public void deleteUser(UUID userId) {
-        User user = userRepository.findById(userId)
+        userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
-        
-        // Delete avatar if exists
-        if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
-            avatarService.deleteAvatar(user.getAvatarUrl());
-        }
-        
         userRepository.deleteById(userId);
     }
 
@@ -63,10 +43,5 @@ public class UserServiceImpl implements UserService {
     public User findByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
-    }
-
-    @Override
-    public boolean existsById(UUID userId) {
-        return userRepository.existsById(userId);
     }
 }

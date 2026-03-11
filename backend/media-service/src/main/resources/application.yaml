@@ -17,6 +17,9 @@ spring:
       password: ${MEDIA_MONGO_DB_PWD:123456}
       authentication-database: admin
       
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKER:localhost:9092}
+
 security:
   jwt:
     public-key: ${JWT_PUBLIC_KEY}

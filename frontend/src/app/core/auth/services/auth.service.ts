@@ -15,7 +15,7 @@ export class AuthService {
   public currentUser$ = this.currentUserSubject.asObservable();
 
   private currentUserSignal = signal<User | null>(null);
-  private isAuthSignal = signal<boolean>(false);
+  private isAuthSignal = signal<boolean>(this.getToken() !== null);
 
   constructor(
     private http: HttpClient,

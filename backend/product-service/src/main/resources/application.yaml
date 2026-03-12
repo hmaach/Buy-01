@@ -16,6 +16,10 @@ spring:
   kafka:
     bootstrap-servers: ${KAFKA_BROKER:localhost:9092}
 
+kafka:
+  topics:
+    user-deleted: user-deleted
+
 eureka:
   client:
     service-url:

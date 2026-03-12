@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class MongoProductAdapter implements ProductRepositoryPort {
+
     private final SpringDataProductRepository springRepo;
     private final ProductDocumentMapper mapper;
 
@@ -29,6 +30,11 @@ public class MongoProductAdapter implements ProductRepositoryPort {
     @Override
     public Mono<Product> findById(String id) {
         return springRepo.findById(id).map(mapper::toDomain);
+    }
+
+    @Override
+    public Flux<Product> findByUserId(String userId) {
+        return springRepo.findByUserId(userId).map(mapper::toDomain);
     }
 
     @Override

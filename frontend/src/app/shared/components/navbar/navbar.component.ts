@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { Component, inject, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -57,16 +57,8 @@ export class NavbarComponent {
 
   env = env;
 
-  currentUser = computed(() => {
-    const user = this.authService.user;
-    console.log('Navbar currentUser:', user);
-    return user;
-  });
-  isLoggedIn = computed(() => {
-    const loggedIn = this.authService.isAuthenticated;
-    console.log('Navbar isLoggedIn:', loggedIn);
-    return loggedIn;
-  });
+  currentUser = computed(() => this.authService.user);
+  isLoggedIn = computed(() => this.authService.isAuthenticated);
   isSeller = computed(() => this.authService.isSeller);
 
   currentUrl: string = '';

@@ -45,6 +45,14 @@ export const errorInterceptor: HttpInterceptorFn = (
         }
       }
 
+      // Handle 404 on GET /me - user account no longer exists (e.g., deleted by admin)
+      if (error.status === 404 && req.url.includes('/me') && req.method === 'GET') {
+        console.log('[HTTP] User not found (404 /me) - logging out');
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_expires_at');
+        router.navigate(['/login']);
+      }
+
       // Legacy handling for non-ProblemDetail responses
       if (error.status === 401) {
         console.log('[HTTP] Unauthorized - redirecting to login');

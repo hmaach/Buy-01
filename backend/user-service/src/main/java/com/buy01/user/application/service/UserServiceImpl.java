@@ -2,61 +2,33 @@ package com.buy01.user.application.service;
 
 import java.util.UUID;
 
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.buy01.user.application.command.UpdateUserCommand;
+import com.buy01.user.application.events.UserDeletedEvent;
 import com.buy01.user.domain.exception.UserNotFoundException;
 import com.buy01.user.domain.model.User;
 import com.buy01.user.domain.port.in.AvatarService;
 import com.buy01.user.domain.port.in.UserService;
 import com.buy01.user.domain.port.out.UserRepositoryPort;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepositoryPort userRepository;
     private final AvatarService avatarService;
+    private final KafkaTemplate<String, UserDeletedEvent> userDeleteTemplate;
 
-    public UserServiceImpl(UserRepositoryPort userRepository, AvatarService avatarService) {
-        this.userRepository = userRepository;
-        this.avatarService = avatarService;
-    }
+    private static final String TOPIC_USER_DELETED = "user-deleted";
 
     @Override
     public User findById(UUID userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
-    }
-
-    @Override
-    public User updateUser(UUID userId, UpdateUserCommand command) {
-        User user = findById(userId);
-        
-        // Handle avatar update - delete old avatar if new one is provided
-        String newAvatarUrl = command.avatarUrl();
-        if (newAvatarUrl != null && !newAvatarUrl.isEmpty()) {
-            // Delete old avatar if exists
-            if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
-                avatarService.deleteAvatar(user.getAvatarUrl());
-            }
-            user.setAvatarUrl(newAvatarUrl);
-        }
-        
-        user.update(command.name(), command.email(), newAvatarUrl);
-        return userRepository.save(user);
-    }
-
-    @Override
-    public void deleteUser(UUID userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
-        
-        // Delete avatar if exists
-        if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
-            avatarService.deleteAvatar(user.getAvatarUrl());
-        }
-        
-        userRepository.deleteById(userId);
     }
 
     @Override
@@ -69,4 +41,50 @@ public class UserServiceImpl implements UserService {
     public boolean existsById(UUID userId) {
         return userRepository.existsById(userId);
     }
+
+    @Override
+    public User updateUser(UUID userId, UpdateUserCommand command) {
+        User user = findById(userId);
+
+        // Handle avatar update - delete old avatar if new one is provided
+        String newAvatarUrl = command.avatarUrl();
+        if (newAvatarUrl != null && !newAvatarUrl.isEmpty()) {
+            // Delete old avatar if exists
+            if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
+                avatarService.deleteAvatar(user.getAvatarUrl());
+            }
+            user.setAvatarUrl(newAvatarUrl);
+        }
+
+        user.update(command.name(), command.email(), newAvatarUrl);
+        return userRepository.save(user);
+    }
+
+    @Override
+    public void deleteUser(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+
+        // Delete avatar if exists
+        if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
+            avatarService.deleteAvatar(user.getAvatarUrl());
+        }
+
+        userRepository.deleteById(userId);
+        sendKafkaUserDeleted(userId);
+    }
+
+    @Override
+    public void sendKafkaUserDeleted(UUID userId) {
+        UserDeletedEvent event = new UserDeletedEvent(userId);
+        sendKafkaEvent(userDeleteTemplate, TOPIC_USER_DELETED, userId.toString(), event);
+    }
+
+    private <T> void sendKafkaEvent(KafkaTemplate<String, T> template, String topic, String key, T event) {
+        if (topic != null && key != null) {
+            template.send(topic, key, event);
+            System.out.println("Kafka event sent: user=" + key);
+        }
+    }
+
 }

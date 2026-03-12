@@ -1,0 +1,79 @@
+package com.buy01.product.infrastructure.messaging;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+
+import com.buy01.product.application.events.UserDeletedEvent;
+import com.buy01.product.infrastructure.messaging.ImagesLinkedEvent;
+
+@Configuration
+@EnableKafka
+public class KafkaConsumerConfig {
+    @Value("${spring.kafka.bootstrap-servers:localhost:9092}")
+    private String bootstrapServers;
+    
+    private Map<String, Object> baseConsumerProps() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "product-service-group");
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        
+
+        return props;
+    }
+
+    @Bean
+    public ConsumerFactory<String, ImagesLinkedEvent> consumerFactory() {
+        JsonDeserializer<ImagesLinkedEvent> deserializer = new JsonDeserializer<>(ImagesLinkedEvent.class, false);
+        deserializer.addTrustedPackages("*");
+
+        return new DefaultKafkaConsumerFactory<>(
+                baseConsumerProps(),
+                new StringDeserializer(),
+                deserializer);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, ImagesLinkedEvent> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, ImagesLinkedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory()); // Call the bean method directly
+        factory.setConcurrency(2);
+        return factory;
+    }
+
+    // ────────────────────────────────────────────────
+    // UserDeletedEvent
+    // ────────────────────────────────────────────────
+
+    @Bean
+    public ConsumerFactory<String, UserDeletedEvent> userDeletedConsumerFactory() {
+        JsonDeserializer<UserDeletedEvent> deserializer = new JsonDeserializer<>(UserDeletedEvent.class, false);
+        deserializer.addTrustedPackages("*");
+        
+        return new DefaultKafkaConsumerFactory<>(
+                baseConsumerProps(),
+                new StringDeserializer(),
+                deserializer);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, UserDeletedEvent> userDeletedKafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, UserDeletedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(userDeletedConsumerFactory());
+        factory.setConcurrency(2);
+        return factory;
+    }
+}

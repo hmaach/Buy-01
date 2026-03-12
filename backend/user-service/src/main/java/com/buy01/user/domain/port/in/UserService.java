@@ -16,4 +16,6 @@ public interface UserService {
     User findByEmail(String email);
 
     boolean existsById(UUID userId);
+
+    void sendKafkaUserDeleted(UUID userId);
 }

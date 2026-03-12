@@ -15,6 +15,7 @@ export class AuthService {
   public currentUser$ = this.currentUserSubject.asObservable();
 
   private currentUserSignal = signal<User | null>(null);
+  private isAuthSignal = signal<boolean>(this.getToken() !== null);
 
   constructor(
     private http: HttpClient,
@@ -58,7 +59,7 @@ export class AuthService {
   }
 
   get isAuthenticated(): boolean {
-    return this.getToken() !== null;
+    return this.isAuthSignal();
   }
 
   get isSeller(): boolean {
@@ -128,6 +129,7 @@ export class AuthService {
   private handleAuthSuccess(response: AuthResponse): void {
     localStorage.setItem(this.TOKEN_KEY, response.token);
     localStorage.setItem(this.EXPIRES_AT_KEY, response.expiresAt);
+    this.isAuthSignal.set(true);
   }
 
   logout(): void {
@@ -140,6 +142,7 @@ export class AuthService {
     localStorage.removeItem(this.EXPIRES_AT_KEY);
     this.currentUserSubject.next(null);
     this.currentUserSignal.set(null);
+    this.isAuthSignal.set(false);
   }
 
   getToken(): string | null {

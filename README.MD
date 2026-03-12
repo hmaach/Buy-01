@@ -261,28 +261,26 @@ cd buy-01
 
 ---
 
-### Build & Clean
+### Generate the `.env` file
 
 ```bash
-make install      # Clean install all services
-make clean        # Clean all services
-make rebuild      # Full rebuild (clean + install)
+make env
 ```
 
-### Docker Management
+### Start the project with Docker
+
+This starts all containers defined in `docker-compose.yml` in detached mode.
 
 ```bash
-make docker-build # Build Docker images
-make docker-up    # Start stack in detached mode
-make docker-down  # Stop stack
-```
-
-### Recommended Workflow
-
-```bash
-make rebuild
-make docker-build
 make docker-up
+```
+
+## 3. Stop the project
+
+To stop and remove all running containers:
+
+```bash
+make docker-down
 ```
 
 ---

@@ -67,7 +67,7 @@ services:
       MONGO_INITDB_DATABASE: ${MEDIA_MONGO_DB_NAME}
       MONGO_INITDB_ROOT_USERNAME: ${MEDIA_MONGO_DB_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MEDIA_MONGO_DB_PWD}
-    volumes:  
+    volumes:
       - media-mongo-data:/data/db
     networks:
       - ecommerce-network
@@ -83,7 +83,7 @@ services:
     image: mongo:7
     restart: always
     ports:
-      - "${PRODUCT_MONGO_LOCAL_PORT}:27017" 
+      - "${PRODUCT_MONGO_LOCAL_PORT}:27017"
     environment:
       MONGO_INITDB_DATABASE: ${PRODUCT_MONGO_DB_NAME}
       MONGO_INITDB_ROOT_USERNAME: ${PRODUCT_MONGO_DB_USER}
@@ -127,9 +127,9 @@ services:
       - ecommerce-network
 
   # USER SERVICE
-  user-service: 
-    build: 
-      context: ./backend/user-service 
+  user-service:
+    build:
+      context: ./backend/user-service
       dockerfile: Dockerfile
     container_name: user-service
     restart: unless-stopped
@@ -160,7 +160,7 @@ services:
       - ./uploads/avatars:/app/uploads/avatars
     networks:
       - ecommerce-network
-  
+
   # PRODUCT SERVICE
   product-service:
     build:
@@ -224,7 +224,7 @@ services:
       - ecommerce-network
 
     # FRONTEND
- 
+
   # FRONTEND
   frontend:
     build:
@@ -235,8 +235,7 @@ services:
     container_name: frontend
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      - "4200:443"
     depends_on:
       - api-gateway
     networks:

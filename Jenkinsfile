@@ -21,6 +21,11 @@ pipeline {
                 git branch: 'main', url: "${REPO_URL}"
             }
         }
+        stage('Test') {
+            steps {
+                sh 'mvn clean test'
+            }
+        }
 
         stage('Build') {
             steps {
@@ -31,22 +36,20 @@ pipeline {
             }
         }
 
-        stage('Integration Test') {
-            steps {
-                echo "Running logic tests against the new build..."
-                // We run a temporary container just to execute tests
-                // '--rm' ensures the container is deleted immediately after testing
-                sh '''
-                    docker run --rm \
-                    --network buy-01_ecommerce-network \
-                    --env-file .env \
-                    -e SPRING_CLOUD_DISCOVERY_ENABLED=false \
-                    -e EUREKA_CLIENT_ENABLED=false \
-                    product-service-image \
-                    ./mvnw test -B clean test -Dtest=ProductApplicationTests
-                '''
-            }
-        }
+        // stage('Integration Test') {
+        //     steps {
+        //         echo "Running logic tests against the new build..."
+        //         // We run a temporary container just to execute tests
+        //         // '--rm' ensures the container is deleted immediately after testing
+        //         sh '''
+        //             docker run --rm \
+        //             --network buy-01_ecommerce-network \
+        //             --env-file .env \
+        //             product-service-image \
+        //             ./mvnw test
+        //         '''
+        //     }
+        // }
 
         // stage('Safe Deploy') {
         //     // This stage ONLY runs if the 'Integration Test' stage finished successfully

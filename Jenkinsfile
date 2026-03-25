@@ -23,7 +23,9 @@ pipeline {
         }
         stage('Test') {
             steps {
-                sh './mvnw clean test'
+                dir('backend/product-service') {
+                    sh './mvnw clean test'
+                }
             }
         }
 

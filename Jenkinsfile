@@ -26,7 +26,8 @@ pipeline {
             steps {
                 echo "Starting Docker Compose Build..."
                 // This command tells the host's Docker engine to build your services
-                sh 'docker compose build --no-cache'
+                sh 'docker compose build product-service'
+                sh 'docker compose up -d product-service'
             }
         }
     }

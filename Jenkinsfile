@@ -40,7 +40,7 @@ pipeline {
                     docker run --rm \
                     --network ecommerce-network \
                     -e SPRING_PROFILES_ACTIVE=test \
-                    product-service \
+                    product-service-image \
                     ./mvnw test
                 '''
             }

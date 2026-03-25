@@ -167,6 +167,7 @@ services:
       context: ./backend/product-service
       dockerfile: Dockerfile
     container_name: product-service
+    image: product-service-image
     restart: unless-stopped
     ports:
       - "8082:8082"

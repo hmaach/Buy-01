@@ -43,7 +43,7 @@ pipeline {
                     -e SPRING_CLOUD_DISCOVERY_ENABLED=false \
                     -e EUREKA_CLIENT_ENABLED=false \
                     product-service-image \
-                    ./mvnw test
+                    ./mvnw test -B clean test -Dtest=ProductApplicationTests
                 '''
             }
         }

@@ -38,7 +38,7 @@ pipeline {
                 // '--rm' ensures the container is deleted immediately after testing
                 sh '''
                     docker run --rm \
-                    --network ecommerce-network \
+                    --network buy-01_ecommerce-network \
                     -e SPRING_PROFILES_ACTIVE=test \
                     product-service-image \
                     ./mvnw test

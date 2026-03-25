@@ -39,8 +39,10 @@ pipeline {
                 sh '''
                     docker run --rm \
                     --network buy-01_ecommerce-network \
-                    -e SPRING_PROFILES_ACTIVE=test \
                     --env-file .env \
+                    -e SPRING_PROFILES_ACTIVE=test \
+                    -e EUREKA_CLIENT_ENABLED=false \
+                    -e SPRING_CLOUD_DISCOVERY_ENABLED=false \
                     product-service-image \
                     ./mvnw test
                 '''

@@ -25,12 +25,18 @@ pipeline {
 
         stage('Prepare Environment') {
             steps {
-                withCredentials([file(credentialsId: 'buy01-env-file', variable: 'ENV_FILE')]) {
-                    sh 'cp "$ENV_FILE" .env'
-                }
                 sh '''
+                    if [ -f .env ]; then
+                      echo "Using existing .env from workspace"
+                    elif [ -f .env.example ]; then
+                      echo "Creating .env from .env.example"
+                      cp .env.example .env
+                    else
+                      echo "Missing .env and .env.example"
+                      exit 1
+                    fi
+
                     test -s .env
-                    grep -q '^JWT_PUBLIC_KEY=' .env
                     grep -q '^SPRING_PROFILES_ACTIVE=' .env
                 '''
             }

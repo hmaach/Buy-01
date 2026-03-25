@@ -223,8 +223,6 @@ services:
     networks:
       - ecommerce-network
 
-    # FRONTEND
-
   # FRONTEND
   frontend:
     build:
@@ -235,9 +233,28 @@ services:
     container_name: frontend
     restart: unless-stopped
     ports:
-      - "4200:443"
+      - "443:443"
     depends_on:
       - api-gateway
+    networks:
+      - ecommerce-network
+
+  # jenkins
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    privileged: true
+    user: root
+    restart: unless-stopped
+    environment:
+      - JENKINS_OPTS=--prefix=/jenkins
+    ports:
+      - "8084:8080"   
+      - "50000:50000" # Jenkins agent communication
+    volumes:
+      - jenkins-data:/var/jenkins-data
+      # Optional: Mount the docker socket to run docker commands inside Jenkins
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - ecommerce-network
 
@@ -252,3 +269,4 @@ volumes:
   product-mongo-data:
   media-mongo-data:
   kafka-data:
+  jenkins-data:

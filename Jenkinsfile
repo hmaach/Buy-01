@@ -24,12 +24,7 @@ pipeline {
         stage('Test') {
             steps {
                 dir('backend/product-service') {
-                    sh '''
-                        set -a
-                        source ../../.env
-                        set +a
-                        ./mvnw clean test
-                    '''
+                    sh './mvnw clean test'
                 }
             }
         }

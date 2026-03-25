@@ -27,6 +27,7 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> exchange
                         .pathMatchers("/products/user").authenticated()
+                        .pathMatchers("/actuator/health").permitAll()
                         .pathMatchers(HttpMethod.GET, "/products/**").permitAll()
                         .pathMatchers("/products/**").hasRole("SELLER")
                         .anyExchange().authenticated())

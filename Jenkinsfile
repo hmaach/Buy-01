@@ -2,73 +2,85 @@ pipeline {
     agent any
 
     environment {
-        // Use the public URL of your repo
         REPO_URL = 'https://github.com/rachid-serraf/Buy-01.git'
+        SERVICE_NAME = 'product-service'
+        IMAGE_REPO = 'product-service-image'
+        IMAGE_TAG = "${BUILD_NUMBER}"
+        PRODUCT_SERVICE_IMAGE = "${IMAGE_REPO}:${IMAGE_TAG}"
+    }
+
+    options {
+        ansiColor('xterm')
+        timestamps()
+        disableConcurrentBuilds()
     }
 
     stages {
-        stage('Cleanup') {
+        stage('Checkout') {
             steps {
-                echo "Cleaning up workspace..."
                 cleanWs()
-            }
-        }
-
-        stage('Clone') {
-            steps {
                 echo "Cloning ${REPO_URL}..."
-                // Simple git clone for public repos
                 git branch: 'main', url: "${REPO_URL}"
             }
         }
-        stage('Test') {
+
+        stage('Prepare Environment') {
+            steps {
+                withCredentials([file(credentialsId: 'buy01-env-file', variable: 'ENV_FILE')]) {
+                    sh 'cp "$ENV_FILE" .env'
+                }
+                sh '''
+                    test -s .env
+                    grep -q '^JWT_PUBLIC_KEY=' .env
+                    grep -q '^SPRING_PROFILES_ACTIVE=' .env
+                '''
+            }
+        }
+
+        stage('Unit Test') {
             steps {
                 dir('backend/product-service') {
                     sh './mvnw clean test'
                 }
             }
-        }
-
-
-        stage('Build') {
-            steps {
-                echo "Starting Docker Compose Build..."
-                sh 'make env'
-                // Build the image without starting it
-                sh 'docker compose build product-service'
+            post {
+                always {
+                    junit 'backend/product-service/target/surefire-reports/*.xml'
+                }
             }
         }
 
-        // stage('Integration Test') {
-        //     steps {
-        //         echo "Running logic tests against the new build..."
-        //         // We run a temporary container just to execute tests
-        //         // '--rm' ensures the container is deleted immediately after testing
-        //         sh '''
-        //             docker run --rm \
-        //             --network buy-01_ecommerce-network \
-        //             --env-file .env \
-        //             product-service-image \
-        //             ./mvnw test
-        //         '''
-        //     }
-        // }
+        stage('Build Image') {
+            steps {
+                sh 'docker build -t "${PRODUCT_SERVICE_IMAGE}" backend/product-service'
+                sh 'docker tag "${PRODUCT_SERVICE_IMAGE}" "${IMAGE_REPO}:latest"'
+            }
+        }
 
-        // stage('Safe Deploy') {
-        //     // This stage ONLY runs if the 'Integration Test' stage finished successfully
-        //     steps {
-        //         echo "Tests passed! Updating production container..."
-        //         sh 'docker compose up -d --no-deps product-service'
-        //     }
-        // }
+        stage('Smoke Test Image') {
+            steps {
+                sh 'docker run --rm --entrypoint java "${PRODUCT_SERVICE_IMAGE}" -version'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo "Deploying ${PRODUCT_SERVICE_IMAGE}..."
+                sh 'PRODUCT_SERVICE_IMAGE="${PRODUCT_SERVICE_IMAGE}" docker compose up -d --no-deps --force-recreate product-service'
+            }
+        }
     }
 
     post {
         success {
-            echo "Successfully cloned and built the images!"
+            echo "Deployment completed for ${PRODUCT_SERVICE_IMAGE}"
         }
         failure {
             echo "Something went wrong. Check the Console Output in Jenkins."
+        }
+        always {
+            sh 'docker image ls "${IMAGE_REPO}" --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}" || true'
+            cleanWs()
         }
     }
 }

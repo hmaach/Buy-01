@@ -3,6 +3,9 @@ package com.buy01.product;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
@@ -10,6 +13,12 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 class ProductApplicationTests {
+	@MockBean
+	private KafkaTemplate<String, Object> kafkaTemplate;
+
+	// This stops the background listeners from starting/hanging
+	@MockBean
+	private KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
 
 	@Autowired
 	private WebTestClient webTestClient;

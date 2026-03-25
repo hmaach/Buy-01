@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         REPO_URL = 'https://github.com/rachid-serraf/Buy-01.git'
-        SERVICE_NAME = 'product-service'
         IMAGE_REPO = 'product-service-image'
         IMAGE_TAG = "${BUILD_NUMBER}"
         PRODUCT_SERVICE_IMAGE = "${IMAGE_REPO}:${IMAGE_TAG}"
@@ -19,7 +18,7 @@ pipeline {
             steps {
                 cleanWs()
                 echo "Cloning ${REPO_URL}..."
-                git branch: 'main', url: "${REPO_URL}"
+                checkout scm
             }
         }
 
@@ -56,6 +55,9 @@ pipeline {
         }
 
         stage('Build Image') {
+            when {
+                branch 'main'
+            }
             steps {
                 sh 'docker build -t "${PRODUCT_SERVICE_IMAGE}" backend/product-service'
                 sh 'docker tag "${PRODUCT_SERVICE_IMAGE}" "${IMAGE_REPO}:latest"'
@@ -63,12 +65,21 @@ pipeline {
         }
 
         stage('Smoke Test Image') {
+            when {
+                branch 'main'
+            }
             steps {
                 sh 'docker run --rm --entrypoint java "${PRODUCT_SERVICE_IMAGE}" -version'
             }
         }
 
         stage('Deploy') {
+            when {
+                allOf {
+                    branch 'main'
+                    not { changeRequest() }
+                }
+            }
             steps {
                 echo "Deploying ${PRODUCT_SERVICE_IMAGE}..."
                 sh 'PRODUCT_SERVICE_IMAGE="${PRODUCT_SERVICE_IMAGE}" docker compose up -d --no-deps --force-recreate product-service'
@@ -78,7 +89,15 @@ pipeline {
 
     post {
         success {
-            echo "Deployment completed for ${PRODUCT_SERVICE_IMAGE}"
+            script {
+                if (env.CHANGE_ID) {
+                    echo "Pull request validation completed successfully."
+                } else if (env.BRANCH_NAME == 'main') {
+                    echo "Main branch deployment completed for ${PRODUCT_SERVICE_IMAGE}"
+                } else {
+                    echo "Branch validation completed successfully."
+                }
+            }
         }
         failure {
             echo "Something went wrong. Check the Console Output in Jenkins."

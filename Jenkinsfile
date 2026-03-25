@@ -25,26 +25,26 @@ pipeline {
         stage('Build') {
             steps {
                 echo "Starting Docker Compose Build..."
-                // Build the image without starting it
                 sh 'make env'
+                // Build the image without starting it
                 sh 'docker compose build product-service'
             }
         }
 
-        // stage('Integration Test') {
-        //     steps {
-        //         echo "Running logic tests against the new build..."
-        //         // We run a temporary container just to execute tests
-        //         // '--rm' ensures the container is deleted immediately after testing
-        //         sh '''
-        //             docker run --rm \
-        //             --network ecommerce-network \
-        //             -e SPRING_PROFILES_ACTIVE=test \
-        //             product-service:latest \
-        //             ./mvnw test
-        //         '''
-        //     }
-        // }
+        stage('Integration Test') {
+            steps {
+                echo "Running logic tests against the new build..."
+                // We run a temporary container just to execute tests
+                // '--rm' ensures the container is deleted immediately after testing
+                sh '''
+                    docker run --rm \
+                    --network ecommerce-network \
+                    -e SPRING_PROFILES_ACTIVE=test \
+                    product-service:latest \
+                    ./mvnw test
+                '''
+            }
+        }
 
         // stage('Safe Deploy') {
         //     // This stage ONLY runs if the 'Integration Test' stage finished successfully

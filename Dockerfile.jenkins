@@ -6,7 +6,8 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     curl \
     gnupg \
-    lsb-release
+    lsb-release \
+    make
 
 # 2. Add Docker’s official GPG key
 RUN mkdir -p /etc/apt/keyrings && \
@@ -17,10 +18,14 @@ RUN echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
   $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-# 4. Install Docker CLI and the Compose Plugin
+# 4. Install Docker CLI and the Compose Plugin (Cleaned up list)
 RUN apt-get update && apt-get install -y docker-ce-cli docker-compose-plugin
 
-# 5. Cleanup to keep the image small
+# 5. Permission Fix (Important!)
+# This ensures the 'jenkins' user can read the /var/run/docker.sock
+RUN groupadd -f docker && usermod -aG docker jenkins
+
+# 6. Cleanup
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 USER jenkins

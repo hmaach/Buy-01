@@ -166,7 +166,6 @@ services:
     build:
       context: ./backend/product-service
       dockerfile: Dockerfile
-    container_name: product-service
     image: ${PRODUCT_SERVICE_IMAGE:-product-service-image:latest}
     restart: unless-stopped
     ports:

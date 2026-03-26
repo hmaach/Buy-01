@@ -6,6 +6,7 @@ pipeline {
         IMAGE_REPO = 'product-service-image'
         IMAGE_TAG = "${BUILD_NUMBER}"
         PRODUCT_SERVICE_IMAGE = "${IMAGE_REPO}:${IMAGE_TAG}"
+        COMPOSE_PROJECT_NAME = 'buy01'
     }
 
     options {
@@ -82,7 +83,7 @@ pipeline {
             }
             steps {
                 echo "Deploying ${PRODUCT_SERVICE_IMAGE}..."
-                sh 'PRODUCT_SERVICE_IMAGE="${PRODUCT_SERVICE_IMAGE}" docker compose up -d --no-deps --force-recreate product-service'
+                sh 'COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}" PRODUCT_SERVICE_IMAGE="${PRODUCT_SERVICE_IMAGE}" docker compose up -d --no-deps --force-recreate product-service'
             }
         }
     }

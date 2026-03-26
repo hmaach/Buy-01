@@ -83,7 +83,14 @@ pipeline {
             }
             steps {
                 echo "Deploying ${PRODUCT_SERVICE_IMAGE}..."
-                sh 'COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}" PRODUCT_SERVICE_IMAGE="${PRODUCT_SERVICE_IMAGE}" docker compose up -d --no-deps --force-recreate product-service'
+                sh '''
+                    # One-time migration cleanup: remove the old fixed-name container if it still exists.
+                    docker rm -f product-service >/dev/null 2>&1 || true
+
+                    COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}" \
+                    PRODUCT_SERVICE_IMAGE="${PRODUCT_SERVICE_IMAGE}" \
+                    docker compose up -d --no-deps --force-recreate product-service
+                '''
             }
         }
     }

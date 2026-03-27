@@ -112,62 +112,62 @@ pipeline {
             }
         }
 
-        // stage('Health Check') {
-        //     when {
-        //         allOf {
-        //             branch 'main'
-        //             not { changeRequest() }
-        //         }
-        //     }
-        //     steps {
-        //         sh '''
-        //             check_healthy() {
-        //                 SERVICE=$1
-        //                 RETRIES=${HEALTH_RETRIES}
-        //                 until [ "$(docker inspect --format='{{.State.Health.Status}}' \
-        //                         "$SERVICE" 2>/dev/null)" = "healthy" ]; do
-        //                     RETRIES=$((RETRIES - 1))
-        //                     if [ "$RETRIES" -le 0 ]; then
-        //                         echo "ERROR: $SERVICE did not become healthy."
-        //                         return 1
-        //                     fi
-        //                     echo "Waiting for $SERVICE... ($RETRIES retries left)"
-        //                     sleep ${HEALTH_INTERVAL}
-        //                 done
-        //                 echo "$SERVICE is healthy."
-        //             }
+        stage('Health Check') {
+            when {
+                allOf {
+                    branch 'main'
+                    not { changeRequest() }
+                }
+            }
+            steps {
+                sh '''
+                    check_healthy() {
+                        SERVICE=$1
+                        RETRIES=${HEALTH_RETRIES}
+                        until [ "$(docker inspect --format='{{.State.Health.Status}}' \
+                                "$SERVICE" 2>/dev/null)" = "healthy" ]; do
+                            RETRIES=$((RETRIES - 1))
+                            if [ "$RETRIES" -le 0 ]; then
+                                echo "ERROR: $SERVICE did not become healthy."
+                                return 1
+                            fi
+                            echo "Waiting for $SERVICE... ($RETRIES retries left)"
+                            sleep ${HEALTH_INTERVAL}
+                        done
+                        echo "$SERVICE is healthy."
+                    }
 
-        //             check_healthy product-service || exit 1
-        //             check_healthy user-service    || exit 1
-        //             check_healthy media-service   || exit 1
-        //         '''
-        //     }
-        //     post {
-        //         failure {
-        //             sh '''
-        //                 echo "Health check failed — rolling back..."
+                    check_healthy product-service || exit 1
+                    check_healthy user-service    || exit 1
+                    check_healthy media-service   || exit 1
+                '''
+            }
+            post {
+                failure {
+                    sh '''
+                        echo "Health check failed — rolling back..."
 
-        //                 PREV_PRODUCT=$(cat .previous_product 2>/dev/null || echo "")
-        //                 PREV_USER=$(cat .previous_user       2>/dev/null || echo "")
-        //                 PREV_MEDIA=$(cat .previous_media     2>/dev/null || echo "")
+                        PREV_PRODUCT=$(cat .previous_product 2>/dev/null || echo "")
+                        PREV_USER=$(cat .previous_user       2>/dev/null || echo "")
+                        PREV_MEDIA=$(cat .previous_media     2>/dev/null || echo "")
 
-        //                 if [ -n "$PREV_PRODUCT" ] && \
-        //                    [ -n "$PREV_USER" ]    && \
-        //                    [ -n "$PREV_MEDIA" ]; then
-        //                     COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}" \
-        //                     PRODUCT_SERVICE_IMAGE="$PREV_PRODUCT" \
-        //                     USER_SERVICE_IMAGE="$PREV_USER" \
-        //                     MEDIA_SERVICE_IMAGE="$PREV_MEDIA" \
-        //                     docker compose up -d --no-deps --force-recreate \
-        //                         user-service product-service media-service
-        //                     echo "Rollback complete."
-        //                 else
-        //                     echo "No previous image recorded — skipping rollback."
-        //                 fi
-        //             '''
-        //         }
-        //     }
-        // }
+                        if [ -n "$PREV_PRODUCT" ] && \
+                           [ -n "$PREV_USER" ]    && \
+                           [ -n "$PREV_MEDIA" ]; then
+                            COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}" \
+                            PRODUCT_SERVICE_IMAGE="$PREV_PRODUCT" \
+                            USER_SERVICE_IMAGE="$PREV_USER" \
+                            MEDIA_SERVICE_IMAGE="$PREV_MEDIA" \
+                            docker compose up -d --no-deps --force-recreate \
+                                user-service product-service media-service
+                            echo "Rollback complete."
+                        else
+                            echo "No previous image recorded — skipping rollback."
+                        fi
+                    '''
+                }
+            }
+        }
 
     }
 

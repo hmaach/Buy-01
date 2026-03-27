@@ -128,10 +128,11 @@ services:
 
   # USER SERVICE
   user-service:
+    container_name: user-service
     build:
       context: ./backend/user-service
       dockerfile: Dockerfile
-    container_name: user-service
+    image: ${USER_SERVICE_IMAGE:-user-service-image:latest}
     restart: unless-stopped
     ports:
       - "${USER_SERVICE_PORT}:${USER_SERVICE_PORT}"
@@ -160,9 +161,16 @@ services:
       - ./uploads/avatars:/app/uploads/avatars
     networks:
       - ecommerce-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${USER_SERVICE_PORT}/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
 
   # PRODUCT SERVICE
   product-service:
+    container_name: product-service
     build:
       context: ./backend/product-service
       dockerfile: Dockerfile
@@ -190,13 +198,20 @@ services:
       - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
     networks:
       - ecommerce-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
 
   # MEDIA SERVICE
   media-service:
+    container_name: media-service
     build:
       context: ./backend/media-service
       dockerfile: Dockerfile
-    container_name: media-service
+    image: ${MEDIA_SERVICE_IMAGE:-media-service-image:latest}
     restart: unless-stopped
     ports:
       - "8083:8083"
@@ -222,6 +237,12 @@ services:
       - ./uploads/media:/app/uploads/media
     networks:
       - ecommerce-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s  
 
   # FRONTEND
   frontend:

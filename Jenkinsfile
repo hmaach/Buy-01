@@ -2,57 +2,39 @@ pipeline {
     agent any
 
     environment {
-        REPO_URL = 'https://github.com/rachid-serraf/Buy-01.git'
-        IMAGE_REPO = 'product-service-image'
-        IMAGE_TAG = "${BUILD_NUMBER}"
-        PRODUCT_SERVICE_IMAGE = "${IMAGE_REPO}:${IMAGE_TAG}"
-        COMPOSE_PROJECT_NAME = 'buy01'
+        REPO_URL              = 'https://github.com/rachid-serraf/Buy-01.git'
+        PRODUCT_IMAGE_REPO    = 'product-service-image'
+        USER_IMAGE_REPO       = 'user-service-image'
+        MEDIA_IMAGE_REPO      = 'media-service-image'
+        IMAGE_TAG             = "${BUILD_NUMBER}"
+        PRODUCT_SERVICE_IMAGE = "${PRODUCT_IMAGE_REPO}:${IMAGE_TAG}"
+        USER_SERVICE_IMAGE    = "${USER_IMAGE_REPO}:${IMAGE_TAG}"
+        MEDIA_SERVICE_IMAGE   = "${MEDIA_IMAGE_REPO}:${IMAGE_TAG}"
+        COMPOSE_PROJECT_NAME  = 'buy01'
+        HEALTH_RETRIES        = '20'
+        HEALTH_INTERVAL       = '10'
     }
 
     options {
         timestamps()
         disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 cleanWs()
-                echo "Cloning ${REPO_URL}..."
                 checkout scm
-            }
-        }
-
-        stage('Prepare Environment') {
-            steps {
-                sh '''
-                    if [ -f .env ]; then
-                      echo "Using existing .env from workspace"
-                    elif [ -f .env.example ]; then
-                      echo "Creating .env from .env.example"
-                      cp .env.example .env
-                    else
-                      echo "Missing .env and .env.example"
-                      exit 1
-                    fi
-
-                    test -s .env
-                    grep -q '^SPRING_PROFILES_ACTIVE=' .env
-                '''
             }
         }
 
         stage('Unit Tests') {
             steps {
-                dir('backend/product-service') {
-                    sh './mvnw clean test'
-                }
-                dir('backend/media-service') {
-                    sh './mvnw clean test'
-                }
-                dir('backend/user-service') {
-                    sh './mvnw clean test'
-                }
+                dir('backend/product-service') { sh './mvnw clean test' }
+                dir('backend/media-service')   { sh './mvnw clean test' }
+                dir('backend/user-service')    { sh './mvnw clean test' }
             }
             post {
                 always {
@@ -65,22 +47,33 @@ pipeline {
             }
         }
 
-        stage('Build Image') {
-            when {
-                branch 'main'
-            }
+        stage('Build Images') {
+            when { branch 'main' }
             steps {
-                sh 'docker build -t "${PRODUCT_SERVICE_IMAGE}" backend/product-service'
-                sh 'docker tag "${PRODUCT_SERVICE_IMAGE}" "${IMAGE_REPO}:latest"'
+                sh '''
+                    docker build -t "${PRODUCT_SERVICE_IMAGE}" \
+                                 -t "${PRODUCT_IMAGE_REPO}:latest" \
+                                 backend/product-service
+
+                    docker build -t "${USER_SERVICE_IMAGE}" \
+                                 -t "${USER_IMAGE_REPO}:latest" \
+                                 backend/user-service
+
+                    docker build -t "${MEDIA_SERVICE_IMAGE}" \
+                                 -t "${MEDIA_IMAGE_REPO}:latest" \
+                                 backend/media-service
+                '''
             }
         }
 
-        stage('Smoke Test Image') {
-            when {
-                branch 'main'
-            }
+        stage('Smoke Test Images') {
+            when { branch 'main' }
             steps {
-                sh 'docker run --rm --entrypoint java "${PRODUCT_SERVICE_IMAGE}" -version'
+                sh '''
+                    docker run --rm --entrypoint java "${PRODUCT_SERVICE_IMAGE}" -version
+                    docker run --rm --entrypoint java "${USER_SERVICE_IMAGE}"    -version
+                    docker run --rm --entrypoint java "${MEDIA_SERVICE_IMAGE}"   -version
+                '''
             }
         }
 
@@ -92,15 +85,87 @@ pipeline {
                 }
             }
             steps {
-                echo "Deploying ${PRODUCT_SERVICE_IMAGE}..."
-                sh '''
-                    # One-time migration cleanup: remove the old fixed-name container if it still exists.
-                    docker rm -f product-service >/dev/null 2>&1 || true
+                // APP_ENV_FILE — Jenkins "Secret file" credential
+                withCredentials([file(credentialsId: 'APP_ENV_FILE', variable: 'ENV_FILE')]) {
+                    sh '''
+                        # Inject .env from Jenkins — never from the repo
+                        cp "${ENV_FILE}" .env
+                        test -s .env
+                        grep -q '^SPRING_PROFILES_ACTIVE=' .env
 
-                    COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}" \
-                    PRODUCT_SERVICE_IMAGE="${PRODUCT_SERVICE_IMAGE}" \
-                    docker compose up -d --no-deps --force-recreate product-service
+                        # Snapshot current images for rollback
+                        docker inspect product-service \
+                            --format '{{.Config.Image}}' > .previous_product 2>/dev/null || true
+                        docker inspect user-service \
+                            --format '{{.Config.Image}}' > .previous_user    2>/dev/null || true
+                        docker inspect media-service \
+                            --format '{{.Config.Image}}' > .previous_media   2>/dev/null || true
+
+                        COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}" \
+                        PRODUCT_SERVICE_IMAGE="${PRODUCT_SERVICE_IMAGE}" \
+                        USER_SERVICE_IMAGE="${USER_SERVICE_IMAGE}" \
+                        MEDIA_SERVICE_IMAGE="${MEDIA_SERVICE_IMAGE}" \
+                        docker compose up -d --no-deps --force-recreate \
+                            user-service product-service media-service
+                    '''
+                }
+            }
+        }
+
+        stage('Health Check') {
+            when {
+                allOf {
+                    branch 'main'
+                    not { changeRequest() }
+                }
+            }
+            steps {
+                sh '''
+                    check_healthy() {
+                        SERVICE=$1
+                        RETRIES=${HEALTH_RETRIES}
+                        until [ "$(docker inspect --format='{{.State.Health.Status}}' \
+                                "$SERVICE" 2>/dev/null)" = "healthy" ]; do
+                            RETRIES=$((RETRIES - 1))
+                            if [ "$RETRIES" -le 0 ]; then
+                                echo "ERROR: $SERVICE did not become healthy."
+                                return 1
+                            fi
+                            echo "Waiting for $SERVICE... ($RETRIES retries left)"
+                            sleep ${HEALTH_INTERVAL}
+                        done
+                        echo "$SERVICE is healthy."
+                    }
+
+                    check_healthy product-service || exit 1
+                    check_healthy user-service    || exit 1
+                    check_healthy media-service   || exit 1
                 '''
+            }
+            post {
+                failure {
+                    sh '''
+                        echo "Health check failed — rolling back..."
+
+                        PREV_PRODUCT=$(cat .previous_product 2>/dev/null || echo "")
+                        PREV_USER=$(cat .previous_user       2>/dev/null || echo "")
+                        PREV_MEDIA=$(cat .previous_media     2>/dev/null || echo "")
+
+                        if [ -n "$PREV_PRODUCT" ] && \
+                           [ -n "$PREV_USER" ]    && \
+                           [ -n "$PREV_MEDIA" ]; then
+                            COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}" \
+                            PRODUCT_SERVICE_IMAGE="$PREV_PRODUCT" \
+                            USER_SERVICE_IMAGE="$PREV_USER" \
+                            MEDIA_SERVICE_IMAGE="$PREV_MEDIA" \
+                            docker compose up -d --no-deps --force-recreate \
+                                user-service product-service media-service
+                            echo "Rollback complete."
+                        else
+                            echo "No previous image recorded — skipping rollback."
+                        fi
+                    '''
+                }
             }
         }
     }
@@ -108,20 +173,39 @@ pipeline {
     post {
         success {
             script {
-                if (env.CHANGE_ID) {
-                    echo "Pull request validation completed successfully."
-                } else if (env.BRANCH_NAME == 'main') {
-                    echo "Main branch deployment completed for ${PRODUCT_SERVICE_IMAGE}"
-                } else {
-                    echo "Branch validation completed successfully."
+                def msg = env.CHANGE_ID
+                    ? "PR #${env.CHANGE_ID} validation passed — ${env.BUILD_URL}"
+                    : "Build #${env.BUILD_NUMBER} deployed successfully — ${env.BUILD_URL}"
+
+                // SLACK_WEBHOOK — Jenkins "Secret text" credential
+                withCredentials([string(credentialsId: 'SLACK_WEBHOOK', variable: 'WEBHOOK')]) {
+                    sh """
+                        curl -s -X POST -H 'Content-type: application/json' \
+                        --data "{\"text\":\"${msg}\"}" \
+                        "\${WEBHOOK}"
+                    """
                 }
             }
         }
         failure {
-            echo "Something went wrong. Check the Console Output in Jenkins."
+            // SLACK_WEBHOOK — Jenkins "Secret text" credential
+            withCredentials([string(credentialsId: 'SLACK_WEBHOOK', variable: 'WEBHOOK')]) {
+                sh """
+                    curl -s -X POST -H 'Content-type: application/json' \
+                    --data "{\"text\":\"Build #${env.BUILD_NUMBER} failed — ${env.BUILD_URL}\"}" \
+                    "\${WEBHOOK}"
+                """
+            }
         }
         always {
-            sh 'docker image ls "${IMAGE_REPO}" --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}" || true'
+            sh '''
+                docker image ls "${PRODUCT_IMAGE_REPO}" \
+                    --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}" || true
+                docker image ls "${USER_IMAGE_REPO}" \
+                    --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}" || true
+                docker image ls "${MEDIA_IMAGE_REPO}" \
+                    --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}" || true
+            '''
             cleanWs()
         }
     }

@@ -1,0 +1,31 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/user-test-db
+  kafka:
+    bootstrap-servers: localhost:9092
+
+eureka:
+  client:
+    enabled: false
+    register-with-eureka: false
+    fetch-registry: false
+
+security:
+  jwt:
+    private-key: dGVzdC1wcml2YXRlLWtleQ==
+    public-key: dGVzdC1wdWJsaWMta2V5
+    expiration: 86400000
+
+app:
+  avatar:
+    upload-dir: ./uploads/avatars-test
+
+management:
+  health:
+    mongo:
+      enabled: false
+    discoveryComposite:
+      enabled: false
+    binders:
+      enabled: false

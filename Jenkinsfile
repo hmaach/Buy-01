@@ -42,15 +42,25 @@ pipeline {
             }
         }
 
-        stage('Unit Test') {
+        stage('Unit Tests') {
             steps {
                 dir('backend/product-service') {
+                    sh './mvnw clean test'
+                }
+                dir('backend/media-service') {
+                    sh './mvnw clean test'
+                }
+                dir('backend/user-service') {
                     sh './mvnw clean test'
                 }
             }
             post {
                 always {
-                    junit 'backend/product-service/target/surefire-reports/*.xml'
+                    junit '''
+                        backend/product-service/target/surefire-reports/*.xml,
+                        backend/media-service/target/surefire-reports/*.xml,
+                        backend/user-service/target/surefire-reports/*.xml
+                    '''
                 }
             }
         }

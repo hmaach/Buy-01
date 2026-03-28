@@ -128,7 +128,6 @@ services:
 
   # USER SERVICE
   user-service:
-    container_name: user-service
     build:
       context: ./backend/user-service
       dockerfile: Dockerfile
@@ -170,7 +169,6 @@ services:
 
   # PRODUCT SERVICE
   product-service:
-    container_name: product-service
     build:
       context: ./backend/product-service
       dockerfile: Dockerfile
@@ -207,7 +205,6 @@ services:
 
   # MEDIA SERVICE
   media-service:
-    container_name: media-service
     build:
       context: ./backend/media-service
       dockerfile: Dockerfile

@@ -31,7 +31,7 @@ When Jenkins builds a direct push on `main`:
 4. Publish JUnit test results
 5. Build Docker image for `product-service`
 6. Smoke test the built image
-7. Recreate the running `product-service` container with the new image
+7. Recreate the running `product-service` service container with the new image
 
 ## Current Deployment Logic
 
@@ -44,7 +44,7 @@ PRODUCT_SERVICE_IMAGE="${PRODUCT_SERVICE_IMAGE}" docker compose up -d --no-deps 
 This means:
 
 - Jenkins deploys a newly built image
-- Docker Compose recreates the `product-service` container
+- Docker Compose recreates the `product-service` service container
 - It does not redeploy other services
 - It does not update code inside the running container directly
 

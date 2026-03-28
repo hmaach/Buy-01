@@ -88,18 +88,26 @@ pipeline {
                 // APP_ENV_FILE — Jenkins "Secret file" credential
                 withCredentials([file(credentialsId: 'APP_ENV_FILE', variable: 'ENV_FILE')]) {
                     sh '''
+                        get_compose_cid() {
+                            docker compose ps -q "$1"
+                        }
+
+                        get_compose_image() {
+                            CID=$(get_compose_cid "$1")
+                            if [ -n "$CID" ]; then
+                                docker inspect --format '{{.Config.Image}}' "$CID"
+                            fi
+                        }
+
                         # Inject .env from Jenkins — never from the repo
                         cp "${ENV_FILE}" .env
                         test -s .env
                         grep -q '^SPRING_PROFILES_ACTIVE=' .env
 
                         # Snapshot current images for rollback
-                        docker inspect product-service \
-                            --format '{{.Config.Image}}' > .previous_product 2>/dev/null || true
-                        docker inspect user-service \
-                            --format '{{.Config.Image}}' > .previous_user    2>/dev/null || true
-                        docker inspect media-service \
-                            --format '{{.Config.Image}}' > .previous_media   2>/dev/null || true
+                        get_compose_image product-service > .previous_product 2>/dev/null || true
+                        get_compose_image user-service    > .previous_user    2>/dev/null || true
+                        get_compose_image media-service   > .previous_media   2>/dev/null || true
 
                         COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}" \
                         PRODUCT_SERVICE_IMAGE="${PRODUCT_SERVICE_IMAGE}" \
@@ -121,11 +129,16 @@ pipeline {
             }
             steps {
                 sh '''
+                    get_compose_cid() {
+                        docker compose ps -q "$1"
+                    }
+
                     check_healthy() {
                         SERVICE=$1
                         RETRIES=${HEALTH_RETRIES}
-                        until [ "$(docker inspect --format='{{.State.Health.Status}}' \
-                                "$SERVICE" 2>/dev/null)" = "healthy" ]; do
+                        until [ -n "$(get_compose_cid "$SERVICE")" ] && \
+                              [ "$(docker inspect --format='{{.State.Health.Status}}' \
+                                "$(get_compose_cid "$SERVICE")" 2>/dev/null)" = "healthy" ]; do
                             RETRIES=$((RETRIES - 1))
                             if [ "$RETRIES" -le 0 ]; then
                                 echo "ERROR: $SERVICE did not become healthy."

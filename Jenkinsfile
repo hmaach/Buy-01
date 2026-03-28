@@ -11,8 +11,8 @@ pipeline {
         USER_SERVICE_IMAGE    = "${USER_IMAGE_REPO}:${IMAGE_TAG}"
         MEDIA_SERVICE_IMAGE   = "${MEDIA_IMAGE_REPO}:${IMAGE_TAG}"
         COMPOSE_PROJECT_NAME  = 'buy01'
-        HEALTH_RETRIES        = '200'
-        HEALTH_INTERVAL       = '160'
+        HEALTH_RETRIES        = '30'
+        HEALTH_INTERVAL       = '10'
     }
 
     options {

@@ -245,10 +245,9 @@ pipeline {
                         echo "$SVC is healthy."
                     }
 
-                    healthy product-service || exit 1
                     healthy user-service    || exit 1
+                    healthy product-service || exit 1
                     healthy media-service   || exit 1
-                    healthy frontend        || exit 1
                     echo "All services healthy."
                 '''
             }

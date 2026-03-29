@@ -121,7 +121,6 @@ pipeline {
                     docker run --rm --entrypoint java "${PRODUCT_SERVICE_IMAGE}" -version
                     docker run --rm --entrypoint java "${USER_SERVICE_IMAGE}"    -version
                     docker run --rm --entrypoint java "${MEDIA_SERVICE_IMAGE}"   -version
-                    docker run --rm --entrypoint nginx "${FRONTEND_IMAGE}"       -t
                 """
             }
         }

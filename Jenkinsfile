@@ -13,6 +13,7 @@ pipeline {
         PRODUCT_SERVICE_IMAGE = "product-service-image:${BUILD_NUMBER}"
         USER_SERVICE_IMAGE    = "user-service-image:${BUILD_NUMBER}"
         MEDIA_SERVICE_IMAGE   = "media-service-image:${BUILD_NUMBER}"
+        FRONTEND_IMAGE        = "frontend-image:${BUILD_NUMBER}"
     }
 
     options {
@@ -30,7 +31,7 @@ pipeline {
             }
         }
 
-        // ── Run tests for all three services in parallel ──────────────────
+        // ── Run tests for backend services and frontend in parallel ───────
         stage('Unit Tests') {
             parallel {
                 stage('product-service') {
@@ -41,6 +42,14 @@ pipeline {
                 }
                 stage('media-service') {
                     steps { dir('backend/media-service') { sh './mvnw clean test' } }
+                }
+                stage('frontend') {
+                    steps {
+                        dir('frontend') {
+                            sh 'npm ci'
+                            sh 'npm run test:ci'
+                        }
+                    }
                 }
             }
             post {
@@ -91,10 +100,20 @@ pipeline {
                         """
                     }
                 }
+                stage('frontend') {
+                    steps {
+                        sh """
+                            docker build \
+                                -t "${FRONTEND_IMAGE}" \
+                                -t "frontend-image:latest" \
+                                frontend
+                        """
+                    }
+                }
             }
         }
 
-        // ── Lightweight sanity-check: confirm the JVM starts ─────────────
+        // ── Lightweight sanity-check: confirm images start cleanly ───────
         stage('Smoke Test Images') {
             when { branch 'main' }
             steps {
@@ -102,6 +121,7 @@ pipeline {
                     docker run --rm --entrypoint java "${PRODUCT_SERVICE_IMAGE}" -version
                     docker run --rm --entrypoint java "${USER_SERVICE_IMAGE}"    -version
                     docker run --rm --entrypoint java "${MEDIA_SERVICE_IMAGE}"   -version
+                    docker run --rm --entrypoint nginx "${FRONTEND_IMAGE}"       -t
                 """
             }
         }
@@ -135,15 +155,16 @@ pipeline {
                         snapshot_image product-service > .prev_product
                         snapshot_image user-service    > .prev_user
                         snapshot_image media-service   > .prev_media
+                        snapshot_image frontend        > .prev_frontend
 
                         echo "=== Previous images (empty = first deploy) ==="
-                        cat .prev_product .prev_user .prev_media || true
+                        cat .prev_product .prev_user .prev_media .prev_frontend || true
 
                         # ── Stop & remove old containers ──────────────────────
                         #    This frees the static name AND the bound host ports.
                         #    --volumes is intentionally omitted — named volumes
                         #    (mongo data, uploads) are owned by Docker and survive.
-                        for CTR in product-service user-service media-service; do
+                        for CTR in product-service user-service media-service frontend; do
                             if docker inspect "$CTR" > /dev/null 2>&1; then
                                 echo "Stopping $CTR..."
                                 docker stop "$CTR"
@@ -159,9 +180,10 @@ pipeline {
                         export PRODUCT_SERVICE_IMAGE="${PRODUCT_SERVICE_IMAGE}"
                         export USER_SERVICE_IMAGE="${USER_SERVICE_IMAGE}"
                         export MEDIA_SERVICE_IMAGE="${MEDIA_SERVICE_IMAGE}"
+                        export FRONTEND_IMAGE="${FRONTEND_IMAGE}"
 
                         docker compose up -d --no-deps --force-recreate \
-                            user-service product-service media-service
+                            user-service product-service media-service frontend
 
                         echo "New containers started — health check follows."
                     '''
@@ -178,15 +200,18 @@ pipeline {
                         PREV_PRODUCT=$(cat .prev_product 2>/dev/null || true)
                         PREV_USER=$(cat .prev_user       2>/dev/null || true)
                         PREV_MEDIA=$(cat .prev_media     2>/dev/null || true)
+                        PREV_FRONTEND=$(cat .prev_frontend 2>/dev/null || true)
 
                         if [ -n "$PREV_PRODUCT" ] && \
                            [ -n "$PREV_USER"    ] && \
-                           [ -n "$PREV_MEDIA"   ]; then
+                           [ -n "$PREV_MEDIA"   ] && \
+                           [ -n "$PREV_FRONTEND" ]; then
                             PRODUCT_SERVICE_IMAGE="$PREV_PRODUCT" \
                             USER_SERVICE_IMAGE="$PREV_USER" \
                             MEDIA_SERVICE_IMAGE="$PREV_MEDIA" \
+                            FRONTEND_IMAGE="$PREV_FRONTEND" \
                             docker compose up -d --no-deps --force-recreate \
-                                user-service product-service media-service
+                                user-service product-service media-service frontend
                             echo "Restore complete."
                         else
                             echo "WARNING: first deploy failed — no snapshot to restore from."
@@ -224,6 +249,7 @@ pipeline {
                     healthy product-service || exit 1
                     healthy user-service    || exit 1
                     healthy media-service   || exit 1
+                    healthy frontend        || exit 1
                     echo "All services healthy."
                 '''
             }
@@ -236,15 +262,18 @@ pipeline {
                         PREV_PRODUCT=$(cat .prev_product 2>/dev/null || true)
                         PREV_USER=$(cat .prev_user       2>/dev/null || true)
                         PREV_MEDIA=$(cat .prev_media     2>/dev/null || true)
+                        PREV_FRONTEND=$(cat .prev_frontend 2>/dev/null || true)
 
                         if [ -n "$PREV_PRODUCT" ] && \
                            [ -n "$PREV_USER"    ] && \
-                           [ -n "$PREV_MEDIA"   ]; then
+                           [ -n "$PREV_MEDIA"   ] && \
+                           [ -n "$PREV_FRONTEND" ]; then
                             PRODUCT_SERVICE_IMAGE="$PREV_PRODUCT" \
                             USER_SERVICE_IMAGE="$PREV_USER" \
                             MEDIA_SERVICE_IMAGE="$PREV_MEDIA" \
+                            FRONTEND_IMAGE="$PREV_FRONTEND" \
                             docker compose up -d --no-deps --force-recreate \
-                                user-service product-service media-service
+                                user-service product-service media-service frontend
                             echo "Rollback complete — previous version is live again."
                         else
                             echo "WARNING: no snapshot found — this was a first deploy."
@@ -276,7 +305,7 @@ pipeline {
         }
         always {
             sh '''
-                for repo in product-service-image user-service-image media-service-image; do
+                for repo in product-service-image user-service-image media-service-image frontend-image; do
                     docker image ls "$repo" \
                         --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}" || true
                 done

@@ -264,6 +264,7 @@ services:
 networks:
   ecommerce-network:
     driver: bridge
+    name: buy01-ecommerce-network
 
 # VOLUMES
 volumes:

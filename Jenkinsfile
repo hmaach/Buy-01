@@ -7,7 +7,7 @@ pipeline {
         IMAGE_TAG            = "${BUILD_NUMBER}"
         HEALTH_RETRIES       = '30'
         HEALTH_INTERVAL      = '10'
-        NOTIFY_EMAIL         = 'serrafrachiddev@gmail.com'
+        SLACK_CHANNEL        = '#project-buy-01'
 
         // Derived image names — one source of truth per service
         PRODUCT_SERVICE_IMAGE = "product-service-image:${BUILD_NUMBER}"
@@ -264,15 +264,15 @@ pipeline {
                 def msg = env.CHANGE_ID
                     ? "PR #${env.CHANGE_ID} validation passed — ${env.BUILD_URL}"
                     : "Build #${env.BUILD_NUMBER} deployed successfully — ${env.BUILD_URL}"
-                mail(to: env.NOTIFY_EMAIL,
-                     subject: "Build #${env.BUILD_NUMBER} — Success",
-                     body: msg)
+                slackSend(channel: env.SLACK_CHANNEL,
+                          color: 'good',
+                          message: "SUCCESS: ${msg}")
             }
         }
         failure {
-            mail(to:      env.NOTIFY_EMAIL,
-                 subject: "Build #${env.BUILD_NUMBER} — Failed",
-                 body:    "Build #${env.BUILD_NUMBER} failed — ${env.BUILD_URL}\n\nCheck the console for details.")
+            slackSend(channel: env.SLACK_CHANNEL,
+                      color: 'danger',
+                      message: "FAILED: Build #${env.BUILD_NUMBER} failed — ${env.BUILD_URL}\nCheck the console for details.")
         }
         always {
             sh '''

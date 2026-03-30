@@ -1,0 +1,26 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27019/test-db
+  kafka:
+    listener:
+      auto-startup: false
+
+eureka:
+  client:
+    enabled: false
+    register-with-eureka: false
+    fetch-registry: false
+
+security:
+  jwt:
+    public-key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1D2C2aETfdpam2F8Rb06aEPWMvuTy754jTzNQ6c7fbND3ByWa5gXXLeYFsymjSHiOXxOSNuvmlqtaubxgto6nJmSh9DEu53/+iXAnp424eKQio2WwMY9736BFP2NGxH2PvuLSMTdLQ3fzCk9VZc5/DpHiFw2hWbF3rTwV485+cGKGIyLNL8afHL8EyB+dIejepInX+cuk08XX20giTIC29A5xo3yDnDjN6GsyUXtEoPuCHdmOrKccWLVfUZhoXbBJN27GwduR3ldtNYGOcTEkrq5ZqJujP4wCijkAYcsYOknkB6GWBvvXBD6mOb8w9En+mb9GePwH5cj4eI9KFLZaQIDAQAB
+
+management:
+  health:
+    mongo:
+      enabled: false
+    discoveryComposite:
+      enabled: false
+    binders:
+      enabled: false

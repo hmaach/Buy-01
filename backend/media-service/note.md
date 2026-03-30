@@ -37,7 +37,6 @@ Example response:
 ```
 GET /media/69a071b99cb3d3c6f5dfd64e
 ```
-
 ---
 
 ## Kafka Listener and Local Testing

@@ -64,12 +64,12 @@ pipeline {
                     ) ? 'true' : 'false'
 
                     echo """
-=== Change Detection Summary ===
-Product Service: ${env.PRODUCT_SERVICE_CHANGED}
-User Service:    ${env.USER_SERVICE_CHANGED}
-Media Service:   ${env.MEDIA_SERVICE_CHANGED}
-Frontend:        ${env.FRONTEND_CHANGED}
-Infrastructure:  ${env.INFRASTRUCTURE_CHANGED}
+                        === Change Detection Summary ===
+                        Product Service: ${env.PRODUCT_SERVICE_CHANGED}
+                        User Service:    ${env.USER_SERVICE_CHANGED}
+                        Media Service:   ${env.MEDIA_SERVICE_CHANGED}
+                        Frontend:        ${env.FRONTEND_CHANGED}
+                        Infrastructure:  ${env.INFRASTRUCTURE_CHANGED}
                     """
                 }
             }

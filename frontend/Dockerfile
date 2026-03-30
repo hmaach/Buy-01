@@ -9,8 +9,8 @@ RUN npm run build -- --configuration=production
 # Stage 2: Serve with Nginx + SSL
 FROM nginx:alpine
 
-# Install openssl
-RUN apk add --no-cache openssl
+# Install runtime utilities used by TLS setup and container health checks
+RUN apk add --no-cache openssl wget
 
 # Generate self-signed certificate
 ARG SSL_PASSWORD=123456

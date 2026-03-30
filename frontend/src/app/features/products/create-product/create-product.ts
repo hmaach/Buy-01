@@ -162,7 +162,6 @@ export class ProductForm {
     event.stopPropagation();
   }
 
-
   // ── Form getters ─────────────────────────────────────────
   get name() { return this.form.get('name'); }
   get description() { return this.form.get('description'); }

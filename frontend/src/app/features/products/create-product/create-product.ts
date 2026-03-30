@@ -21,7 +21,7 @@ export class ProductForm {
   private router = inject(Router);
   readonly productService = inject(ProductService);
   readonly mediaService = inject(MediaService);
-    private snackBar = inject(MatSnackBar);
+  private snackBar = inject(MatSnackBar);
 
   isEditMode = signal(false);
   isLoading = signal(false);
@@ -124,7 +124,7 @@ export class ProductForm {
       this.snackBar.open(errorMessage, 'Dismiss', { duration: 3000 });
       return;
     }
-   
+
 
     const formData = new FormData();
     formData.append('files', file);

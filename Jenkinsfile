@@ -40,9 +40,22 @@ pipeline {
             steps {
                 script {
                     def emptyTree = sh(script: 'git hash-object -t tree /dev/null', returnStdout: true).trim()
-                    def baseCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT ?: env.GIT_PREVIOUS_COMMIT ?: emptyTree
+                    def currentCommit = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                    def hasParent = sh(script: 'git rev-parse --verify HEAD^ >/dev/null 2>&1', returnStatus: true) == 0
+                    def baseCommit = emptyTree
+
+                    if (env.CHANGE_TARGET) {
+                        sh "git fetch --no-tags origin ${env.CHANGE_TARGET}"
+                        baseCommit = sh(
+                            script: "git merge-base HEAD origin/${env.CHANGE_TARGET}",
+                            returnStdout: true
+                        ).trim()
+                    } else if (hasParent) {
+                        baseCommit = sh(script: 'git rev-parse HEAD^', returnStdout: true).trim()
+                    }
+
                     def changedFiles = sh(
-                        script: "git diff --name-only ${baseCommit} ${env.GIT_COMMIT}",
+                        script: "git diff --name-only ${baseCommit} ${currentCommit}",
                         returnStdout: true
                     ).trim().split('\n').findAll { it }
 
@@ -62,6 +75,7 @@ pipeline {
                         env.FRONTEND_CHANGED == 'true' ? 'frontend' : null,
                     ].findAll { it }.join(' ')
 
+                    echo "Detecting changes from ${baseCommit} to ${currentCommit}"
                     echo "Changed files: ${changedFiles ?: ['<none>']}"
                     echo """
                         Changed services:

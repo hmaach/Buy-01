@@ -125,7 +125,6 @@ export class ProductForm {
       return;
     }
 
-
     const formData = new FormData();
     formData.append('files', file);
 

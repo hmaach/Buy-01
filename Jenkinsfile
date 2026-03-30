@@ -8,6 +8,11 @@ pipeline {
         HEALTH_RETRIES       = '30'
         HEALTH_INTERVAL      = '10'
         SLACK_CHANNEL        = '#project-buy-01'
+        PRODUCT_CHANGED      = 'false'
+        USER_CHANGED         = 'false'
+        MEDIA_CHANGED        = 'false'
+        FRONTEND_CHANGED     = 'false'
+        DEPLOY_SERVICES      = ''
 
         // Derived image names — one source of truth per service
         PRODUCT_SERVICE_IMAGE = "product-service-image:${BUILD_NUMBER}"
@@ -31,19 +36,62 @@ pipeline {
             }
         }
 
+        stage('Detect Changes') {
+            steps {
+                script {
+                    def emptyTree = sh(script: 'git hash-object -t tree /dev/null', returnStdout: true).trim()
+                    def baseCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT ?: env.GIT_PREVIOUS_COMMIT ?: emptyTree
+                    def changedFiles = sh(
+                        script: "git diff --name-only ${baseCommit} ${env.GIT_COMMIT}",
+                        returnStdout: true
+                    ).trim().split('\n').findAll { it }
+
+                    def changed = { String pathPrefix ->
+                        changedFiles.any { it.startsWith(pathPrefix) }
+                    }
+
+                    env.PRODUCT_CHANGED = changed('backend/product-service/') ? 'true' : 'false'
+                    env.USER_CHANGED = changed('backend/user-service/') ? 'true' : 'false'
+                    env.MEDIA_CHANGED = changed('backend/media-service/') ? 'true' : 'false'
+                    env.FRONTEND_CHANGED = changed('frontend/') ? 'true' : 'false'
+
+                    env.DEPLOY_SERVICES = [
+                        env.USER_CHANGED == 'true' ? 'user-service' : null,
+                        env.PRODUCT_CHANGED == 'true' ? 'product-service' : null,
+                        env.MEDIA_CHANGED == 'true' ? 'media-service' : null,
+                        env.FRONTEND_CHANGED == 'true' ? 'frontend' : null,
+                    ].findAll { it }.join(' ')
+
+                    echo "Changed files: ${changedFiles ?: ['<none>']}"
+                    echo """
+                        Changed services:
+                        - product-service: ${env.PRODUCT_CHANGED}
+                        - user-service: ${env.USER_CHANGED}
+                        - media-service: ${env.MEDIA_CHANGED}
+                        - frontend: ${env.FRONTEND_CHANGED}
+                        - deploy targets: ${env.DEPLOY_SERVICES ?: '<none>'}
+                    """.stripIndent()
+                }
+            }
+        }
+
         // ── Run tests for backend services and frontend in parallel ───────
         stage('Unit Tests') {
             parallel {
                 stage('product-service') {
+                    when { expression { env.PRODUCT_CHANGED == 'true' } }
                     steps { dir('backend/product-service') { sh './mvnw clean test' } }
                 }
                 stage('user-service') {
+                    when { expression { env.USER_CHANGED == 'true' } }
                     steps { dir('backend/user-service') { sh './mvnw clean test' } }
                 }
                 stage('media-service') {
+                    when { expression { env.MEDIA_CHANGED == 'true' } }
                     steps { dir('backend/media-service') { sh './mvnw clean test' } }
                 }
                 stage('frontend') {
+                    when { expression { env.FRONTEND_CHANGED == 'true' } }
                     steps {
                         dir('frontend') {
                             sh 'npm ci'
@@ -60,7 +108,7 @@ pipeline {
                             backend/media-service/target/surefire-reports/*.xml,
                             backend/user-service/target/surefire-reports/*.xml
                         ''',
-                        allowEmptyResults: false
+                        allowEmptyResults: true
                     )
                 }
             }
@@ -68,9 +116,15 @@ pipeline {
 
         // ── Build all images in parallel (main branch only) ───────────────
         stage('Build Images') {
-            when { branch 'main' }
+            when {
+                allOf {
+                    branch 'main'
+                    expression { env.DEPLOY_SERVICES?.trim() }
+                }
+            }
             parallel {
                 stage('product-service') {
+                    when { expression { env.PRODUCT_CHANGED == 'true' } }
                     steps {
                         sh """
                             docker build \
@@ -81,6 +135,7 @@ pipeline {
                     }
                 }
                 stage('user-service') {
+                    when { expression { env.USER_CHANGED == 'true' } }
                     steps {
                         sh """
                             docker build \
@@ -91,6 +146,7 @@ pipeline {
                     }
                 }
                 stage('media-service') {
+                    when { expression { env.MEDIA_CHANGED == 'true' } }
                     steps {
                         sh """
                             docker build \
@@ -101,6 +157,7 @@ pipeline {
                     }
                 }
                 stage('frontend') {
+                    when { expression { env.FRONTEND_CHANGED == 'true' } }
                     steps {
                         sh """
                             docker build \
@@ -115,13 +172,29 @@ pipeline {
 
         // ── Lightweight sanity-check: confirm images start cleanly ───────
         stage('Smoke Test Images') {
-            when { branch 'main' }
-            steps {
-                sh """
-                    docker run --rm --entrypoint java "${PRODUCT_SERVICE_IMAGE}" -version
-                    docker run --rm --entrypoint java "${USER_SERVICE_IMAGE}"    -version
-                    docker run --rm --entrypoint java "${MEDIA_SERVICE_IMAGE}"   -version
-                """
+            when {
+                allOf {
+                    branch 'main'
+                    expression { env.DEPLOY_SERVICES?.trim() }
+                }
+            }
+            parallel {
+                stage('product-service') {
+                    when { expression { env.PRODUCT_CHANGED == 'true' } }
+                    steps { sh 'docker run --rm --entrypoint java "${PRODUCT_SERVICE_IMAGE}" -version' }
+                }
+                stage('user-service') {
+                    when { expression { env.USER_CHANGED == 'true' } }
+                    steps { sh 'docker run --rm --entrypoint java "${USER_SERVICE_IMAGE}" -version' }
+                }
+                stage('media-service') {
+                    when { expression { env.MEDIA_CHANGED == 'true' } }
+                    steps { sh 'docker run --rm --entrypoint java "${MEDIA_SERVICE_IMAGE}" -version' }
+                }
+                stage('frontend') {
+                    when { expression { env.FRONTEND_CHANGED == 'true' } }
+                    steps { sh 'docker run --rm --entrypoint nginx "${FRONTEND_IMAGE}" -t' }
+                }
             }
         }
 
@@ -131,6 +204,7 @@ pipeline {
                 allOf {
                     branch 'main'
                     not { changeRequest() }
+                    expression { env.DEPLOY_SERVICES?.trim() }
                 }
             }
 
@@ -151,19 +225,28 @@ pipeline {
                             docker inspect --format '{{.Config.Image}}' "$1" 2>/dev/null || true
                         }
 
-                        snapshot_image product-service > .prev_product
-                        snapshot_image user-service    > .prev_user
-                        snapshot_image media-service   > .prev_media
-                        snapshot_image frontend        > .prev_frontend
+                        prev_file() {
+                            case "$1" in
+                                product-service) echo .prev_product ;;
+                                user-service)    echo .prev_user ;;
+                                media-service)   echo .prev_media ;;
+                                frontend)        echo .prev_frontend ;;
+                            esac
+                        }
 
-                        echo "=== Previous images (empty = first deploy) ==="
-                        cat .prev_product .prev_user .prev_media .prev_frontend || true
+                        echo "=== Previous images for changed services ==="
+                        for CTR in ${DEPLOY_SERVICES}; do
+                            FILE=$(prev_file "$CTR")
+                            snapshot_image "$CTR" > "$FILE"
+                            printf '%s -> ' "$CTR"
+                            cat "$FILE" || true
+                        done
 
                         # ── Stop & remove old containers ──────────────────────
                         #    This frees the static name AND the bound host ports.
                         #    --volumes is intentionally omitted — named volumes
                         #    (mongo data, uploads) are owned by Docker and survive.
-                        for CTR in product-service user-service media-service frontend; do
+                        for CTR in ${DEPLOY_SERVICES}; do
                             if docker inspect "$CTR" > /dev/null 2>&1; then
                                 echo "Stopping $CTR..."
                                 docker stop "$CTR"
@@ -182,7 +265,7 @@ pipeline {
                         export FRONTEND_IMAGE="${FRONTEND_IMAGE}"
 
                         docker compose up -d --no-deps --force-recreate \
-                            user-service product-service media-service frontend
+                            ${DEPLOY_SERVICES}
 
                         echo "New containers started — health check follows."
                     '''
@@ -196,24 +279,39 @@ pipeline {
                     sh '''
                         echo "Deploy failed — restoring previous images..."
 
-                        PREV_PRODUCT=$(cat .prev_product 2>/dev/null || true)
-                        PREV_USER=$(cat .prev_user       2>/dev/null || true)
-                        PREV_MEDIA=$(cat .prev_media     2>/dev/null || true)
-                        PREV_FRONTEND=$(cat .prev_frontend 2>/dev/null || true)
+                        prev_file() {
+                            case "$1" in
+                                product-service) echo .prev_product ;;
+                                user-service)    echo .prev_user ;;
+                                media-service)   echo .prev_media ;;
+                                frontend)        echo .prev_frontend ;;
+                            esac
+                        }
 
-                        if [ -n "$PREV_PRODUCT" ] && \
-                           [ -n "$PREV_USER"    ] && \
-                           [ -n "$PREV_MEDIA"   ] && \
-                           [ -n "$PREV_FRONTEND" ]; then
-                            PRODUCT_SERVICE_IMAGE="$PREV_PRODUCT" \
-                            USER_SERVICE_IMAGE="$PREV_USER" \
-                            MEDIA_SERVICE_IMAGE="$PREV_MEDIA" \
-                            FRONTEND_IMAGE="$PREV_FRONTEND" \
-                            docker compose up -d --no-deps --force-recreate \
-                                user-service product-service media-service frontend
+                        restore_image_var() {
+                            case "$1" in
+                                product-service) export PRODUCT_SERVICE_IMAGE="$2" ;;
+                                user-service)    export USER_SERVICE_IMAGE="$2" ;;
+                                media-service)   export MEDIA_SERVICE_IMAGE="$2" ;;
+                                frontend)        export FRONTEND_IMAGE="$2" ;;
+                            esac
+                        }
+
+                        RESTORE_SERVICES=""
+
+                        for SVC in ${DEPLOY_SERVICES}; do
+                            PREV_IMAGE=$(cat "$(prev_file "$SVC")" 2>/dev/null || true)
+                            if [ -n "$PREV_IMAGE" ]; then
+                                restore_image_var "$SVC" "$PREV_IMAGE"
+                                RESTORE_SERVICES="$RESTORE_SERVICES $SVC"
+                            fi
+                        done
+
+                        if [ -n "$RESTORE_SERVICES" ]; then
+                            docker compose up -d --no-deps --force-recreate $RESTORE_SERVICES
                             echo "Restore complete."
                         else
-                            echo "WARNING: first deploy failed — no snapshot to restore from."
+                            echo "WARNING: no snapshots found for changed services."
                         fi
                     '''
                 }
@@ -226,6 +324,7 @@ pipeline {
                 allOf {
                     branch 'main'
                     not { changeRequest() }
+                    expression { env.DEPLOY_SERVICES?.trim() }
                 }
             }
 
@@ -245,10 +344,10 @@ pipeline {
                         echo "$SVC is healthy."
                     }
 
-                    healthy user-service    || exit 1
-                    healthy product-service || exit 1
-                    healthy media-service   || exit 1
-                    echo "All services healthy."
+                    for SVC in ${DEPLOY_SERVICES}; do
+                        healthy "$SVC" || exit 1
+                    done
+                    echo "All changed services are healthy."
                 '''
             }
 
@@ -257,24 +356,39 @@ pipeline {
                     sh '''
                         echo "Health check failed — rolling back to previous images..."
 
-                        PREV_PRODUCT=$(cat .prev_product 2>/dev/null || true)
-                        PREV_USER=$(cat .prev_user       2>/dev/null || true)
-                        PREV_MEDIA=$(cat .prev_media     2>/dev/null || true)
-                        PREV_FRONTEND=$(cat .prev_frontend 2>/dev/null || true)
+                        prev_file() {
+                            case "$1" in
+                                product-service) echo .prev_product ;;
+                                user-service)    echo .prev_user ;;
+                                media-service)   echo .prev_media ;;
+                                frontend)        echo .prev_frontend ;;
+                            esac
+                        }
 
-                        if [ -n "$PREV_PRODUCT" ] && \
-                           [ -n "$PREV_USER"    ] && \
-                           [ -n "$PREV_MEDIA"   ] && \
-                           [ -n "$PREV_FRONTEND" ]; then
-                            PRODUCT_SERVICE_IMAGE="$PREV_PRODUCT" \
-                            USER_SERVICE_IMAGE="$PREV_USER" \
-                            MEDIA_SERVICE_IMAGE="$PREV_MEDIA" \
-                            FRONTEND_IMAGE="$PREV_FRONTEND" \
-                            docker compose up -d --no-deps --force-recreate \
-                                user-service product-service media-service frontend
+                        restore_image_var() {
+                            case "$1" in
+                                product-service) export PRODUCT_SERVICE_IMAGE="$2" ;;
+                                user-service)    export USER_SERVICE_IMAGE="$2" ;;
+                                media-service)   export MEDIA_SERVICE_IMAGE="$2" ;;
+                                frontend)        export FRONTEND_IMAGE="$2" ;;
+                            esac
+                        }
+
+                        RESTORE_SERVICES=""
+
+                        for SVC in ${DEPLOY_SERVICES}; do
+                            PREV_IMAGE=$(cat "$(prev_file "$SVC")" 2>/dev/null || true)
+                            if [ -n "$PREV_IMAGE" ]; then
+                                restore_image_var "$SVC" "$PREV_IMAGE"
+                                RESTORE_SERVICES="$RESTORE_SERVICES $SVC"
+                            fi
+                        done
+
+                        if [ -n "$RESTORE_SERVICES" ]; then
+                            docker compose up -d --no-deps --force-recreate $RESTORE_SERVICES
                             echo "Rollback complete — previous version is live again."
                         else
-                            echo "WARNING: no snapshot found — this was a first deploy."
+                            echo "WARNING: no snapshots found for changed services."
                             echo "Manual intervention required."
                         fi
                     '''

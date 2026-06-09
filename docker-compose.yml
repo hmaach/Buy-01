@@ -241,6 +241,19 @@ services:
     networks:
       - ecommerce-network
 
+  # JENKINS
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    restart: unless-stopped
+    ports:
+      - "8090:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins-data:/var/jenkins_home
+    networks:
+      - ecommerce-network
+
 # NETWORK
 networks:
   ecommerce-network:
@@ -252,3 +265,4 @@ volumes:
   product-mongo-data:
   media-mongo-data:
   kafka-data:
+  jenkins-data:

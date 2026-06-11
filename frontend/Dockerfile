@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-RUN npm run build -- --configuration=production
+RUN npm run build -- --configuration=production --base-href=/app/
 
 # Stage 2: Serve with Nginx + SSL
 FROM nginx:alpine
@@ -16,10 +16,10 @@ RUN apk add --no-cache openssl
 ARG SSL_PASSWORD=123456
 RUN mkdir -p /etc/nginx/ssl && \
     openssl req -x509 -newkey rsa:4096 \
-        -keyout /etc/nginx/ssl/key.pem \
-        -out /etc/nginx/ssl/cert.pem \
-        -sha256 -days 365 -nodes \
-        -subj "/C=MA/ST=Oujda/L=Oujda/O=Zone01/OU=IT/CN=localhost"
+    -keyout /etc/nginx/ssl/key.pem \
+    -out /etc/nginx/ssl/cert.pem \
+    -sha256 -days 365 -nodes \
+    -subj "/C=MA/ST=Oujda/L=Oujda/O=Zone01/OU=IT/CN=localhost"
 
 # Remove default nginx config
 RUN rm /etc/nginx/conf.d/default.conf

@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-RUN npm run build -- --configuration=production --base-href=/app/
+RUN npm run build -- --configuration=production --base-href=/
 
 # Stage 2: Serve with Nginx + SSL
 FROM nginx:alpine

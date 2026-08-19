@@ -1,4 +1,4 @@
-const backendUrl = 'https://localhost:8080';
+const backendUrl = '/api';
 
 export const env = {
   backendUrl: backendUrl,

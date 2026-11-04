@@ -263,7 +263,7 @@ cd buy-01
 Build every backend module from one place:
 
 ```bash
-cd backend && ./mvnw -B clean verify
+cd backend && ./mvnw -B clean install -DskipTests
 ```
 
 ---

@@ -21,6 +21,9 @@ public record JwtProperties(
         if (expiration == null) {
             expiration = DEFAULT_EXPIRATION;
         }
+        if (expiration.isZero() || expiration.isNegative()) {
+            throw new IllegalArgumentException("security.jwt.expiration must be positive, got " + expiration);
+        }
     }
 
     public boolean canIssue() {

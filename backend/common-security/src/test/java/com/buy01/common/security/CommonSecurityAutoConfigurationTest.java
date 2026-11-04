@@ -39,6 +39,14 @@ class CommonSecurityAutoConfigurationTest {
     }
 
     @Test
+    void rejectsNonPositiveExpiration() {
+        runner.withPropertyValues(
+                        "security.jwt.public-key=" + TestKeys.publicBase64(TestKeys.PAIR),
+                        "security.jwt.expiration=0")
+                .run(ctx -> assertThat(ctx).hasFailed());
+    }
+
+    @Test
     void failsFastWithoutPublicKey() {
         runner.run(ctx -> assertThat(ctx).hasFailed());
     }

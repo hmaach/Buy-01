@@ -219,7 +219,7 @@ services:
       - KAFKA_BROKER=kafka:9092
       - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
     volumes:
-      - ./uploads/media:/app/uploads/media
+      - ./uploads/media:/app/uploads
     networks:
       - ecommerce-network
 

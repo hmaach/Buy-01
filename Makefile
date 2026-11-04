@@ -4,13 +4,6 @@
 
 BACKEND_DIR := backend
 
-SERVICES := \
-	api-gateway \
-	discovery-server \
-	media-service \
-	product-service \
-	user-service
-
 MVN_CMD := ./mvnw
 
 # ==============================
@@ -38,16 +31,10 @@ help:
 # ==============================
 
 install: ssl
-	@for service in $(SERVICES); do \
-		echo "Building $$service..."; \
-		cd $(BACKEND_DIR)/$$service && $(MVN_CMD) clean install -DskipTests && cd - > /dev/null; \
-	done
+	cd $(BACKEND_DIR) && $(MVN_CMD) -B clean install -DskipTests
 
 clean:
-	@for service in $(SERVICES); do \
-		echo "Cleaning $$service..."; \
-		cd $(BACKEND_DIR)/$$service && $(MVN_CMD) clean && cd - > /dev/null; \
-	done
+	cd $(BACKEND_DIR) && $(MVN_CMD) -B clean
 
 rebuild: clean install
 

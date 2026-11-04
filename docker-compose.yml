@@ -52,7 +52,7 @@ services:
       - ecommerce-network
 
   kafka:
-    image: apache/kafka:3.9.1
+    image: apache/kafka:4.1.0
     container_name: kafka
     restart: unless-stopped
     mem_limit: 512m

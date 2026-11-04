@@ -4,7 +4,6 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
@@ -17,7 +16,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 
-import com.buy01.gateway.security.JwtUtil;
+import com.buy01.common.security.jwt.AuthenticatedUser;
+import com.buy01.common.security.jwt.JwtVerifier;
+import com.buy01.common.security.web.BearerToken;
 
 import reactor.core.publisher.Mono;
 
@@ -41,8 +42,7 @@ record PublicEndpoint(HttpMethod method, String pattern) {
 public class AuthenticationGatewayFilterFactory
         extends AbstractGatewayFilterFactory<AuthenticationGatewayFilterFactory.Config> {
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtVerifier jwtVerifier;
 
     private final WebClient webClient;
 
@@ -54,8 +54,9 @@ public class AuthenticationGatewayFilterFactory
             new PublicEndpoint(HttpMethod.GET, "/products"),
             new PublicEndpoint(HttpMethod.GET, "/products/**"));
 
-    public AuthenticationGatewayFilterFactory() {
+    public AuthenticationGatewayFilterFactory(JwtVerifier jwtVerifier) {
         super(Config.class);
+        this.jwtVerifier = jwtVerifier;
         this.webClient = WebClient.builder().build();
     }
 
@@ -78,21 +79,20 @@ public class AuthenticationGatewayFilterFactory
             }
 
             // 1. Check for Authorization header
-            String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            String token = BearerToken.from(request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION)).orElse(null);
+            if (token == null) {
                 return onError(exchange, "Missing or invalid authorization header", HttpStatus.UNAUTHORIZED);
             }
 
-            String token = authHeader.substring(7);
-
             try {
                 // 2. Validate token
-                if (!jwtUtil.validateToken(token)) {
+                AuthenticatedUser user = jwtVerifier.verify(token).orElse(null);
+                if (user == null) {
                     return onError(exchange, "Invalid or expired token", HttpStatus.UNAUTHORIZED);
                 }
 
-                String userId = jwtUtil.extractUserId(token);
-                String role = jwtUtil.extractRole(token);
+                String userId = user.id();
+                String role = user.role();
 
                 // 3. Optional Role check
                 if (config.getRequiredRole() != null && !config.getRequiredRole().isEmpty()) {

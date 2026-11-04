@@ -2,6 +2,6 @@ const backendUrl = '/api';
 
 export const env = {
     backendUrl: backendUrl,
-    mediaUrl: 'https://localhost:8080/media',
+    mediaUrl: `${backendUrl}/media`,
     avatarUrl: `${backendUrl}/users`,
 };

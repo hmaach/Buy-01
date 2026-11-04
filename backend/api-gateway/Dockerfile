@@ -1,9 +1,9 @@
 # Stage 1: Build the application
-FROM maven:3.9-eclipse-temurin-21-alpine AS build
+FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
 # Install openssl
-RUN apk add --no-cache openssl
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 # Copy the pom.xml and source code
 COPY pom.xml .
@@ -13,23 +13,23 @@ COPY src ./src
 ARG SSL_PASSWORD=123456
 RUN mkdir -p src/main/resources && \
     openssl req -x509 -newkey rsa:4096 \
-        -keyout src/main/resources/key.pem \
-        -out src/main/resources/cert.pem \
-        -sha256 -days 365 -nodes \
-        -subj "/C=MA/ST=Oujda/L=Oujda/O=Zone01/OU=IT/CN=localhost" && \
+    -keyout src/main/resources/key.pem \
+    -out src/main/resources/cert.pem \
+    -sha256 -days 365 -nodes \
+    -subj "/C=MA/ST=Oujda/L=Oujda/O=Zone01/OU=IT/CN=localhost" && \
     openssl pkcs12 -export \
-        -in src/main/resources/cert.pem \
-        -inkey src/main/resources/key.pem \
-        -out src/main/resources/edge-service.p12 \
-        -name springgateway \
-        -passout pass:${SSL_PASSWORD} && \
+    -in src/main/resources/cert.pem \
+    -inkey src/main/resources/key.pem \
+    -out src/main/resources/edge-service.p12 \
+    -name springgateway \
+    -passout pass:${SSL_PASSWORD} && \
     rm src/main/resources/key.pem src/main/resources/cert.pem
 
 # Build the application (skipping tests for speed)
 RUN mvn clean package -DskipTests
 
 # Stage 2: Create the final lightweight image
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080

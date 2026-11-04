@@ -1,0 +1,15 @@
+{
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./**/.env)",
+      "Read(./**/*.p12)",
+      "Read(./**/*.pem)",
+      "Bash(git push --force:*)"
+    ]
+  }
+}

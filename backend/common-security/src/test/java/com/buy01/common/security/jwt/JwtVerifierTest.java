@@ -16,7 +16,7 @@ import io.jsonwebtoken.Jwts;
 
 class JwtVerifierTest {
 
-    private final JwtIssuer issuer = new JwtIssuer(TestKeys.PAIR.getPrivate(), Duration.ofHours(1), Clock.systemUTC());
+    private final JwtIssuer issuer = new JwtIssuer(TestKeys.PAIR.getPrivate(), Duration.ofDays(1), Clock.systemUTC());
     private final JwtVerifier verifier = new JwtVerifier(TestKeys.PAIR.getPublic());
 
     @Test
@@ -45,7 +45,7 @@ class JwtVerifierTest {
 
     @Test
     void rejectsTokenSignedWithAnotherKey() {
-        JwtIssuer foreign = new JwtIssuer(TestKeys.OTHER_PAIR.getPrivate(), Duration.ofHours(1), Clock.systemUTC());
+        JwtIssuer foreign = new JwtIssuer(TestKeys.OTHER_PAIR.getPrivate(), Duration.ofDays(1), Clock.systemUTC());
 
         assertThat(verifier.verify(foreign.issue("u", "e", "SELLER").token())).isEmpty();
     }
@@ -63,7 +63,7 @@ class JwtVerifierTest {
     void rejectsTokenWithoutRole() {
         String token = Jwts.builder()
                 .subject("u")
-                .expiration(Date.from(Instant.now().plusSeconds(60)))
+                .expiration(Date.from(Instant.now().plus(Duration.ofDays(1))))
                 .signWith(TestKeys.PAIR.getPrivate(), Jwts.SIG.RS256)
                 .compact();
 

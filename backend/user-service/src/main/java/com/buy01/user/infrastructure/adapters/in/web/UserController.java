@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.buy01.common.security.jwt.AuthenticatedUser;
 import com.buy01.user.domain.model.User;
 import com.buy01.user.domain.port.in.AvatarService;
 import com.buy01.user.domain.port.in.UserService;
 import com.buy01.user.infrastructure.adapters.in.web.dto.request.UpdateUserRequest;
 import com.buy01.user.infrastructure.adapters.in.web.dto.response.UserResponse;
-import com.buy01.user.infrastructure.security.JwtAuthenticationFilter.UserPrincipal;
 
 import jakarta.validation.Valid;
 
@@ -41,8 +41,8 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getCurrentUser(Authentication authentication) {
-        UserPrincipal currUser = (UserPrincipal) authentication.getPrincipal();
-        User user = userService.findById(currUser.id());
+        AuthenticatedUser currUser = (AuthenticatedUser) authentication.getPrincipal();
+        User user = userService.findById(UUID.fromString(currUser.id()));
         return ResponseEntity.ok(UserResponse.from(user));
     }
 
@@ -62,21 +62,21 @@ public class UserController {
             Authentication authentication,
             @Valid @ModelAttribute UpdateUserRequest request
     ) {
-        UserPrincipal currUser = (UserPrincipal) authentication.getPrincipal();
+        AuthenticatedUser currUser = (AuthenticatedUser) authentication.getPrincipal();
 
         String avatarUrl = null;
         if (request.avatar() != null && !request.avatar().isEmpty()) {
             avatarUrl = avatarService.saveAvatar(request.avatar());
         }
 
-        User updatedUser = userService.updateUser(currUser.id(), request.toCommand(avatarUrl));
+        User updatedUser = userService.updateUser(UUID.fromString(currUser.id()), request.toCommand(avatarUrl));
         return ResponseEntity.ok(UserResponse.from(updatedUser));
     }
 
     @DeleteMapping("/me")
     public void deleteUser(Authentication authentication) {
-        UserPrincipal currUser = (UserPrincipal) authentication.getPrincipal();
-        User user = userService.findById(currUser.id());
+        AuthenticatedUser currUser = (AuthenticatedUser) authentication.getPrincipal();
+        User user = userService.findById(UUID.fromString(currUser.id()));
         userService.deleteUser(user.getId());
     }
 }

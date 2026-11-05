@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.buy01.product.domain.model.Product;
 import com.buy01.product.domain.ports.inbound.ProductUseCase;
-import com.buy01.product.infrastructure.security.JwtAuthenticationFilter.UserPrincipal;
+import com.buy01.common.security.jwt.AuthenticatedUser;
 import com.buy01.product.infrastructure.web.dto.ProductCreateRequest;
 import com.buy01.product.infrastructure.web.dto.ProductResponse;
 import com.buy01.product.infrastructure.web.mapper.ProductWebMapper;
@@ -39,7 +39,7 @@ public class ProductController {
     @PostMapping
     public Mono<ResponseEntity<ProductResponse>> createProduct(
             @Valid @RequestBody ProductCreateRequest request,
-            @AuthenticationPrincipal UserPrincipal principal) {
+            @AuthenticationPrincipal AuthenticatedUser principal) {
         Product product = mapper.toDomain(request, principal.id());
         return productUseCase.createProduct(product, request.imagesIds())
                 .map(mapper::toResponse)
@@ -50,7 +50,7 @@ public class ProductController {
     public Mono<ProductResponse> updateProduct(
             @PathVariable String id,
             @Valid @RequestBody ProductCreateRequest request,
-            @AuthenticationPrincipal UserPrincipal principal) {
+            @AuthenticationPrincipal AuthenticatedUser principal) {
 
         Product update = mapper.toDomain(request, principal.id());
         return productUseCase.updateProduct(update, id, principal.id())
@@ -80,7 +80,7 @@ public class ProductController {
     }
 
     @GetMapping("/user")
-    public ResponseEntity<?> getUserProductsList(@AuthenticationPrincipal UserPrincipal principal,
+    public ResponseEntity<?> getUserProductsList(@AuthenticationPrincipal AuthenticatedUser principal,
             @RequestParam(required = false) Instant beforeTime) {
         if (beforeTime == null) {
             beforeTime = Instant.now();
@@ -92,7 +92,7 @@ public class ProductController {
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<Void>> deleteProduct(
             @PathVariable String id,
-            @AuthenticationPrincipal UserPrincipal principal) {
+            @AuthenticationPrincipal AuthenticatedUser principal) {
         return productUseCase.deleteProduct(id, principal.id())
                 .then(Mono.just(ResponseEntity.noContent().build()));
     }

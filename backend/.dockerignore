@@ -1,0 +1,9 @@
+**/target
+**/.env
+**/*.p12
+**/*.pem
+**/uploads
+**/.idea
+**/.vscode
+**/node_modules
+**/compose.yaml

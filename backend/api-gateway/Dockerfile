@@ -1,36 +1,32 @@
-# Stage 1: Build the application
+# syntax=docker/dockerfile:1
+# Build context: backend/ (the gateway needs the parent POM and shared modules).
 FROM maven:3.9-eclipse-temurin-21 AS build
-WORKDIR /app
+WORKDIR /workspace
 
-# Install openssl
-RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
 
-# Copy the pom.xml and source code
-COPY pom.xml .
-COPY src ./src
+COPY . .
 
-# Generate SSL certificate into resources so it gets bundled in the jar
-ARG SSL_PASSWORD=123456
-RUN mkdir -p src/main/resources && \
+ARG SSL_PASSWORD
+RUN test -n "${SSL_PASSWORD}" && \
+    RES=api-gateway/src/main/resources && \
     openssl req -x509 -newkey rsa:4096 \
-    -keyout src/main/resources/key.pem \
-    -out src/main/resources/cert.pem \
+    -keyout "$RES/key.pem" -out "$RES/cert.pem" \
     -sha256 -days 365 -nodes \
     -subj "/C=MA/ST=Oujda/L=Oujda/O=Zone01/OU=IT/CN=localhost" && \
     openssl pkcs12 -export \
-    -in src/main/resources/cert.pem \
-    -inkey src/main/resources/key.pem \
-    -out src/main/resources/edge-service.p12 \
+    -in "$RES/cert.pem" -inkey "$RES/key.pem" \
+    -out "$RES/edge-service.p12" \
     -name springgateway \
     -passout pass:${SSL_PASSWORD} && \
-    rm src/main/resources/key.pem src/main/resources/cert.pem
+    rm "$RES/key.pem" "$RES/cert.pem"
 
-# Build the application (skipping tests for speed)
-RUN mvn clean package -DskipTests
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -B -q -pl api-gateway -am package -DskipTests && \
+    cp api-gateway/target/api-gateway-*.jar /workspace/app.jar
 
-# Stage 2: Create the final lightweight image
 FROM eclipse-temurin:21-jre
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /workspace/app.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]

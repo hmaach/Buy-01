@@ -8,6 +8,7 @@ Current phase and status: @docs/zone01/plan.md
 - Subjects: docs/zone01/subjects.md
 - Audit criteria (acceptance tests): docs/zone01/audits/
 - Codebase snapshot: docs/zone01/analysis.md
+- Decisions and context: docs/zone01/decisions.md
 
 ## Source of truth
 - docs/zone01/analysis.md and the code win over any other file in docs/.

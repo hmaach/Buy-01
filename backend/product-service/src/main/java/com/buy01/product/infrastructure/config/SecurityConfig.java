@@ -8,16 +8,17 @@ import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
-import com.buy01.product.infrastructure.security.JwtAuthenticationFilter;
+import com.buy01.common.security.jwt.JwtVerifier;
+import com.buy01.common.security.web.ReactiveJwtAuthenticationFilter;
 
 @Configuration
 @EnableReactiveMethodSecurity
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtVerifier jwtVerifier;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    public SecurityConfig(JwtVerifier jwtVerifier) {
+        this.jwtVerifier = jwtVerifier;
     }
 
     @Bean
@@ -30,7 +31,7 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.GET, "/products/**").permitAll()
                         .pathMatchers("/products/**").hasRole("SELLER")
                         .anyExchange().authenticated())
-                .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+                .addFilterAt(new ReactiveJwtAuthenticationFilter(jwtVerifier), SecurityWebFiltersOrder.AUTHENTICATION)
                 .build();
     }
 }

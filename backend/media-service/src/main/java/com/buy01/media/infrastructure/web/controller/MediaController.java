@@ -27,7 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.buy01.media.domain.ports.inbound.MediaUseCase;
 import com.buy01.media.infrastructure.web.dto.Batch;
-import com.buy01.media.infrastructure.security.JwtAuthenticationFilter.UserPrincipal;
+import com.buy01.common.security.jwt.AuthenticatedUser;
 import com.buy01.media.infrastructure.web.dto.MediaResponse;
 import com.buy01.media.infrastructure.web.mapper.MediaMapper;
 
@@ -47,8 +47,8 @@ public class MediaController {
     }
 
     @GetMapping("/user")
-    public UserPrincipal testUser(Authentication authentication) {
-        UserPrincipal currUser = (UserPrincipal) authentication.getPrincipal();
+    public AuthenticatedUser testUser(Authentication authentication) {
+        AuthenticatedUser currUser = (AuthenticatedUser) authentication.getPrincipal();
         return currUser;
     }
 
@@ -80,14 +80,14 @@ public class MediaController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteImages(@PathVariable String id, @AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<Void> deleteImages(@PathVariable String id, @AuthenticationPrincipal AuthenticatedUser principal) {
         mediaService.deleteById(id, principal.id());
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public List<MediaResponse> uploadImages(@RequestParam("files") MultipartFile[] files, @AuthenticationPrincipal UserPrincipal principal) {
+    public List<MediaResponse> uploadImages(@RequestParam("files") MultipartFile[] files, @AuthenticationPrincipal AuthenticatedUser principal) {
         return List.of(files).stream()
                 .map(file -> {
                     var media = mediaService.uploadImage(file, principal.id());

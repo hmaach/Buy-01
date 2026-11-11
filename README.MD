@@ -98,7 +98,8 @@ backend/
 
 ## Technology Stack
 
-- **Framework:** Spring Boot 3.x
+- **Framework:** Spring Boot 3.5.x, Spring Cloud 2025.0.x
+- **Build:** Maven multi-module (`backend/pom.xml` parent, shared `common-security` module)
 - **Language:** Java 21
 - **Databases:** MongoDB
 - **Message Broker:** Apache Kafka
@@ -257,7 +258,13 @@ cd buy-01
 - Git
 - Docker & Docker Compose
 - Java 21+
-- Maven (optional, `mvnw` included)
+- Maven 3.9+ (optional, `backend/mvnw` included)
+
+Build every backend module from one place:
+
+```bash
+cd backend && ./mvnw -B clean install -DskipTests
+```
 
 ---
 

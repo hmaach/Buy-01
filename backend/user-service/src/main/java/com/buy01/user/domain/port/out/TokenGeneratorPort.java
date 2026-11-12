@@ -7,12 +7,4 @@ import com.buy01.user.domain.model.Role;
 public interface TokenGeneratorPort {
 
     TokenResult generateToken(UUID userId, String email, Role role);
-
-    UUID extractUserId(String token);
-
-    String extractEmail(String token);
-
-    Role extractRole(String token);
-
-    boolean validateToken(String token);
 }

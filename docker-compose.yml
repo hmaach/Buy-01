@@ -38,7 +38,10 @@ x-mongo-cmd:
 
 services:
   discovery-server:
-    build: ./backend/discovery-server/
+    build:
+      context: ./backend
+      args:
+        SERVICE: discovery-server
     container_name: discovery-server
     restart: unless-stopped
     mem_limit: 320m
@@ -134,8 +137,8 @@ services:
 
   api-gateway:
     build:
-      context: ./backend/api-gateway
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: api-gateway/Dockerfile
       args:
         SSL_PASSWORD: ${SSL_PASSWORD}
     container_name: api-gateway
@@ -161,8 +164,9 @@ services:
 
   user-service:
     build:
-      context: ./backend/user-service
-      dockerfile: Dockerfile
+      context: ./backend
+      args:
+        SERVICE: user-service
     container_name: user-service
     restart: unless-stopped
     mem_limit: 384m
@@ -195,8 +199,9 @@ services:
 
   product-service:
     build:
-      context: ./backend/product-service
-      dockerfile: Dockerfile
+      context: ./backend
+      args:
+        SERVICE: product-service
     container_name: product-service
     restart: unless-stopped
     mem_limit: 384m
@@ -225,8 +230,9 @@ services:
 
   media-service:
     build:
-      context: ./backend/media-service
-      dockerfile: Dockerfile
+      context: ./backend
+      args:
+        SERVICE: media-service
     container_name: media-service
     restart: unless-stopped
     mem_limit: 384m

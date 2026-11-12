@@ -27,6 +27,8 @@ public class SecurityConfig {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> exchange
+                        // Docker healthcheck calls this without a token
+                        .pathMatchers("/actuator/health").permitAll()
                         .pathMatchers("/products/user").authenticated()
                         .pathMatchers(HttpMethod.GET, "/products/**").permitAll()
                         .pathMatchers("/products/**").hasRole("SELLER")

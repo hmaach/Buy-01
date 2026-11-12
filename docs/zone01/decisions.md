@@ -38,8 +38,9 @@ Handoff from the planning chat of 2026-11-04. Read with plan.md and analysis.md.
 
 ## Incidents (useful for the jury)
 1. Disk 76% full: 18.3 GB of logs from the 3 MongoDB containers. Root cause: healthcheck opened a connection every 10 s and Mongo logged each one. Fixed in code: --quiet, 60 s interval, log rotation.
-2. Kafka crash loop after pinning 3.9.1: volume written by a newer :latest (metadata feature level 29). Fixed by pinning the version that wrote the data. Reason :latest is banned.
+2. Kafka crash loop after pinning 3.9.1: volume written by a newer :latest (metadata feature level 29). Pinning 4.1.0 did not fix it: on 2026-11-11, after the multi-module rebuild, 4.1.0 crashed the same way because it only supports levels 7 to 27. Fix: delete the kafka-data volume (Kafka only holds transient events here). Reason :latest is banned, and the version must never go below the one that wrote the volume.
 3. Media images lived only inside the container (wrong mount path). Backed up, then fixed with the mount.
+4. 502 from host nginx right after the 2026-11-11 rebuild: the gateway container was "Started" but Spring Boot needs 60 to 120 s on 1 OCPU before it listens. Lesson: a deploy health check must poll /actuator/health, not trust container state.
 
 ## Open questions for Zone01 staff
 - Can several Java projects be audited during the same January visit (unlock order)?

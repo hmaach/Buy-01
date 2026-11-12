@@ -30,6 +30,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(HttpMethod.GET, "/media/**").permitAll()
                         .requestMatchers("/media/batch").permitAll()
+                        // Docker healthcheck calls this without a token
+                        .requestMatchers("/actuator/health").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtVerifier), UsernamePasswordAuthenticationFilter.class);
 

@@ -10,7 +10,7 @@ MVN_CMD := ./mvnw
 # Phony Targets
 # ==============================
 
-.PHONY: help build clean install rebuild docker-up docker-up-dbs docker-down docker-build env
+.PHONY: help build clean install rebuild docker-up docker-up-dbs docker-down docker-build fresh env
 
 # Default target
 help:
@@ -25,6 +25,7 @@ help:
 	@echo "  make docker-up-dev  -> start docker-compose with dbs and discovery-server for development"
 	@echo "  make docker-up-dbs  -> start docker-compose databases only"
 	@echo "  make docker-down    -> stop docker-compose"
+	@echo "  make fresh          -> wipe all app data and images, rebuild, start (asks first)"
 
 # ==============================
 # Maven Targets
@@ -56,6 +57,9 @@ docker-up-dev:
 
 docker-down:
 	docker compose down
+
+fresh:
+	sudo ./scripts/fresh-start.sh
 
 # ==============================
 # Key Generation

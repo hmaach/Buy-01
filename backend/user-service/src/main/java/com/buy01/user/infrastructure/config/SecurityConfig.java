@@ -28,6 +28,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/users/auth/register", "/users/auth/login", "/users/avatars/**").permitAll()
+                // Docker healthcheck calls this without a token
+                .requestMatchers("/actuator/health").permitAll()
                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtVerifier), UsernamePasswordAuthenticationFilter.class);

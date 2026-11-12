@@ -11,6 +11,10 @@ RUN --mount=type=cache,target=/root/.m2 \
     cp "${SERVICE}/target/${SERVICE}-"*.jar /workspace/app.jar
 
 FROM eclipse-temurin:21-jre
+# Run as an unprivileged user: a compromised app cannot act as root in the container.
+RUN groupadd --system --gid 10001 app \
+    && useradd --system --uid 10001 --gid app --no-create-home app
 WORKDIR /app
-COPY --from=build /workspace/app.jar app.jar
+COPY --from=build --chown=app:app /workspace/app.jar app.jar
+USER app
 ENTRYPOINT ["java", "-jar", "app.jar"]

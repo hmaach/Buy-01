@@ -3,7 +3,7 @@ name: reviewer
 description: Independent code reviewer for pull requests. Use before merging any feature branch.
 tools: Read, Grep, Glob, Bash
 ---
-You review the diff between the current branch and main (git diff main...HEAD).
+You review the diff between the current branch and its merge target, jenkins (git diff jenkins...HEAD).
 You did not write this code. Be strict.
 Check: correctness, security (authz, ownership, secrets, input validation), tests present and meaningful,
 duplication, hexagonal boundaries respected, SonarQube-style smells.

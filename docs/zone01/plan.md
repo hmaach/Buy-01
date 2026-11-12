@@ -18,10 +18,12 @@
 - [ ] Create CI VM (A1 3 OCPU / 18 GB / 120 GB)
 - [ ] Rotate JWT keys and Mongo passwords, untrack backend/media-service/.env
 - [ ] Purge secrets and Claude trailers from git history (one force-push)
-- [ ] Parent POM, align Boot 3.5.x / Cloud 2025.0.x / Java 21, rename eurika-server
+- [x] Parent POM, align Boot 3.5.x / Cloud 2025.0.x / Java 21, rename eurika-server (PR #57)
 - [ ] Replace spring-cloud-starter-gateway with spring-cloud-starter-gateway-server-webflux
 - [ ] Gateway: remove DEBUG logging and header logging in LoggingFilter
-- [ ] common-security module
+- [x] common-security module (PR #57, 17 unit tests)
+- [ ] Add HEALTHCHECK and a non-root user to backend/Dockerfile and the gateway Dockerfile
+- [ ] Delete merged branches phase0-parent-pom and claude/project-thread-n6ds0r (local and origin)
 - [ ] Unit tests for user, product, media application services
 - [ ] Split docs/zone01/audits.md into audits/<project>.md
 - [ ] Add .githooks/commit-msg and set core.hooksPath

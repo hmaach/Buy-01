@@ -53,6 +53,12 @@ services:
         -XX:ReservedCodeCacheSize=32m -XX:+UseSerialGC -XX:TieredStopAtLevel=1
     networks:
       - ecommerce-network
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "-o", "/dev/null", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
 
   kafka:
     image: apache/kafka:4.1.0
@@ -148,7 +154,14 @@ services:
     ports:
       - "127.0.0.1:${GATEWAY_PORT}:8080"
     depends_on:
-      - discovery-server
+      discovery-server:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
+      media-service:
+        condition: service_healthy
     environment:
       <<: *java
       TZ: ${TZ}
@@ -161,6 +174,12 @@ services:
       RATE_LIMIT_REFILL_MINUTES: ${RATE_LIMIT_REFILL_MINUTES}
     networks:
       - ecommerce-network
+    healthcheck:
+      test: ["CMD", "curl", "-fsk", "-o", "/dev/null", "https://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
 
   user-service:
     build:
@@ -175,7 +194,7 @@ services:
       mongo-user:
         condition: service_healthy
       discovery-server:
-        condition: service_started
+        condition: service_healthy
       kafka:
         condition: service_started
     environment:
@@ -196,6 +215,12 @@ services:
       - ./uploads/avatars:/app/uploads/avatars
     networks:
       - ecommerce-network
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "-o", "/dev/null", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
 
   product-service:
     build:
@@ -210,7 +235,7 @@ services:
       mongo-product:
         condition: service_healthy
       discovery-server:
-        condition: service_started
+        condition: service_healthy
       kafka:
         condition: service_started
     environment:
@@ -227,6 +252,12 @@ services:
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
     networks:
       - ecommerce-network
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "-o", "/dev/null", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
 
   media-service:
     build:
@@ -241,7 +272,7 @@ services:
       mongo-media:
         condition: service_healthy
       discovery-server:
-        condition: service_started
+        condition: service_healthy
       kafka:
         condition: service_started
     environment:
@@ -260,6 +291,12 @@ services:
       - ./uploads/media:/app/uploads
     networks:
       - ecommerce-network
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "-o", "/dev/null", "http://localhost:8083/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
 
   frontend:
     build:
@@ -274,7 +311,8 @@ services:
     ports:
       - "127.0.0.1:4200:443"
     depends_on:
-      - api-gateway
+      api-gateway:
+        condition: service_healthy
     networks:
       - ecommerce-network
 

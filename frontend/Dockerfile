@@ -13,7 +13,6 @@ FROM nginx:alpine
 RUN apk add --no-cache openssl
 
 # Generate self-signed certificate
-ARG SSL_PASSWORD=123456
 RUN mkdir -p /etc/nginx/ssl && \
     openssl req -x509 -newkey rsa:4096 \
     -keyout /etc/nginx/ssl/key.pem \

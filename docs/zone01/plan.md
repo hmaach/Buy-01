@@ -16,8 +16,7 @@
 - [x] Fix media persistence (mount on /app/uploads)
 - [ ] Ask Zone01 staff: multi-project audits in January, Java 17/21 for nexus, remote audits
 - [ ] Create CI VM (A1 3 OCPU / 18 GB / 120 GB)
-- [ ] Rotate JWT keys and Mongo passwords, untrack backend/media-service/.env
-- [ ] Purge secrets and Claude trailers from git history (one force-push)
+- [x] Rotate JWT keys, Mongo passwords and keystore password, untrack backend/media-service/.env (rotate, no history rewrite)
 - [x] Parent POM, align Boot 3.5.x / Cloud 2025.0.x / Java 21, rename eurika-server (PR #57)
 - [ ] Replace spring-cloud-starter-gateway with spring-cloud-starter-gateway-server-webflux
 - [ ] Gateway: remove DEBUG logging and header logging in LoggingFilter

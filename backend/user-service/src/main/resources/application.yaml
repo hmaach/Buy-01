@@ -41,9 +41,6 @@ security:
     expiration: ${JWT_EXPIRATION:3600000}
     refresh-expiration: ${JWT_REFRESH_EXPIRATION:86400000}
 
-media:
-  service:
-    url: ${MEDIA_SERVICE_URL:http://localhost:8083}
 
 app:
   avatar:

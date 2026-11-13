@@ -1,2 +1,7 @@
 .env
 **/uploads
+*.pem
+*.key
+*.p12
+*.jks
+*keystore*

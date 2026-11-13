@@ -13,8 +13,8 @@ spring:
       host: ${MEDIA_MONGO_HOST:localhost}
       port: ${MEDIA_MONGO_LOCAL_PORT:27018}
       database: ${MEDIA_MONGO_DB_NAME:mongo-media}
-      username: ${MEDIA_MONGO_DB_USER:rserraf}
-      password: ${MEDIA_MONGO_DB_PWD:123456}
+      username: ${MEDIA_MONGO_DB_USER}
+      password: ${MEDIA_MONGO_DB_PWD}
       authentication-database: admin
       
   kafka:

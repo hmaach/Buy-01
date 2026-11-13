@@ -59,7 +59,7 @@ I explain every line to my peers during audits. Write code a junior can read on 
 - No generic sections (installation boilerplate, contribution guidelines, badges) unless I ask.
 
 ## Git
-- Work on a feature branch, never on main. Feature branches start from jenkins and merge back into it by PR (jenkins is the integration branch for now).
+- Work on a feature branch, never on main. Feature branches start from dev and merge back into it by PR (dev is the integration branch).
 - Commit only when I ask. Use my git identity as configured, never a Claude identity.
 - When I say "commit", commit all pending changes split into logical commits: one commit per concern (for example config, feature code, tests, docs), each one building on its own. Never bundle unrelated changes in one commit.
 - Commit messages: conventional prefix (feat, fix, chore, test, docs, refactor, ci), then a short natural sentence written like a developer would, lowercase, no period. Example: "fix: media files now saved in the mounted folder".

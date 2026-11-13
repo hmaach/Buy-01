@@ -27,8 +27,8 @@ spring:
       host: ${USER_MONGO_HOST:localhost}
       port: ${USER_MONGO_PORT:27017}
       database: ${USER_MONGO_DB:user_db}
-      username: ${USER_MONGO_USERNAME:user_service}
-      password: ${USER_MONGO_PASSWORD:user_password}
+      username: ${USER_MONGO_USERNAME}
+      password: ${USER_MONGO_PASSWORD}
       authentication-database: admin
 
   kafka:
@@ -41,9 +41,6 @@ security:
     expiration: ${JWT_EXPIRATION:3600000}
     refresh-expiration: ${JWT_REFRESH_EXPIRATION:86400000}
 
-media:
-  service:
-    url: ${MEDIA_SERVICE_URL:http://localhost:8083}
 
 app:
   avatar:

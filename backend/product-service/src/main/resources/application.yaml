@@ -9,8 +9,8 @@ spring:
       host: ${PRODUCT_MONGO_HOST:localhost}
       port: ${PRODUCT_MONGO_LOCAL_PORT:27019}
       database: ${PRODUCT_MONGO_DB_NAME:mongo-product}
-      username: ${PRODUCT_MONGO_DB_USER:rserraf}
-      password: ${PRODUCT_MONGO_DB_PWD:123456}
+      username: ${PRODUCT_MONGO_DB_USER}
+      password: ${PRODUCT_MONGO_DB_PWD}
       authentication-database: admin
 
   kafka:

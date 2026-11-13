@@ -302,8 +302,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      args:
-        SSL_PASSWORD: ${SSL_PASSWORD}
     container_name: frontend
     restart: unless-stopped
     mem_limit: 64m

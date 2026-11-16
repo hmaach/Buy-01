@@ -28,10 +28,13 @@ public class AvatarServiceImpl implements AvatarService {
 
     private final Tika tika = new Tika();
 
-    @Value("${app.avatar.upload-dir:./uploads/avatars}")
-    private String uploadDir;
+    private final String uploadDir;
 
     private Path avatarPath;
+
+    public AvatarServiceImpl(@Value("${app.avatar.upload-dir:./uploads/avatars}") String uploadDir) {
+        this.uploadDir = uploadDir;
+    }
 
     @Override
     @PostConstruct

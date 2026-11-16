@@ -47,9 +47,9 @@ Jenkins is fully defined in git: the image (`jenkins/Dockerfile`, `jenkins/plugi
 
 6. **Open Jenkins.** Until the proxy is set up, Jenkins only listens on the VM's localhost. Tunnel to it from your machine:
    ```bash
-   ssh -L 8080:127.0.0.1:8080 ubuntu@<ci-vm-ip>
+   ssh -L 8090:127.0.0.1:8090 ubuntu@<ci-vm-ip>
    ```
-   Then browse to http://localhost:8080 and log in with `JENKINS_ADMIN_ID` and `JENKINS_ADMIN_PASSWORD`. There is no setup wizard: Configuration as Code already created the admin and the security settings.
+   Then browse to http://localhost:8090 and log in with `JENKINS_ADMIN_ID` and `JENKINS_ADMIN_PASSWORD`. There is no setup wizard: Configuration as Code already created the admin and the security settings.
 
 ## Why the Docker socket is mounted
 

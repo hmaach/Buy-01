@@ -9,11 +9,12 @@ services:
     container_name: jenkins
     restart: unless-stopped
     mem_limit: 2g
-    # Localhost only. Reach it through an SSH tunnel until the proxy (proxy/) adds TLS.
+    # Jenkins listens on 8090 (8080 is the app gateway). Localhost only: reach it through an SSH tunnel until the proxy (proxy/) adds TLS.
     ports:
-      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:8090:8090"
     environment:
       JAVA_OPTS: -Xmx1g -Djenkins.install.runSetupWizard=false
+      JENKINS_OPTS: --httpPort=8090
       CASC_JENKINS_CONFIG: /var/jenkins_conf
       JENKINS_ADMIN_ID: ${JENKINS_ADMIN_ID}
       JENKINS_ADMIN_PASSWORD: ${JENKINS_ADMIN_PASSWORD}
@@ -23,7 +24,7 @@ services:
       - ./jenkins/casc:/var/jenkins_conf:ro
       - /var/run/docker.sock:/var/run/docker.sock
     healthcheck:
-      test: ["CMD", "curl", "-fs", "-o", "/dev/null", "http://localhost:8080/login"]
+      test: ["CMD", "curl", "-fs", "-o", "/dev/null", "http://localhost:8090/login"]
       interval: 30s
       timeout: 5s
       retries: 3

@@ -22,7 +22,7 @@ Handoff from the planning chat of 2026-11-04. Read with plan.md and analysis.md.
 | New order-service for cart, orders, analytics | user is identity only, product is the catalog. Analytics are Mongo aggregations on orders |
 | Search and filters in product-service | It owns the products collection |
 | Two VMs | App VM is 1 OCPU / 5.8 GB. SonarQube and Nexus do not fit. Builds must never starve the live site |
-| CI stack in infra/ci/, never in the app compose | A deploy must not restart the Jenkins running it. Separate blast radius |
+| CI stack in infra/, never in the app compose | A deploy must not restart the Jenkins running it. Separate blast radius |
 | Jenkins controller on CI VM, SSH agent on app VM | Agent runs deploy, health check, rollback. Covers the distributed builds bonus |
 | Deploy only images pulled from Nexus by tag | What runs is exactly what was tested. Rollback = redeploy previous tag |
 | SonarQube remote, docker-compose fallback for local | Subject says "locally" but the constraint is "via Docker" |

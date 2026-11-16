@@ -24,7 +24,7 @@ Current phase and status: @docs/zone01/plan.md
 - Docker: backend/Dockerfile builds every service except the gateway (build arg SERVICE=<module>, context backend/). The gateway has its own Dockerfile for the TLS keystore.
 - A new service is one <module> line in backend/pom.xml plus one compose entry using backend/Dockerfile.
 - App VM: Oracle Cloud ARM64, 1 OCPU, 6 GB RAM. Keep memory and disk usage low. Every compose service has a mem_limit.
-- CI VM (separate): Jenkins, SonarQube, Nexus in infra/ci/. Never add CI tools to the app compose.
+- CI VM (separate): Jenkins, SonarQube, Nexus in infra/. Never add CI tools to the app compose.
 - All images must build for arm64.
 
 ## Deployment

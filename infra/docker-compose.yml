@@ -1,0 +1,38 @@
+# CI stack for the CI VM only. Never merged with the app compose at the repo root:
+# a deploy of the app must not restart the Jenkins that runs it.
+services:
+  jenkins:
+    build:
+      context: ./jenkins
+      args:
+        DOCKER_GID: ${DOCKER_GID}
+    container_name: jenkins
+    restart: unless-stopped
+    mem_limit: 2g
+    # Localhost only. Reach it through an SSH tunnel until the proxy (proxy/) adds TLS.
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      JAVA_OPTS: -Xmx1g -Djenkins.install.runSetupWizard=false
+      CASC_JENKINS_CONFIG: /var/jenkins_conf
+      JENKINS_ADMIN_ID: ${JENKINS_ADMIN_ID}
+      JENKINS_ADMIN_PASSWORD: ${JENKINS_ADMIN_PASSWORD}
+      JENKINS_URL: ${JENKINS_URL}
+    volumes:
+      - jenkins-home:/var/jenkins_home
+      - ./jenkins/casc:/var/jenkins_conf:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "-o", "/dev/null", "http://localhost:8080/login"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+volumes:
+  jenkins-home:

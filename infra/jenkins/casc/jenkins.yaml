@@ -1,0 +1,18 @@
+# Jenkins Configuration as Code: read at every start, so the controller can be rebuilt from git.
+# ${...} values come from the container environment (infra/.env), never from this file.
+jenkins:
+  systemMessage: "Buy-01 CI. Configured from infra/jenkins/casc/jenkins.yaml, changes in the UI are lost on restart."
+  numExecutors: 2
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "${JENKINS_ADMIN_ID}"
+          password: "${JENKINS_ADMIN_PASSWORD}"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+unclassified:
+  location:
+    url: "${JENKINS_URL}"

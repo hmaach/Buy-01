@@ -4,13 +4,11 @@ import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.buy01.product.domain.model.Product;
 import com.buy01.product.domain.ports.inbound.ProductUseCase;
 import com.buy01.product.domain.ports.outbound.ProductRepositoryPort;
-import com.buy01.product.infrastructure.messaging.ImagesLinkedEvent;
 import com.buy01.product.infrastructure.web.dto.ProductDeletedEvent;
 import com.buy01.product.infrastructure.web.dto.ProductList;
 import com.buy01.product.infrastructure.web.dto.ProductResponse;
@@ -26,7 +24,6 @@ import reactor.core.publisher.Mono;
 public class ProductServiceImpl implements ProductUseCase {
 
     private final ProductRepositoryPort productRepository;
-    private final KafkaTemplate<String, ImagesLinkedEvent> kafkaTemplate;
     private final ImageService imageService;
 
     private static final String TOPIC_IMAGES_LINKED = "images-linked";

@@ -44,6 +44,8 @@
 - [ ] Quality gate fails the pipeline
 - [ ] Branch protection, PR scans, reviewer agent on every PR
 - [ ] Fix Critical items from analysis.md section 10, document each fix
+- [ ] Fix MediaStatusListener.onProductDeleted: it calls deleteById(media.getImagePath()) instead of the media id and never deletes the file. Add its unit test with the fix
+- [ ] Fix ImageService.getProductImages: bodyToFlux(String.class) returns the JSON array as one string (the frontend works around it with JSON.parse(imagesIds[0])). Add its unit test with the fix
 - [ ] Consolidate docs/
 
 ## Phase 3 buy-02

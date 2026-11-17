@@ -1,0 +1,156 @@
+# Jenkins Configuration as Code: read at every start, so the controller can be rebuilt from git.
+# ${...} values come from the container environment (infra/.env). ${readFile:...} values come from
+# files created once in the jenkins-home volume (see infra/README.md). No secret is written in this file.
+jenkins:
+  systemMessage: "Buy-01 CI. Configured from infra/jenkins/casc/jenkins.yaml, changes in the UI are lost on restart."
+
+  # The controller only schedules. Builds run on the agent below.
+  numExecutors: 0
+  mode: EXCLUSIVE
+
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "${JENKINS_ADMIN_ID}"
+          password: "${JENKINS_ADMIN_PASSWORD}"
+
+  # Only the admin has permissions. Anonymous users get nothing, not even read.
+  # The GitHub webhook endpoint does not need a login, so it still works.
+  authorizationStrategy:
+    globalMatrix:
+      entries:
+        - user:
+            name: "${JENKINS_ADMIN_ID}"
+            permissions:
+              - "Overall/Administer"
+
+  # CSRF protection. The client IP is left out of the crumb because requests come through nginx.
+  crumbIssuer:
+    standard:
+      excludeClientIPFromCrumb: true
+
+  # Agents connect over SSH started by the controller, so the inbound agent port stays closed.
+  slaveAgentPort: -1
+
+  # Build agent: the VM host itself, user jenkins-agent, reached over SSH.
+  # It has Docker, so each pipeline stage runs in a throwaway container (Maven, Node and Chromium).
+  nodes:
+    - permanent:
+        name: "vm-agent"
+        labelString: "docker arm64"
+        remoteFS: "/home/jenkins-agent/agent"
+        numExecutors: 1
+        mode: NORMAL
+        retentionStrategy: "always"
+        launcher:
+          ssh:
+            host: "host.docker.internal"
+            port: 22
+            credentialsId: "agent-ssh-key"
+            javaPath: "/usr/bin/java"
+            jvmOptions: "-Xmx256m"
+            launchTimeoutSeconds: 60
+            maxNumRetries: 3
+            retryWaitTime: 15
+            sshHostKeyVerificationStrategy:
+              knownHostsFileKeyVerificationStrategy: {}
+
+  # Available to every build as env.NOTIFY_EMAIL, so no address is written in the Jenkinsfile.
+  globalNodeProperties:
+    - envVars:
+        env:
+          - key: "NOTIFY_EMAIL"
+            value: "${NOTIFY_EMAIL}"
+
+# Every secret the pipeline uses. Jobs only see them by id, through withCredentials.
+# Credentials created by hand in the UI would be removed at the next restart: add them here instead.
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - usernamePassword:
+              scope: GLOBAL
+              id: "github-token"
+              description: "Fine-grained GitHub token, Buy-01 repository only"
+              username: "${GITHUB_USER}"
+              password: "${GITHUB_TOKEN}"
+          - string:
+              scope: SYSTEM
+              id: "github-webhook-secret"
+              description: "Shared secret that signs the GitHub webhook calls"
+              secret: "${GITHUB_WEBHOOK_SECRET}"
+          - usernamePassword:
+              scope: SYSTEM
+              id: "smtp-credentials"
+              description: "SMTP account for build emails"
+              username: "${SMTP_USER}"
+              password: "${SMTP_PASSWORD}"
+          - basicSSHUserPrivateKey:
+              scope: SYSTEM
+              id: "agent-ssh-key"
+              description: "Controller key to start the agent on the VM"
+              username: "jenkins-agent"
+              privateKeySource:
+                directEntry:
+                  privateKey: "${readFile:/var/jenkins_home/casc-secrets/agent_ed25519}"
+          - file:
+              scope: GLOBAL
+              id: "buy01-app-env"
+              description: "App .env (JWT keys, Mongo passwords) for image builds and deploys"
+              fileName: "app.env"
+              secretBytes: "${base64:${readFile:/var/jenkins_home/casc-secrets/app.env}}"
+
+security:
+  # The only Job DSL script is the one below, and only the admin can change this file.
+  globalJobDslSecurityConfiguration:
+    useScriptSecurity: false
+
+unclassified:
+  location:
+    url: "${JENKINS_URL}"
+    adminAddress: "${SMTP_USER}"
+
+  # Rejects webhook calls that are not signed with the shared secret.
+  gitHubPluginConfig:
+    hookSecretConfigs:
+      - credentialsId: "github-webhook-secret"
+
+  email-ext:
+    mailAccount:
+      smtpHost: "${SMTP_HOST}"
+      smtpPort: "${SMTP_PORT}"
+      credentialsId: "smtp-credentials"
+      useSsl: true
+    defaultContentType: "text/plain"
+
+# One multibranch job reads the Jenkinsfile at the repo root.
+# It builds main, dev and pull requests. A GitHub push event starts the build (webhook).
+jobs:
+  - script: |
+      multibranchPipelineJob('buy-01') {
+        displayName('Buy-01')
+        description('Defined in infra/jenkins/casc/jenkins.yaml. Builds main, dev and pull requests, deploys main.')
+        branchSources {
+          branchSource {
+            source {
+              github {
+                id('buy-01')
+                repoOwner('hmaach')
+                repository('Buy-01')
+                repositoryUrl('https://github.com/hmaach/Buy-01')
+                configuredByUrl(true)
+                credentialsId('github-token')
+                traits {
+                  gitHubBranchDiscovery { strategyId(1) }
+                  gitHubPullRequestDiscovery { strategyId(1) }
+                  headRegexFilter { regex('main|dev|PR-.*') }
+                }
+              }
+            }
+          }
+        }
+        orphanedItemStrategy {
+          discardOldItems { numToKeep(10) }
+        }
+      }

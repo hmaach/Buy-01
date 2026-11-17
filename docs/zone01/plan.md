@@ -30,7 +30,7 @@
 - [ ] Resize app VM boot volume to 60 GB
 
 ## Phase 1 mr-jenk
-- [ ] infra/ci compose: Jenkins (with Docker CLI), Caddy
+- [ ] infra compose: Jenkins (with Docker CLI), Caddy
 - [ ] Jenkinsfile with all stages, Sonar and Nexus stages as stubs
 - [ ] GitHub webhook trigger
 - [ ] Karma specs and headless Chrome for frontend tests
@@ -40,10 +40,12 @@
 - [ ] Bonus: parameterized build (environment), distributed build
 
 ## Phase 2 safe-zone
-- [ ] SonarQube + PostgreSQL in infra/ci, JaCoCo and lcov coverage
+- [ ] SonarQube + PostgreSQL in infra/, JaCoCo and lcov coverage
 - [ ] Quality gate fails the pipeline
 - [ ] Branch protection, PR scans, reviewer agent on every PR
 - [ ] Fix Critical items from analysis.md section 10, document each fix
+- [ ] Fix MediaStatusListener.onProductDeleted: it calls deleteById(media.getImagePath()) instead of the media id and never deletes the file. Add its unit test with the fix
+- [ ] Fix ImageService.getProductImages: bodyToFlux(String.class) returns the JSON array as one string (the frontend works around it with JSON.parse(imagesIds[0])). Add its unit test with the fix
 - [ ] Consolidate docs/
 
 ## Phase 3 buy-02
@@ -55,7 +57,7 @@
 - [ ] e2e tests on critical flows
 
 ## Phase 4 nexus
-- [ ] Nexus in infra/ci, run as non-root
+- [ ] Nexus in infra/, run as non-root
 - [ ] Maven hosted, proxy, group repos; settings.xml in Jenkins
 - [ ] Docker hosted repo behind TLS, push and pull
 - [ ] Versioning strategy, multiple versions shown

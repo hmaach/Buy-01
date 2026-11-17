@@ -24,7 +24,7 @@ Current phase and status: @docs/zone01/plan.md
 - Docker: backend/Dockerfile builds every service except the gateway (build arg SERVICE=<module>, context backend/). The gateway has its own Dockerfile for the TLS keystore.
 - A new service is one <module> line in backend/pom.xml plus one compose entry using backend/Dockerfile.
 - App VM: Oracle Cloud ARM64, 1 OCPU, 6 GB RAM. Keep memory and disk usage low. Every compose service has a mem_limit.
-- CI VM (separate): Jenkins, SonarQube, Nexus in infra/ci/. Never add CI tools to the app compose.
+- CI VM (separate): Jenkins, SonarQube, Nexus in infra/. Never add CI tools to the app compose.
 - All images must build for arm64.
 
 ## Deployment
@@ -40,8 +40,8 @@ Current phase and status: @docs/zone01/plan.md
 ## Commands
 - Backend build: cd backend && ./mvnw -B clean verify
 - Single module: ./mvnw -B -pl <module> -am verify
-- Until the service contextLoads tests are replaced, verify fails without live infra. The build that passes today is ./mvnw -B clean install -DskipTests. Do not add -DskipTests to CI.
-- Frontend: cd frontend && npm ci && npx ng test --watch=false --browsers=ChromeHeadless && npx ng build
+- verify runs unit tests only and needs no live infra (the contextLoads tests were removed). Do not add -DskipTests to CI.
+- Frontend: cd frontend && npm ci && npx ng test --watch=false --browsers=ChromeHeadlessCI && npx ng build
 
 ## Code style
 I explain every line to my peers during audits. Write code a junior can read on first pass.

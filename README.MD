@@ -43,6 +43,7 @@ Buy-01 is a microservices-based e-commerce platform built with Spring Boot, prov
 8. [Media Service Documentaion](./backend/media-service/README.md)
 9. [Discovery Server Documentaion](./backend/discovery-server/README.md)
 10. [Configuration](./docs/configuration.md) – One root .env, the .env.example contract, running a service locally
+11. [Backend testing](./docs/testing.md) – Unit tests with mocked ports, how to run and write them
 
 ---
 

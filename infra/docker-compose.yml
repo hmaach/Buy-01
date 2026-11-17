@@ -1,0 +1,47 @@
+# Jenkins controller. Never merged with the app compose at the repo root:
+# a deploy of the app must not restart the Jenkins that runs it.
+services:
+  jenkins:
+    build: ./jenkins
+    image: buy01/jenkins:2.580.2
+    container_name: jenkins
+    restart: unless-stopped
+    mem_limit: 1280m
+    # Localhost only: host nginx (proxy/jenkins.conf) adds TLS in front of it.
+    ports:
+      - "127.0.0.1:8090:8090"
+    # Lets the controller reach the build agent, which runs on this same VM as the jenkins-agent user over SSH.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      JAVA_OPTS: -Xmx768m -Djenkins.install.runSetupWizard=false
+      JENKINS_OPTS: --httpPort=8090
+      CASC_JENKINS_CONFIG: /var/jenkins_conf
+      JENKINS_ADMIN_ID: ${JENKINS_ADMIN_ID}
+      JENKINS_ADMIN_PASSWORD: ${JENKINS_ADMIN_PASSWORD}
+      JENKINS_URL: ${JENKINS_URL}
+      GITHUB_USER: ${GITHUB_USER}
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      GITHUB_WEBHOOK_SECRET: ${GITHUB_WEBHOOK_SECRET}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      NOTIFY_EMAIL: ${NOTIFY_EMAIL}
+    volumes:
+      - jenkins-home:/var/jenkins_home
+      - ./jenkins/casc:/var/jenkins_conf:ro
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "-o", "/dev/null", "http://localhost:8090/login"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+volumes:
+  jenkins-home:

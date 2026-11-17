@@ -40,8 +40,8 @@ Current phase and status: @docs/zone01/plan.md
 ## Commands
 - Backend build: cd backend && ./mvnw -B clean verify
 - Single module: ./mvnw -B -pl <module> -am verify
-- Until the service contextLoads tests are replaced, verify fails without live infra. The build that passes today is ./mvnw -B clean install -DskipTests. Do not add -DskipTests to CI.
-- Frontend: cd frontend && npm ci && npx ng test --watch=false --browsers=ChromeHeadless && npx ng build
+- verify runs unit tests only and needs no live infra (the contextLoads tests were removed). Do not add -DskipTests to CI.
+- Frontend: cd frontend && npm ci && npx ng test --watch=false --browsers=ChromeHeadlessCI && npx ng build
 
 ## Code style
 I explain every line to my peers during audits. Write code a junior can read on first pass.

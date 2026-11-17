@@ -28,6 +28,11 @@ Handoff from the planning chat of 2026-11-04. Read with plan.md and analysis.md.
 | SonarQube remote, docker-compose fallback for local | Subject says "locally" but the constraint is "via Docker" |
 | Simple, explainable code | Every line is explained to peers during audits |
 | Reviewer subagent writes docs/reviews/<branch>.md | Solo project still shows a PR review process for buy-02 |
+| Phase 1: Jenkins controller on the app VM, builds on an SSH agent on the same host (user jenkins-agent) | No docker.sock in the controller. A socket proxy would still allow container create, which is root on the host. Same agent layout works when the controller moves to the CI VM |
+| Multibranch job: main, dev and PRs build, only main deploys | One job, PR builds ready for safe-zone. Deploy branch is one line in the Jenkinsfile |
+| Images built on the VM and kept locally (no registry until Nexus) | Rollback = compose up with the previous tag, read from the running container |
+| Email notifications (email-ext, Gmail app password) | No extra plugin or workspace setup, Slack would add both |
+| Removed the 4 contextLoads tests | They needed live Mongo, Kafka and Eureka, so verify could never pass in CI. Real unit tests replace them |
 
 ## Infrastructure state
 - App VM: Oracle Cloud Ampere A1 (aarch64), 1 OCPU, 5.8 GB RAM, 4 GB swap added, 45 GB disk (27 GB free after cleanup).

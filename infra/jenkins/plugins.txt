@@ -1,13 +1,31 @@
+# Installed at image build time by jenkins-plugin-cli, with their dependencies.
+# Freeze exact versions with the command in infra/README.md once the setup works.
+
+# Configuration as Code and the job definition inside it
 configuration-as-code
 job-dsl
+
+# Security: per-user permissions
+matrix-auth
+
+# Pipeline and its UI
 workflow-aggregator
 pipeline-stage-view
-git
-github
-credentials-binding
-ssh-agent
-docker-workflow
-junit
-email-ext
 timestamper
 ws-cleanup
+
+# GitHub: multibranch job, webhook endpoint, commit status
+git
+github
+github-branch-source
+
+# Build agent over SSH, stages in Docker containers
+ssh-slaves
+docker-workflow
+
+# Secrets in builds
+credentials-binding
+
+# Test reports and notifications
+junit
+email-ext

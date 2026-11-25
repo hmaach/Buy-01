@@ -26,9 +26,10 @@ jenkins:
               - "Overall/Administer"
 
   # CSRF protection. The client IP is left out of the crumb because requests come through nginx.
-  crumbIssuer:
-    standard:
-      excludeClientIPFromCrumb: true
+  crumbIssuer: "standard"
+#     standard:
+#        excludeClientIPFromCrumb: true
+
 
   # Agents connect over SSH started by the controller, so the inbound agent port stays closed.
   slaveAgentPort: -1

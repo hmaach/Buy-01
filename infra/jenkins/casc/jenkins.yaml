@@ -124,6 +124,12 @@ unclassified:
       credentialsId: "smtp-credentials"
       useSsl: true
     defaultContentType: "text/plain"
+  
+  scmGit:
+    globalConfigName: "Jenkins CI"
+    globalConfigEmail: "jenkins@buy-01.local"
+    createAccountBasedOnEmail: false
+
 
 # One multibranch job reads the Jenkinsfile at the repo root.
 # It builds main, dev and pull requests. A GitHub push event starts the build (webhook).

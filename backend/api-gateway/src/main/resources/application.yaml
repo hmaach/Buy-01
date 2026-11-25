@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: wrong-port
   ssl:
       key-store: classpath:edge-service.p12
       key-store-password: ${SSL_PASSWORD}

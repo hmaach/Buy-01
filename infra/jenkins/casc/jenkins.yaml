@@ -82,7 +82,7 @@ credentials:
               description: "Shared secret that signs the GitHub webhook calls"
               secret: "${GITHUB_WEBHOOK_SECRET}"
           - usernamePassword:
-              scope: SYSTEM
+              scope: GLOBAL
               id: "smtp-credentials"
               description: "SMTP account for build emails"
               username: "${SMTP_USER}"

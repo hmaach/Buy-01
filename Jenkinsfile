@@ -149,6 +149,26 @@ pipeline {
         }
     }
 
+    stage('Backend: code analysis') {
+        agent {
+            docker {
+                image 'maven:3.9.16-eclipse-temurin-21'
+                args '-v /home/jenkins-agent/.m2:/home/jenkins-agent/.m2 -v /home/jenkins-agent/.sonar:/home/jenkins-agent/.sonar --memory=1536m'
+                reuseNode true
+            }
+        }
+        environment {
+            MAVEN_OPTS = '-Xmx512m -Duser.home=/home/jenkins-agent'
+        }
+        steps {
+            withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                dir('backend') {
+                    sh 'mvn -B compile sonar:sonar -Dsonar.projectVersion="$IMAGE_TAG"'
+                }
+            }
+        }
+    }
+
     post {
         always {
             sendBuildEmail()

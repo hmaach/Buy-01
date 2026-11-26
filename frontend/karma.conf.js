@@ -16,7 +16,12 @@ module.exports = function (config) {
     client: {
       clearContext: false,
     },
-    reporters: ['progress', 'kjhtml', 'junit'],
+    reporters: ['progress', 'kjhtml', 'junit', 'coverage'],
+    coverageReporter: {
+      dir: require('path').join(__dirname, 'coverage'),
+      subdir: '.',
+      reporters: [{ type: 'lcovonly' }, { type: 'text-summary' }],
+    },
     junitReporter: {
       outputDir: 'test-results/karma',
       useBrowserName: false,

@@ -42,3 +42,5 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 test-results/
+
+.scannerwork/

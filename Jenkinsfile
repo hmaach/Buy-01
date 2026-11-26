@@ -74,12 +74,35 @@ pipeline {
             steps {
                 dir('frontend') {
                     sh 'npm ci --no-audit --no-fund'
-                    sh 'npx ng test --watch=false --browsers=ChromeHeadlessCI'
+                    sh 'npx ng test --watch=false --browsers=ChromeHeadlessCI --code-coverage'
                 }
             }
             post {
                 always {
                     junit testResults: 'frontend/test-results/karma/*.xml', allowEmptyResults: true
+                }
+            }
+        }
+
+        stage('Frontend: code analysis') {
+            agent {
+                dockerfile {
+                    dir 'infra/jenkins/agents/node'
+                    args '-v /home/jenkins-agent/.npm:/home/jenkins-agent/.npm -v /home/jenkins-agent/.sonar:/home/jenkins-agent/.sonar --memory=1536m'
+                    reuseNode true
+                }
+            }
+            environment {
+                HOME = '/tmp'
+                npm_config_cache = '/home/jenkins-agent/.npm'
+                SONAR_USER_HOME = '/home/jenkins-agent/.sonar'
+                XDG_CONFIG_HOME = '/tmp/.config'
+            }
+            steps {
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                    dir('frontend') {
+                        sh 'npx --yes @sonar/scan@5.1.0 -Dsonar.projectVersion="$IMAGE_TAG"'
+                    }
                 }
             }
         }

@@ -63,6 +63,8 @@ jenkins:
         env:
           - key: "NOTIFY_EMAIL"
             value: "${NOTIFY_EMAIL}"
+          - key: "SONAR_HOST_URL"
+            value: "${SONAR_HOST_URL}"
 
 # Every secret the pipeline uses. Jobs only see them by id, through withCredentials.
 # Credentials created by hand in the UI would be removed at the next restart: add them here instead.
@@ -95,6 +97,11 @@ credentials:
               privateKeySource:
                 directEntry:
                   privateKey: "${readFile:/var/jenkins_home/casc-secrets/agent_ed25519}"
+          - string:
+              scope: GLOBAL
+              id: "sonar-token"
+              description: "SonarQube token of the jenkins user: analysis only, on the two Buy-01 projects"
+              secret: "${SONAR_TOKEN}"
           - file:
               scope: GLOBAL
               id: "buy01-app-env"

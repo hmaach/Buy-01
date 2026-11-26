@@ -159,6 +159,7 @@ pipeline {
             environment {
                 MAVEN_OPTS = '-Xmx512m -Duser.home=/home/jenkins-agent'
                 SONAR_USER_HOME = '/home/jenkins-agent/.sonar'
+                XDG_CONFIG_HOME = '/tmp/.config'
             }
             steps {
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {

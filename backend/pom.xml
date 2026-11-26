@@ -40,6 +40,10 @@
         <springdoc.version>2.8.17</springdoc.version>
         <cloudinary.version>1.30.0</cloudinary.version>
         <reactor-kafka.version>1.3.25</reactor-kafka.version>
+        <jacoco.version>0.8.16</jacoco.version>
+        <sonar-maven-plugin.version>5.8.0.7211</sonar-maven-plugin.version>
+        <sonar.projectKey>buy-01-backend</sonar.projectKey>
+        <sonar.projectName>Buy-01 backend</sonar.projectName>
     </properties>
 
     <dependencyManagement>
@@ -137,6 +141,11 @@
                         </excludes>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>${sonar-maven-plugin.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -161,6 +170,21 @@
                                 <banDuplicatePomDependencyVersions/>
                             </rules>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals><goal>prepare-agent</goal></goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <goals><goal>report</goal></goals>
                     </execution>
                 </executions>
             </plugin>
